@@ -64,15 +64,34 @@ Setup + fundamentos   Core features + visor 3D      Polish + pitch
 
 ---
 
-### BLOQUE 3 — Noche (20:00 - 22:00): PAE + Descargas + Pulido base
+### BLOQUE 3 — Noche (20:00 - 23:00): PAE + Historial + Descargas
 
 | # | Tarea | Tiempo |
 |---|---|---|
 | 1 | `PAEHeatmap` — Plotly.js con la pae_matrix | 60 min |
 | 2 | `DownloadBar` — botones descarga PDB, mmCIF, JSON | 30 min |
-| 3 | Responsive básico — que no se rompa en pantallas distintas | 30 min |
+| 3 | **`JobsHistoryPage`** — tabla de predicciones en localStorage | 60 min |
+| 4 | Guardar cada job completado en localStorage automáticamente | 20 min |
+| 5 | Responsive básico — que no se rompa en pantallas distintas | 20 min |
 
-**Checkpoint noche viernes:** MVP 100% funcional. Todo el flujo de punta a punta.
+**Estructura localStorage:**
+```json
+{
+  "localfold_jobs": [
+    {
+      "job_id": "abc123",
+      "protein_name": "Ubiquitin",
+      "plddt_mean": 71.7,
+      "solubility": 79.8,
+      "status": "COMPLETED",
+      "submitted_at": "2026-04-11T10:30:00",
+      "project": "TFM 2026"
+    }
+  ]
+}
+```
+
+**Checkpoint noche viernes:** MVP 100% funcional + historial de jobs persistente.
 
 ---
 
@@ -80,23 +99,24 @@ Setup + fundamentos   Core features + visor 3D      Polish + pitch
 
 ### BLOQUE 4 — Diferenciación (09:00 - 11:00)
 
-Elegir **uno** según el tiempo disponible:
+Ambas son **obligatorias**, en este orden:
 
-**Opción A — LLM Asistente (máximo impacto en jurado)**
-- Integrar llamada a Gemini/GPT con el resultado
-- El LLM recibe: pLDDT medio, datos biológicos, nombre proteína
-- Genera un párrafo en lenguaje natural para el biólogo
-- Tiempo estimado: ~90 min
+**A — Protein Copilot (LLM) ⭐ — máximo impacto**
+- Obtener API key de Gemini Flash 2.0 (gratis, sin tarjeta)
+- Llamada desde `src/api/llm.js` con el contexto del resultado
+- Resumen automático al cargar la pantalla de resultados
+- Chat con preguntas presugeridas
+- Tiempo: ~90 min
 
-**Opción B — ProteinCatalogChips + historial de jobs**
-- Chips de proteínas del catálogo que autorrellanan el formulario
-- Persistir historial en localStorage
-- Tiempo estimado: ~90 min
+**B — Chips de proteínas de ejemplo en el formulario**
+- Chips clicables que autocompletan el textarea (Ubiquitina, GFP, p53...)
+- Buscador por nombre conectado a `GET /proteins/?search=`
+- Tiempo: ~45 min
 
-**Opción C — Comparación sano vs mutado**
-- Formulario doble: secuencia original + variante
-- Visual side-by-side
-- Tiempo estimado: ~2h (solo si el equipo va muy adelantado)
+**C (si queda tiempo) — Agrupación por proyecto en el historial**
+- Añadir campo "proyecto" al guardar en localStorage
+- Agrupar filas de la tabla por proyecto con headers colapsables
+- Tiempo: ~60 min
 
 ---
 

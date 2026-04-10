@@ -7,7 +7,33 @@ todos y normalizarlos internamente antes de enviar a la API.
 
 ---
 
-## 1. Formatos que el usuario puede pegar
+## 1. Formatos y vías de entrada
+
+El usuario puede introducir la secuencia a través de dos mecanismos:
+1. **Pegar texto** en el `<textarea>`
+2. **Subida de archivo (Drag & Drop / Input file):** Seleccionando un fichero físico.
+
+### 🚀 Código de inyección de archivos
+Gracias a la API nativa del navegador, sea cual sea la extensión (`.fasta, .fa, .txt, .seq`), extraeremos el texto en el frontend instantáneamente sin coste de servidor:
+
+```javascript
+const handleFileUpload = (evento) => {
+  const archivo = evento.target.files[0];
+  const lector = new FileReader();
+  
+  lector.onload = (e) => {
+    const textoPuro = e.target.result;
+    // Se inyecta el texto en el flujo de validación estándar
+    setTextareaValue(textoPuro);
+    validarYNormalizar(); 
+  };
+  lector.readAsText(archivo);
+};
+```
+
+---
+
+## 2. Formatos que el usuario puede pegar/subir
 
 ### ✅ FASTA estándar con header (formato esperado por la API)
 ```
