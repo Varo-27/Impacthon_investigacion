@@ -60,10 +60,56 @@ fetch nativo / axios → Llamadas REST a https://api-mock-cesga.onrender.com
 Polling              → GET /jobs/{id}/status cada ~3s hasta COMPLETED
 ```
 
+### Auth e Historial de Jobs — Supabase ✅ (DECISIÓN OFICIAL)
+```
+Supabase (BaaS open-source)
+  → Auth anónima automática al entrar (sin email ni contraseña)
+  → Upgrade opcional a Google OAuth en 1 clic
+  → PostgreSQL para guardar metadatos de jobs
+  → Row Level Security: cada usuario solo ve sus jobs
+  → Región EU (Frankfurt) — cumple GDPR y alineado con valores CESGA
+  → Self-hostable en producción en el clúster del CESGA propio
+```
+
+**Por qué NO Firebase:**
+- Firestore es NoSQL — nuestros datos son tabulares/relacionales
+- Datos en servidores Google USA (problema para contexto institucional español)
+- No self-hostable — imposible llevarlo al CESGA real en producción
+- Supabase permite SQL estándar para queries complejas de historial
+
+**Schema en Supabase:**
+```sql
+CREATE TABLE jobs (
+  id        uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id   uuid REFERENCES auth.users ON DELETE CASCADE,
+  job_id    text NOT NULL,
+  protein_name text,
+  plddt_mean   float,
+  solubility   float,
+  status       text DEFAULT 'COMPLETED',
+  created_at   timestamptz DEFAULT now()
+);
+
+-- Solo el dueño puede ver sus jobs
+ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "own jobs" ON jobs
+  USING (auth.uid() = user_id);
+```
+
+**Código React (auth anónima al entrar):**
+```javascript
+// Al arrancar la app — login invisible sin pedir nada al usuario
+const { data } = await supabase.auth.signInAnonymously()
+
+// El usuario quiere guardar su historial permanentemente:
+await supabase.auth.signInWithOAuth({ provider: 'google' })
+// → el historial anónimo migra automáticamente a su cuenta real
+```
+
 ### IA / LLMs (diferenciación)
 ```
-API de OpenAI o Gemini → Asistente para explicar resultados al biólogo
-                       → Generación de FASTA por nombre de proteína
+Gemini Flash 2.0 → Protein Copilot (explicación en lenguaje natural)
+                 → Chat contextual con datos del job actual
 ```
 
 ### Despliegue rápido (para el hackathon)
@@ -161,3 +207,20 @@ Frontend renderiza:
    - Proteína pequeña (<100 aa): `gpus: 0, cpus: 4, memory_gb: 8`
    - Proteína mediana: `gpus: 1, cpus: 8, memory_gb: 32`
    - Proteína grande (>300 aa): `gpus: 2-4, cpus: 16-32, memory_gb: 64-128`
+
+7. **Renderizado del PAE Heatmap:** AlphaFold devuelve los datos crudos matemáticos (`pae_matrix`: array 2D bidimensional), NO una foto. Para generar el Heatmap en React usaremos `react-plotly.js`.
+   - Eje Z: pasamos el array directamente.
+   - Plot type: `heatmap`.
+   - Colorscale: Invertida (bajos errores = color fuerte/azul, alto error = color claro/rojo).
+   - Ejemplo de código rápido:
+     ```javascript
+     <Plot
+       data={[{
+         z: data.pae_matrix,
+         type: 'heatmap',
+         colorscale: 'RdBu',
+         reversescale: true
+       }]}
+       layout={{ title: 'Error Espacial Predicho (PAE)' }}
+     />
+     ```
