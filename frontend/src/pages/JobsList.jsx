@@ -13,8 +13,7 @@ const STATUS = {
 };
 
 
-
-const AUTO_REFRESH_MS = 30_000;
+const AUTO_REFRESH_MS = 500; // 0.5 segundos
 
 /* ── Modal eliminar job ── */
 function DeleteJobModal({ job, onClose, onConfirm }) {
