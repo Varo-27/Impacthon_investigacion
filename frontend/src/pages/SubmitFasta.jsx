@@ -1,13 +1,83 @@
 import { useState } from "react";
-import { UploadCloud, FileText, CheckCircle, AlertTriangle } from "lucide-react";
+import { UploadCloud, FileText, CheckCircle, AlertTriangle, FlaskConical } from "lucide-react";
 import { db, auth } from "../lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
+const PROTEIN_SAMPLES = [
+  {
+    name: "Ubiquitina",
+    tag: "UBQ",
+    color: "amber",
+    fasta: `>sp|P0CG48|UBC_HUMAN Polyubiquitin-C OS=Homo sapiens
+MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG`
+  },
+  {
+    name: "GFP",
+    tag: "GFP",
+    color: "emerald",
+    fasta: `>sp|P42212|GFP_AEQVI Green fluorescent protein OS=Aequorea victoria
+MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTLTYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITLGMDELYK`
+  },
+  {
+    name: "p53",
+    tag: "P53",
+    color: "red",
+    fasta: `>sp|P04637|P53_HUMAN Cellular tumor antigen p53 OS=Homo sapiens
+MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKTYPQGLNGTVNLFRNLNSSSSPQPKKKPLDGEYFTLQIRGRERFEMFRELNEALELKDAHATEESGDSRAHSSYLKTKKGQSTSRHKKLMFKTEGPDSD`
+  },
+  {
+    name: "SOD1",
+    tag: "SOD1",
+    color: "blue",
+    fasta: `>sp|P00441|SODC_HUMAN Superoxide dismutase [Cu-Zn] OS=Homo sapiens
+MATKAVCVLKGDGPVQGIINFEQKESNGPVKVWGSIKGLTEGLHGFHVHEFGDNTAGCTSAGPHFNPLSRKHGGPKDEERHVGDLGNVTADKDGVADVSIEDSVISLSGDHCIIGRTLVVHEKADDLGKGGNEESTKTGNAGSRLACGVIGIAQ`
+  },
+  {
+    name: "Insulina",
+    tag: "INS",
+    color: "purple",
+    fasta: `>sp|P01308|INS_HUMAN Insulin OS=Homo sapiens
+MALWMRLLPLLALLALWGPDPAAAFVNQHLCGSHLVEALYLVCGERGFFYTPKTRREAEDLQVGQVELGGGPGAGSLQPLALEGSLQKRGIVEQCCTSICSLYQLENYCN`
+  },
+];
+
+const CHIP_COLORS = {
+  amber:   "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/50 dark:hover:bg-amber-900/40",
+  emerald: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50 dark:hover:bg-emerald-900/40",
+  red:     "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/50 dark:hover:bg-red-900/40",
+  blue:    "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50 dark:hover:bg-blue-900/40",
+  purple:  "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800/50 dark:hover:bg-purple-900/40",
+};
+
+const CHIP_ACTIVE_COLORS = {
+  amber:   "ring-2 ring-amber-400 dark:ring-amber-500",
+  emerald: "ring-2 ring-emerald-400 dark:ring-emerald-500",
+  red:     "ring-2 ring-red-400 dark:ring-red-500",
+  blue:    "ring-2 ring-blue-400 dark:ring-blue-500",
+  purple:  "ring-2 ring-purple-400 dark:ring-purple-500",
+};
+
 export default function SubmitFasta() {
   const [fastaContent, setFastaContent] = useState("");
+  const [activeChip, setActiveChip] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  const handleChipClick = (protein) => {
+    if (activeChip === protein.tag) {
+      setFastaContent("");
+      setActiveChip(null);
+    } else {
+      setFastaContent(protein.fasta);
+      setActiveChip(protein.tag);
+    }
+  };
+
+  const handleTextareaChange = (e) => {
+    setFastaContent(e.target.value);
+    setActiveChip(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,6 +183,31 @@ export default function SubmitFasta() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           
+          {/* Proteínas de ejemplo */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+              <FlaskConical className="w-4 h-4 text-slate-400" />
+              Proteínas de ejemplo
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {PROTEIN_SAMPLES.map((protein) => (
+                <button
+                  key={protein.tag}
+                  type="button"
+                  onClick={() => handleChipClick(protein)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${CHIP_COLORS[protein.color]} ${activeChip === protein.tag ? CHIP_ACTIVE_COLORS[protein.color] : ""}`}
+                >
+                  <span className="font-mono text-[10px] font-bold opacity-60">{protein.tag}</span>
+                  {protein.name}
+                  {activeChip === protein.tag && <CheckCircle className="w-3.5 h-3.5 ml-0.5" />}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              Haz clic en una proteína para rellenar la secuencia automáticamente. Vuelve a hacer clic para limpiar.
+            </p>
+          </div>
+
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Secuencia FASTA
@@ -120,7 +215,7 @@ export default function SubmitFasta() {
             <div className="relative">
               <textarea
                 value={fastaContent}
-                onChange={(e) => setFastaContent(e.target.value)}
+                onChange={handleTextareaChange}
                 placeholder=">sp|P02769|ALBU_BOVIN Serum albumin OS=Bos taurus OX=9913\nMKWVTFISLLLLFSSAYSRGVFRR..."
                 className="w-full h-64 p-4 font-mono text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-slate-200 resize-none transition-all"
               />

@@ -91,25 +91,23 @@ Priorización basada en los **5 criterios oficiales del jurado**, en orden de pe
 
 ## 🟠 BLOQUE B — DIFERENCIADORES (con esto se gana)
 
-### B1. ⭐ Protein Copilot — IA que explica en lenguaje natural
-**El feature que gana el hackathon. El jurado preguntará "¿tiene IA?".**
+### B1. ⭐ Protein Copilot ("Bio-Copilot") — Asistente Inteligente de Plegamiento
+**El feature que gana el hackathon. El jurado preguntará "¿tiene IA?".** En lugar de un simple formulario, integra un agente de IA que guía al usuario durante todo el proceso end-to-end.
 
-**Modo automático** (al cargar resultados, sin hacer nada):
-- El LLM recibe: nombre, pLDDT, solubilidad, estabilidad, toxicidad, estructura secundaria
-- Genera un párrafo en lenguaje de biólogo explicando qué significa el resultado
-- Spinner `"Analizando con IA..."` (~2s) → texto aparece
+**1. Conversión de Lenguaje Natural a FASTA (El Input del futuro)**
+- El usuario en lugar de pegar texto raro puede decir: *"Quiero plegar la proteína Spike del SARS-CoV-2 pero con una mutación en la posición 501"*. El sistema busca la secuencia, aplica la mutación y prepara el envío automáticamente.
 
-**Modo chat:**
-- Preguntas presugeridas: `[¿Qué hace?]` `[¿Qué son las zonas naranjas?]` `[¿Es diana terapéutica?]`
-- Input libre para preguntas personalizadas
-- El LLM de contexto: siempre tiene acceso a los datos del job actual
+**2. Explicador de Métricas en Tiempo Real**
+- Mientras el proceso está en `RUNNING`, el agente lee y explica los logs.
+- Al terminar, el LLM recibe: nombre, pLDDT, solubilidad y estabilidad, y genera una conclusión en lenguaje de biólogo (ej. *"Alta confianza en el dominio catalítico, pero estructura inestable"*) sin forzar al usuario a descifrar matrices complejas.
 
-**Red flags automáticos:**
-- 🔴 `"pLDDT < 40 en más del 50% — no recomendado para docking"`
-- 🟡 `"Región desordenada larga — puede ser funcional (IDR)"`
-- 🟢 `"Alta confianza en dominio catalítico — apto para estudios de binding"`
+**3. Diagnóstico de Fallos Inteligente (Salvavidas del CESGA)**
+- Hoy, un fallo es un volcado de memoria. Nosotros detectamos si el proceso da error en el CESGA, y el agente traduce el log técnico de Linux/SLURM a un consejo humano: *"Pusiste una secuencia demasiado corta para este modelo"* o *"Has metido codones de parada sin querer"*. Salva cientos de tickets de soporte técnico.
 
-**API:** Gemini Flash 2.0 (gratis, sin tarjeta de crédito)
+**4. Generador de Reportes Automático (Exportación a Paper)**
+- Un botón para descargar un documento PDF que consolide la imagen 3D, las gráficas de PAE/pLDDT y una leyenda técnica escrita por IA, un 'abstract' listo para adjuntar a una publicación, tesis o reporte de laboratorio.
+
+**API:** Gemini 1.5 Pro vía n8n Webhooks (Integración viva)
 **Criterio:** 🥇 UX + IA (criterio 1 explícito del reto)
 
 ### B2. Historial de jobs — "Mis predicciones"

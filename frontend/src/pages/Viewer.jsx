@@ -20,7 +20,7 @@ export default function Viewer() {
   useEffect(() => {
     let viewerInstance;
     let isCancelled = false;
-    
+
     const fetchAndInitViewer = async () => {
       let customUrl = null;
       let data = {
@@ -36,12 +36,13 @@ export default function Viewer() {
             const out = await resp.json();
             data = {
               name: out.protein_metadata?.protein_name || jobId,
-              plddt: out.protein_metadata?.plddt_average || 85.0,
+              plddt: out.structural_data?.confidence?.plddt_mean || 85.0,
               pdbFileUrl: out.structural_data?.pdb_file || null,
               biological: out.biological_data || null,
               uniprot: out.protein_metadata?.uniprot_id || null,
               organism: out.protein_metadata?.organism || null,
-              paeMatrix: out.structural_data?.confidence?.pae_matrix || null
+              paeMatrix: out.structural_data?.confidence?.pae_matrix || null,
+              plddtHistogram: out.structural_data?.confidence?.plddt_histogram || null,
             };
             if (data.pdbFileUrl) {
               // The API returns the raw text content of the PDB, not a URL.
@@ -54,29 +55,29 @@ export default function Viewer() {
           console.error("Error fetching job outputs", e);
         }
       }
-      
+
       if (isCancelled) return;
       setJobData(data);
 
       if (typeof window !== "undefined" && viewerContainerRef.current) {
         try {
           await import("pdbe-molstar/build/pdbe-molstar-plugin");
-          
+
           if (!window.PDBeMolstarPlugin) {
             throw new Error("PDBeMolstarPlugin not found on window object");
           }
           if (isCancelled) return;
-          
+
           viewerInstance = new window.PDBeMolstarPlugin();
           viewerInstanceRef.current = viewerInstance;
-          
+
           const options = {
-            hideControls: true, 
-            bgColor: { r: 255, g: 255, b: 255 }, 
+            hideControls: true,
+            bgColor: { r: 255, g: 255, b: 255 },
             hideCanvasControls: ["expand", "selection", "animation", "controlToggle", "controlInfo"],
             visualStyle: "cartoon",
             // Keep AF specific parsing for the Blue->Red B-factor scale
-            alphafoldView: true, 
+            alphafoldView: true,
           };
 
           if (customUrl) {
@@ -86,7 +87,7 @@ export default function Viewer() {
           }
 
           viewerInstance.render(viewerContainerRef.current, options);
-          
+
           setIsLoaded(true);
         } catch (err) {
           console.error("Failed to load Mol* viewer:", err);
@@ -130,7 +131,7 @@ export default function Viewer() {
           grid-template-rows: 0fr 1fr 0fr !important;
         }
       `}</style>
-      
+
       {/* 3D Main Viewer Area */}
       <div className="flex-1 relative h-full flex flex-col">
         {/* Top Floating Header overlay */}
@@ -146,11 +147,11 @@ export default function Viewer() {
         </div>
 
         {/* The actual Mol* Canvas Container */}
-        <div 
-          className={`w-full h-full ${!isLoaded ? "animate-pulse bg-slate-200 dark:bg-slate-800" : ""}`} 
+        <div
+          className={`w-full h-full ${!isLoaded ? "animate-pulse bg-slate-200 dark:bg-slate-800" : ""}`}
           ref={viewerContainerRef}
         ></div>
-        
+
         {!isLoaded && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="flex flex-col items-center text-slate-400">
@@ -164,19 +165,13 @@ export default function Viewer() {
       {/* Right Panel - Settings / Details */}
       <div className="w-80 border-l border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 h-full flex flex-col shadow-xl z-20 transition-transform overflow-y-auto">
         <div className="flex w-full border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-          <button 
-            className={`flex-1 py-4 text-sm font-semibold transition-all border-b-2 ${activeTab === 'view' ? 'border-primary-500 text-primary-600 dark:text-primary-400 bg-slate-50/50 dark:bg-slate-800/50' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
-            onClick={() => setActiveTab('view')}
-          >
-            Vista 3D
-          </button>
-          <button 
+          <button
             className={`flex-1 py-4 text-sm font-semibold transition-all border-b-2 ${activeTab === 'details' ? 'border-primary-500 text-primary-600 dark:text-primary-400 bg-slate-50/50 dark:bg-slate-800/50' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
             onClick={() => setActiveTab('details')}
           >
-            Info
+            Información
           </button>
-          <button 
+          <button
             className={`flex-1 py-4 text-sm font-semibold transition-all border-b-2 ${activeTab === 'copilot' ? 'border-primary-500 text-primary-600 dark:text-primary-400 bg-slate-50/50 dark:bg-slate-800/50' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
             onClick={() => setActiveTab('copilot')}
           >
@@ -185,47 +180,6 @@ export default function Viewer() {
         </div>
 
         <div className="p-5 flex flex-col gap-6 flex-1">
-          {activeTab === 'view' && (
-            <div className="space-y-4">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs">
-                Leyenda de Colores (pLDDT)
-              </label>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                La estructura se colorea según la confianza de la predicción de AlphaFold para cada residuo.
-              </p>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full flex-shrink-0" style={{background: "#0053D6"}}></span>
-                  <div>
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Muy alta (&gt; 90)</span>
-                    <p className="text-xs text-slate-400">Estructura casi segura</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full flex-shrink-0" style={{background: "#65CBF3"}}></span>
-                  <div>
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Alta (70–90)</span>
-                    <p className="text-xs text-slate-400">Generalmente correcta</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full flex-shrink-0" style={{background: "#FFDB13"}}></span>
-                  <div>
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Baja (50–70)</span>
-                    <p className="text-xs text-slate-400">Tomar con cautela</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full flex-shrink-0" style={{background: "#FF7D45"}}></span>
-                  <div>
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Muy baja (&lt; 50)</span>
-                    <p className="text-xs text-slate-400">Región probablemente desordenada</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {activeTab === 'details' && (
             <>
               <div className="space-y-3">
@@ -243,19 +197,19 @@ export default function Viewer() {
                   </div>
                   <div className="pt-3 flex justify-between items-center border-t border-slate-200/50 dark:border-slate-700/50 mt-1">
                     <span className="text-xs text-slate-500 dark:text-slate-400">Mapizado de Error</span>
-                    <button 
+                    <button
                       onClick={() => setIsModalOpen(true)}
                       className="text-xs font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 flex items-center gap-1 bg-white dark:bg-slate-800 px-2 py-1 object-scale-down rounded shadow-sm border border-slate-200 dark:border-slate-700"
                     >
                       <Maximize2 className="w-3 h-3" /> Ver Matriz PAE
                     </button>
                   </div>
-                  
+
                   {jobData?.paeMatrix && (
                     <div className="w-full flex justify-center py-2 relative group cursor-pointer" onClick={() => setIsModalOpen(true)}>
                       <PAEHeatmap matrix={jobData.paeMatrix} className="w-[180px] h-[180px]" />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 dark:group-hover:bg-black/40 transition-all rounded flex items-center justify-center opacity-0 group-hover:opacity-100">
-                         <Maximize2 className="text-white w-6 h-6 drop-shadow-md" />
+                        <Maximize2 className="text-white w-6 h-6 drop-shadow-md" />
                       </div>
                     </div>
                   )}
@@ -281,13 +235,13 @@ export default function Viewer() {
                       </span>
                     </div>
                     {jobData.organism && (
-                       <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 py-2">
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 py-2">
                         <span className="text-slate-500">Organismo:</span>
                         <span className="font-medium italic text-slate-800 dark:text-slate-200">{jobData.organism}</span>
                       </div>
                     )}
                     {jobData.uniprot && (
-                       <div className="flex justify-between items-center pt-2">
+                      <div className="flex justify-between items-center pt-2">
                         <span className="text-slate-500">UniProt:</span>
                         <span className="font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2 py-0.5 rounded">
                           {jobData.uniprot}
@@ -302,10 +256,10 @@ export default function Viewer() {
 
           {activeTab === 'copilot' && (
             <div className="flex-1 -mx-5 -mb-5 h-full">
-              <ProteinCopilot 
-                jobId={jobId} 
-                proteinName={jobData?.name} 
-                statusData={jobData} 
+              <ProteinCopilot
+                jobId={jobId}
+                proteinName={jobData?.name}
+                statusData={jobData}
               />
             </div>
           )}
@@ -316,6 +270,26 @@ export default function Viewer() {
             <Download className="w-4 h-4" />
             Descargar Archivos
           </button>
+        </div>
+
+        {/* Floating pLDDT Legend — bottom-left corner of the canvas */}
+        <div className="absolute bottom-5 left-4 z-10 bg-slate-900/70 backdrop-blur-md border border-white/10 rounded-xl px-3 py-3 shadow-xl pointer-events-none">
+          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">pLDDT</p>
+          <div className="flex flex-col gap-1.5">
+            {[
+              { color: "#0053D6", label: "Muy alta", range: "> 90" },
+              { color: "#65CBF3", label: "Alta", range: "70–90" },
+              { color: "#FFDB13", label: "Baja", range: "50–70" },
+              { color: "#FF7D45", label: "Muy baja", range: "< 50" },
+            ].map(({ color, label, range }) => (
+              <div key={label} className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }}></span>
+                <span className="text-[10px] text-slate-300 leading-none">
+                  {label} <span className="text-slate-500">({range})</span>
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -338,27 +312,27 @@ export default function Viewer() {
                 <div className="shadow-lg border-2 border-white dark:border-slate-700 rounded bg-white p-2">
                   <PAEHeatmap matrix={jobData?.paeMatrix} className="w-[500px] h-[500px] max-w-full max-h-[60vh] object-contain" />
                 </div>
-                
+
                 {/* Legend Panel */}
                 <div className="w-48 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-sm">
-                   <h4 className="font-bold text-slate-700 dark:text-slate-300 mb-2 border-b border-slate-100 dark:border-slate-700 pb-1">Leyenda</h4>
-                   <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                     El color indica la precisión en la distancia posicional entre el residuo Y frente al X.
-                   </p>
-                   <div className="space-y-2 text-xs">
-                     <div className="flex items-center gap-2">
-                       <span className="w-4 h-4 block rounded bg-[#0053D6]"></span> Error Mínimo (&lt;5Å)
-                     </div>
-                     <div className="flex items-center gap-2">
-                       <span className="w-4 h-4 block rounded bg-[#65CBF3]"></span> Confianza Media
-                     </div>
-                     <div className="flex items-center gap-2">
-                       <span className="w-4 h-4 block rounded bg-[#FFDB13]"></span> Confianza Baja
-                     </div>
-                     <div className="flex items-center gap-2">
-                       <span className="w-4 h-4 block rounded bg-[#FF7D45]"></span> Error Alto (&gt;30Å)
-                     </div>
-                   </div>
+                  <h4 className="font-bold text-slate-700 dark:text-slate-300 mb-2 border-b border-slate-100 dark:border-slate-700 pb-1">Leyenda</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                    El color indica la precisión en la distancia posicional entre el residuo Y frente al X.
+                  </p>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-4 h-4 block rounded bg-[#0053D6]"></span> Error Mínimo (&lt;5Å)
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-4 h-4 block rounded bg-[#65CBF3]"></span> Confianza Media
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-4 h-4 block rounded bg-[#FFDB13]"></span> Confianza Baja
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-4 h-4 block rounded bg-[#FF7D45]"></span> Error Alto (&gt;30Å)
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
