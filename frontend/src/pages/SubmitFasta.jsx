@@ -43,7 +43,7 @@ MALWMRLLPLLALLALWGPDPAAAFVNQHLCGSHLVEALYLVCGERGFFYTPKTRREAEDLQVGQVELGGGPGAGSLQPL
  *  - Simple:   >My protein                                                → "My protein"
  */
 function parseFastaName(header) {
-  if (!header.startsWith(">")) return "Secuencia nueva";
+  if (!header.startsWith(">")) return "Proteína";
   const raw = header.slice(1).trim();
 
   // UniProt: >sp|ACC|ENTRY_NAME description OS=...
@@ -72,6 +72,9 @@ export default function SubmitFasta() {
   const [projectName, setProjectName] = useState(null);
   const [fastaContent, setFastaContent] = useState("");
   const [customName, setCustomName] = useState("");
+  const [sequenceWarnings, setSequenceWarnings] = useState([]);
+  const [parsedSequences, setParsedSequences] = useState([]);
+  const [multiSubmitSuccess, setMultiSubmitSuccess] = useState(0);
 
   /* Load project name if coming from a project */
   useEffect(() => {
@@ -87,6 +90,25 @@ export default function SubmitFasta() {
 
   const [resourcePreset, setResourcePreset] = useState("Alta");
   const [customResources, setCustomResources] = useState({ cpu: "", gpu: "", memory: "", runtime: "" });
+
+  const CUSTOM_LIMITS = {
+    cpu:     { min: 1,  max: 64,    unit: "cores",   label: "CPU" },
+    gpu:     { min: 0,  max: 4,     unit: "GPUs",    label: "GPU" },
+    memory:  { min: 0,  max: 256,   unit: "GB",      label: "Memoria" },
+    runtime: { min: 60, max: 86400, unit: "s",       label: "Max runtime" },
+  };
+
+  const customResourceWarnings = (() => {
+    if (resourcePreset !== "Personalizado") return [];
+    const warns = [];
+    for (const [key, { min, max, unit, label }] of Object.entries(CUSTOM_LIMITS)) {
+      const val = parseFloat(customResources[key]);
+      if (customResources[key] === "" || isNaN(val)) continue;
+      if (val < min) warns.push({ key, type: "error", msg: `${label}: el mínimo permitido por la API es ${min} ${unit}. Valor actual: ${val}.` });
+      else if (val > max) warns.push({ key, type: "error", msg: `${label}: el máximo permitido por la API es ${max} ${unit}. Valor actual: ${val}.` });
+    }
+    return warns;
+  })();
   
   const [jobStatus, setJobStatus] = useState(null);
   const [jobOutputs, setJobOutputs] = useState(null);
@@ -114,6 +136,73 @@ export default function SubmitFasta() {
     setFastaContent(e.target.value);
     setActiveChip(null);
   };
+
+  useEffect(() => {
+    if (!fastaContent.trim()) {
+      setSequenceWarnings([]);
+      setParsedSequences([]);
+      return;
+    }
+
+    let raw = fastaContent.replace(/\r\n/g, "\n");
+    let sequencesParts = raw.split(/(?=>)/).filter(p => p.trim());
+    if (sequencesParts.length > 0 && !sequencesParts[0].startsWith(">")) {
+      sequencesParts = raw.split(/>/).filter(p => p.trim());
+    }
+
+    let hasHeader = raw.trim().startsWith(">");
+    let warns = [];
+    let parsedArray = [];
+    let globalInvalidChars = new Set();
+    let hasDna = false;
+
+    if (!hasHeader && sequencesParts.length > 0) {
+      warns.push({ type: "generic", msg: "No se ha detectado cabecera FASTA. Se asignará el nombre genérico 'Proteína'. Se recomienda añadir un Nombre personalizado." });
+    }
+
+    sequencesParts.forEach((part, index) => {
+      let header = "";
+      let body = "";
+
+      if (index === 0 && !hasHeader) {
+        header = ">Proteína";
+        body = part;
+      } else {
+        let lines = part.split("\n");
+        header = lines[0].startsWith(">") ? lines[0] : ">" + lines[0];
+        body = lines.slice(1).join("\n");
+      }
+
+      let cleanBody = body.replace(/[\d\s]+/g, "").toUpperCase();
+      let formattedBody = cleanBody.match(/.{1,80}/g)?.join("\n") || cleanBody;
+      let finalCode = `${header}\n${formattedBody}`;
+      
+      const invalidChars = cleanBody.match(/[*\-XBZU]/g);
+      if (invalidChars) invalidChars.forEach(c => globalInvalidChars.add(c));
+
+      const atgcMatch = cleanBody.match(/[ATGC]/g);
+      if (atgcMatch && cleanBody.length > 0 && atgcMatch.length / cleanBody.length > 0.8) {
+        hasDna = true;
+      }
+
+      parsedArray.push({
+        name: parseFastaName(header),
+        cleanFasta: finalCode,
+        aaCount: cleanBody.length,
+        lines: finalCode.split("\n")
+      });
+    });
+
+    if (globalInvalidChars.size > 0) {
+      warns.push({ type: "invalid", msg: `⚠ Se han detectado caracteres no estándar (${Array.from(globalInvalidChars).join(" ")}). Es posible que la predicción sea menos precisa.` });
+    }
+    if (hasDna) {
+      warns.push({ type: "dna", msg: "Parece que has pegado una secuencia de ADN. Esta herramienta acepta secuencias de aminoácidos (proteínas). ¿Quieres traducirla primero?" });
+    }
+
+    setSequenceWarnings(warns);
+    setParsedSequences(parsedArray);
+  }, [fastaContent]);
 
   useEffect(() => {
     let intervalId;
@@ -145,22 +234,19 @@ export default function SubmitFasta() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!fastaContent.trim()) return;
+    if (!fastaContent.trim() || parsedSequences.length === 0) return;
 
     setIsSubmitting(true);
     setErrorMsg(null);
     setSubmitted(false);
+    setMultiSubmitSuccess(0);
     setJobStatus(null);
     setJobOutputs(null);
     setJobAccounting(null);
 
     try {
-      const cleanFasta = fastaContent.replace(/\\n/g, "\n");
-      const lines = cleanFasta.split("\n");
-
       let gpus, cpus, memory_gb, max_runtime_seconds;
       if (resourcePreset === 'Personalizado') {
-         // La API solo acepta gpus entere 0 y 4 (es el contaje, no los GB). Asumimos 1 GPU por defecto.
          gpus = 1;
          cpus = parseInt(customResources.cpu) || 8;
          memory_gb = parseFloat(customResources.memory) || 32.0;
@@ -172,48 +258,61 @@ export default function SubmitFasta() {
          max_runtime_seconds = parseInt(PRESET_RESOURCES[resourcePreset].runtime);
       }
 
-      const response = await fetch("https://api-mock-cesga.onrender.com/jobs/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", accept: "application/json" },
-        body: JSON.stringify({ 
-          fasta_sequence: cleanFasta, 
-          fasta_filename: customName.trim() || "proteina.fasta",
-          gpus,
-          cpus,
-          memory_gb,
-          max_runtime_seconds
-        }),
-      });
+      let submittedJobs = [];
 
-      const data = await response.json();
+      for (let i = 0; i < parsedSequences.length; i++) {
+        const seq = parsedSequences[i];
+        const assignedFileName = (parsedSequences.length === 1 && customName.trim() ? customName.trim() : seq.name) + ".fasta";
 
-      if (!response.ok) {
-        let msg = "Error desconocido al procesar la secuencia";
-        if (data.detail) msg = Array.isArray(data.detail) ? data.detail[0].msg : data.detail;
-        throw new Error(msg);
-      }
-
-      const autoName = lines[0].startsWith(">") ? parseFastaName(lines[0]) : "Secuencia nueva";
-      const name = customName.trim() || autoName;
-
-      if (auth.currentUser) {
-        await addDoc(collection(db, "jobs"), {
-          userId: auth.currentUser.uid,
-          cesgaJobId: data.job_id,
-          proteinName: name,
-          status: data.status || "PENDING",
-          createdAt: serverTimestamp(),
-          fastaContent: cleanFasta,
-          ...(projectId ? { projectId } : {}),
+        const response = await fetch("https://api-mock-cesga.onrender.com/jobs/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", accept: "application/json" },
+          body: JSON.stringify({ 
+            fasta_sequence: seq.cleanFasta, 
+            fasta_filename: assignedFileName,
+            gpus, cpus, memory_gb, max_runtime_seconds
+          }),
         });
+
+        const data = await response.json();
+        if (!response.ok) {
+          let msg = `Error desconocido al procesar la secuencia ${seq.name}`;
+          if (data.detail) msg = Array.isArray(data.detail) ? data.detail[0].msg : data.detail;
+          throw new Error(msg);
+        }
+
+        const fallbackName = seq.lines[0].startsWith(">") ? parseFastaName(seq.lines[0]) : "Proteína";
+        const assignedName = parsedSequences.length === 1 && customName.trim() ? customName.trim() : fallbackName;
+
+        if (auth.currentUser) {
+          await addDoc(collection(db, "jobs"), {
+            userId: auth.currentUser.uid,
+            cesgaJobId: data.job_id,
+            proteinName: assignedName,
+            status: data.status || "PENDING",
+            createdAt: serverTimestamp(),
+            fastaContent: seq.cleanFasta,
+            ...(projectId ? { projectId } : {}),
+          });
+        }
+        
+        submittedJobs.push(data);
       }
 
       setSubmitted(true);
-      setJobStatus({ id: data.job_id, status: data.status || "PENDING" });
+      
+      if (parsedSequences.length === 1) {
+         setJobStatus({ id: submittedJobs[0].job_id, status: submittedJobs[0].status || "PENDING" });
+         setIsSubmitting(false);
+      } else {
+         setMultiSubmitSuccess(parsedSequences.length);
+         setTimeout(() => {
+            navigate(projectId ? `/app/projects/${projectId}` : "/app/jobs");
+         }, 3000);
+      }
     } catch (err) {
       console.error(err);
       setErrorMsg(err.message);
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -228,10 +327,8 @@ export default function SubmitFasta() {
     }
   };
 
-  const lineCount = fastaContent ? fastaContent.split("\n").length : 0;
-  const aaCount = fastaContent
-    ? fastaContent.split("\n").filter((l) => !l.startsWith(">")).join("").replace(/\s/g, "").length
-    : 0;
+  const lineCount = parsedSequences.reduce((acc, seq) => acc + seq.lines.length, 0);
+  const aaCount = parsedSequences.reduce((acc, seq) => acc + seq.aaCount, 0);
 
   return (
     <div className="max-w-4xl mx-auto px-5 py-8 w-full">
@@ -265,10 +362,16 @@ export default function SubmitFasta() {
       )}
 
       {/* Success banner */}
-      {submitted && (
+      {submitted && parsedSequences.length === 1 && (
         <div className="mb-4 flex items-center gap-2.5 px-4 py-3 rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-sm">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           Secuencia enviada. Ve a <button onClick={() => navigate(projectId ? `/app/projects/${projectId}` : "/app/jobs")} className="underline font-medium mx-1">{projectId ? "el proyecto" : "Mis trabajos"}</button> para seguir el progreso.
+        </div>
+      )}
+      {submitted && multiSubmitSuccess > 1 && (
+        <div className="mb-4 flex items-center gap-2.5 px-4 py-3 rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-sm">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          ¡{multiSubmitSuccess} secuencias enviadas al clúster! Redirigiendo a tu bandeja de trabajos...
         </div>
       )}
 
@@ -276,71 +379,11 @@ export default function SubmitFasta() {
       <form onSubmit={handleSubmit}>
         <div className="rounded-lg border border-slate-300 dark:border-slate-700 overflow-hidden">
 
-          {/* Sample proteins */}
-          <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60">
-            <div className="flex items-center gap-2 mb-2.5">
-              <FlaskConical className="w-3.5 h-3.5 text-slate-400" />
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                Proteínas de ejemplo
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {PROTEIN_SAMPLES.map((protein) => (
-                <button
-                  key={protein.tag}
-                  type="button"
-                  onClick={() => handleChipClick(protein)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium transition-colors ${
-                    activeChip === protein.tag
-                      ? "bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-400"
-                      : "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100"
-                  }`}
-                >
-                  <span className="font-mono text-[10px] opacity-60">{protein.tag}</span>
-                  {protein.name}
-                  {activeChip === protein.tag && <CheckCircle2 className="w-3 h-3" />}
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* Nombre personalizado */}
-          <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center gap-3">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">Nombre</label>
-            <input
-              type="text"
-              value={customName}
-              onChange={(e) => setCustomName(e.target.value)}
-              placeholder={
-                fastaContent
-                  ? parseFastaName(fastaContent.split("\n")[0]) + " (autodetectado)"
-                  : "Opcional — se extrae del header FASTA"
-              }
-              className="flex-1 text-sm bg-transparent border-none outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-300 dark:placeholder:text-slate-600"
-            />
-          </div>
-
-          {/* FASTA textarea */}
-          <div className="relative">
-            <textarea
-              value={fastaContent}
-              onChange={handleTextareaChange}
-              placeholder={">sp|P02769|ALBU_BOVIN Serum albumin OS=Bos taurus\nMKWVTFISLLLLFSSAYSRGVFRR..."}
-              rows={12}
-              className="w-full px-4 py-3 font-mono text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500/40 border-none"
-            />
-            {fastaContent && (
-              <div className="absolute bottom-3 right-3 flex items-center gap-2 pointer-events-none">
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500">
-                  {aaCount} aa · {lineCount} líneas
-                </span>
-              </div>
-            )}
-          </div>
 
           {/* Recursos de cómputo */}
-          <div className="px-4 py-5 bg-[#0f1117] border-t border-[#1e2535]">
-            <h3 className="text-[11px] font-semibold text-[#64748b] tracking-[0.08em] uppercase mb-3">
+          <div className="px-4 py-5 bg-white dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-700/50">
+            <h3 className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 tracking-[0.08em] uppercase mb-3">
               Recursos de cómputo
             </h3>
 
@@ -360,13 +403,13 @@ export default function SubmitFasta() {
                     className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-150 ease-in-out border outline-none ${
                       isSelected
                         ? "border-[#2dd4bf] text-[#2dd4bf] bg-[rgba(45,212,191,0.07)]"
-                        : "border-[#2a2f3e] text-[#94a3b8] hover:border-slate-600"
+                        : "border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50 dark:bg-transparent"
                     }`}
                   >
                     {label}
                     {preset === 'Alta' && (
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-sm uppercase tracking-wider font-bold ${
-                        isSelected ? "bg-[#2dd4bf]/20 text-[#2dd4bf]" : "bg-slate-800 text-slate-400"
+                        isSelected ? "bg-[#2dd4bf]/20 text-[#2dd4bf]" : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                       }`}>
                         Recomendado
                       </span>
@@ -379,7 +422,7 @@ export default function SubmitFasta() {
             {/* Preset Info / Custom Form */}
             {resourcePreset !== 'Personalizado' ? (
               <div>
-                <div className="bg-[#161b27] border border-[#1e2535] rounded-[10px] py-[14px] px-[18px] flex flex-wrap lg:flex-nowrap items-center justify-between gap-4">
+                <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 rounded-[10px] py-[14px] px-[18px] flex flex-wrap lg:flex-nowrap items-center justify-between gap-4">
                   {[
                     { label: "CPU", value: `${PRESET_RESOURCES[resourcePreset].cpu} cores` },
                     { label: "GPU (GB)", value: `${PRESET_RESOURCES[resourcePreset].gpu} GB` },
@@ -388,8 +431,8 @@ export default function SubmitFasta() {
                     { label: "Resolución 3D", value: PRESET_RESOURCES[resourcePreset].res }
                   ].map((field, idx) => (
                     <div key={idx} className="flex flex-col gap-1">
-                      <span className="text-[11px] text-[#4b5563] uppercase font-medium">{field.label}</span>
-                      <span className="text-[14px] font-medium text-[#cbd5e1]">{field.value}</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-medium">{field.label}</span>
+                      <span className="text-[14px] font-medium text-slate-700 dark:text-slate-200">{field.value}</span>
                     </div>
                   ))}
                 </div>
@@ -400,61 +443,99 @@ export default function SubmitFasta() {
                 )}
               </div>
             ) : (
-              <div className="bg-[#161b27] border border-[#1e2535] rounded-[10px] p-4">
-                <div className="grid grid-cols-2 lg:flex lg:flex-row gap-4 mb-3">
+              <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 rounded-[10px] p-4">
+                <div className="grid grid-cols-2 lg:flex lg:flex-row gap-4">
                   <div className="flex flex-col gap-1.5 flex-1">
-                    <label className="text-[11px] text-[#4b5563] uppercase font-medium">CPU (cores)</label>
+                    <label className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-medium">CPU (cores)</label>
                     <input
                       type="number"
-                      placeholder="8"
+                      placeholder="1–64"
                       value={customResources.cpu}
                       onChange={(e) => setCustomResources({ ...customResources, cpu: e.target.value })}
-                      className="bg-[#0f1117] border border-[#2a2f3e] focus:border-[#3b82f6] rounded-[6px] px-3 py-1.5 text-sm outline-none text-[#cbd5e1] placeholder:text-[#4b5563] transition-colors duration-150"
+                      className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-600 focus:border-[#3b82f6] rounded-[6px] px-3 py-1.5 text-sm outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-[#4b5563] transition-colors duration-150 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 flex-1">
-                    <label className="text-[11px] text-[#4b5563] uppercase font-medium">GPU (GB)</label>
+                    <label className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-medium">GPU (GB)</label>
                     <input
                       type="number"
-                      placeholder="40"
+                      placeholder="0–4"
                       value={customResources.gpu}
                       onChange={(e) => setCustomResources({ ...customResources, gpu: e.target.value })}
-                      className="bg-[#0f1117] border border-[#2a2f3e] focus:border-[#3b82f6] rounded-[6px] px-3 py-1.5 text-sm outline-none text-[#cbd5e1] placeholder:text-[#4b5563] transition-colors duration-150"
+                      className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-600 focus:border-[#3b82f6] rounded-[6px] px-3 py-1.5 text-sm outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-[#4b5563] transition-colors duration-150 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 flex-1">
-                    <label className="text-[11px] text-[#4b5563] uppercase font-medium">Memoria (GB)</label>
+                    <label className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-medium">Memoria (GB)</label>
                     <input
                       type="number"
-                      placeholder="32"
+                      placeholder="0–256"
                       value={customResources.memory}
                       onChange={(e) => setCustomResources({ ...customResources, memory: e.target.value })}
-                      className="bg-[#0f1117] border border-[#2a2f3e] focus:border-[#3b82f6] rounded-[6px] px-3 py-1.5 text-sm outline-none text-[#cbd5e1] placeholder:text-[#4b5563] transition-colors duration-150"
+                      className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-600 focus:border-[#3b82f6] rounded-[6px] px-3 py-1.5 text-sm outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-[#4b5563] transition-colors duration-150 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 flex-1">
-                    <label className="text-[11px] text-[#4b5563] uppercase font-medium">Max runtime (s)</label>
+                    <label className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-medium">Max runtime (s)</label>
                     <input
                       type="number"
-                      placeholder="3600"
+                      placeholder="60–86400"
                       value={customResources.runtime}
                       onChange={(e) => setCustomResources({ ...customResources, runtime: e.target.value })}
-                      className="bg-[#0f1117] border border-[#2a2f3e] focus:border-[#3b82f6] rounded-[6px] px-3 py-1.5 text-sm outline-none text-[#cbd5e1] placeholder:text-[#4b5563] transition-colors duration-150"
+                      className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-600 focus:border-[#3b82f6] rounded-[6px] px-3 py-1.5 text-sm outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-[#4b5563] transition-colors duration-150 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 </div>
-                <div className="pt-3 border-t border-[#1e2535] text-[13px] text-[#64748b]">
-                  Resumen: {customResources.cpu || "X"} cores · {customResources.gpu || "GPU"} · {customResources.memory || "Y"} GB · {customResources.runtime || "Z"} s
-                </div>
+                {customResourceWarnings.length > 0 && (
+                  <div className="mt-3 flex flex-col gap-1.5">
+                    {customResourceWarnings.map((w, i) => (
+                      <div key={i} className="flex gap-2 items-start text-xs p-2.5 rounded-md border bg-red-500/10 border-red-500/30 text-red-500">
+                        <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 opacity-80" />
+                        <p className="leading-snug">{w.msg}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
 
+
+
+          {/* FASTA textarea */}
+          <div className="relative">
+            <textarea
+              value={fastaContent}
+              onChange={handleTextareaChange}
+              placeholder={">sp|P02769|ALBU_BOVIN Serum albumin OS=Bos taurus\nMKWVTFISLLLLFSSAYSRGVFRR..."}
+              rows={12}
+              className="w-full px-4 py-3 font-mono text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500/40 border-none"
+            />
+            {fastaContent && (
+              <div className="absolute bottom-3 right-3 flex items-center gap-2 pointer-events-none">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500">
+                  {parsedSequences.length > 1 ? `${parsedSequences.length} secuencias · ` : ""}{aaCount} aa · {lineCount} líneas
+                </span>
+              </div>
+            )}
+          </div>
+
+          {sequenceWarnings.length > 0 && (
+            <div className="px-4 py-3 bg-slate-50 dark:bg-slate-900/40/50 border-t border-slate-200 dark:border-slate-700/50 flex flex-col gap-2">
+              {sequenceWarnings.map((w, i) => (
+                <div key={i} className="flex gap-2 items-start text-xs p-2.5 rounded-md border bg-amber-500/10 border-amber-500/30 text-amber-500">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 opacity-80" />
+                  <p className="leading-snug">{w.msg}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Footer bar or Job Status */}
           {jobStatus ? (
-            <div className="flex flex-col p-5 border-t border-[#1e2535] bg-[#0f1117]">
+            <div className="flex flex-col p-5 border-t border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-900/40">
               {/* Status Indicator */}
-              <div className="bg-[#161b27] border border-[#1e2535] rounded-[10px] p-4 flex flex-col items-center justify-center">
+              <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 rounded-[10px] p-4 flex flex-col items-center justify-center">
                 <div className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide flex items-center gap-2 ${
                   jobStatus.status === 'PENDING' ? 'bg-amber-500/20 text-amber-500' :
                   jobStatus.status === 'RUNNING' ? 'bg-blue-500/20 text-blue-400' :
@@ -471,25 +552,25 @@ export default function SubmitFasta() {
 
               {/* FAILED Alert */}
               {jobStatus.status === 'FAILED' && jobStatus.error && (
-                <div className="mt-4 flex flex-col gap-1.5 px-4 py-3 rounded-[10px] border border-red-900/50 bg-[#161b27] text-red-400 text-sm">
+                <div className="mt-4 flex flex-col gap-1.5 px-4 py-3 rounded-[10px] border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-slate-800/40 text-red-700 dark:text-red-400 text-sm">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 shrink-0" />
                     <strong>Error de ejecución</strong>
                   </div>
-                  <p className="text-xs text-[#94a3b8]">{jobStatus.error}</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-300">{jobStatus.error}</p>
                 </div>
               )}
 
               {/* COMPLETED Summary Info */}
               {jobStatus.status === 'COMPLETED' && jobOutputs && jobAccounting && (
-                <div className="mt-4 bg-[#161b27] border border-[#1e2535] rounded-[10px] p-5">
+                <div className="mt-4 bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 rounded-[10px] p-5">
                   {/* Metadata Row */}
                   {jobOutputs.protein_metadata && (
-                    <div className="mb-5 pb-4 border-b border-[#1e2535] text-[12px] text-[#64748b] flex flex-wrap gap-x-5 gap-y-2">
-                      {jobOutputs.protein_metadata.name && <span><strong className="text-[#94a3b8] font-medium">Nombre:</strong> {jobOutputs.protein_metadata.name}</span>}
-                      {jobOutputs.protein_metadata.uniprot_id && <span><strong className="text-[#94a3b8] font-medium">UniProt ID:</strong> {jobOutputs.protein_metadata.uniprot_id}</span>}
-                      {jobOutputs.protein_metadata.pdb_id && <span><strong className="text-[#94a3b8] font-medium">PDB ID:</strong> {jobOutputs.protein_metadata.pdb_id}</span>}
-                      {jobOutputs.protein_metadata.organism && <span><strong className="text-[#94a3b8] font-medium">Organismo:</strong> {jobOutputs.protein_metadata.organism}</span>}
+                    <div className="mb-5 pb-4 border-b border-slate-200 dark:border-slate-700/50 text-[12px] text-[#64748b] flex flex-wrap gap-x-5 gap-y-2">
+                      {jobOutputs.protein_metadata.name && <span><strong className="text-slate-600 dark:text-slate-300 font-medium">Nombre:</strong> {jobOutputs.protein_metadata.name}</span>}
+                      {jobOutputs.protein_metadata.uniprot_id && <span><strong className="text-slate-600 dark:text-slate-300 font-medium">UniProt ID:</strong> {jobOutputs.protein_metadata.uniprot_id}</span>}
+                      {jobOutputs.protein_metadata.pdb_id && <span><strong className="text-slate-600 dark:text-slate-300 font-medium">PDB ID:</strong> {jobOutputs.protein_metadata.pdb_id}</span>}
+                      {jobOutputs.protein_metadata.organism && <span><strong className="text-slate-600 dark:text-slate-300 font-medium">Organismo:</strong> {jobOutputs.protein_metadata.organism}</span>}
                     </div>
                   )}
 
@@ -498,8 +579,8 @@ export default function SubmitFasta() {
                     <div>
                       <h4 className="text-[11px] font-semibold text-[#64748b] tracking-[0.08em] uppercase mb-3">Estructura</h4>
                       <div className="flex flex-col gap-2.5">
-                         <div className="flex justify-between items-center bg-[#0f1117] px-3 py-2 border border-[#1e2535] rounded-[6px]">
-                           <span className="text-xs text-[#cbd5e1]">pLDDT medio</span>
+                         <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
+                           <span className="text-xs text-slate-800 dark:text-slate-200">pLDDT medio</span>
                            <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
                               jobOutputs.metrics.plddt_mean > 90 ? 'bg-[#2dd4bf]/20 text-[#2dd4bf]' :
                               jobOutputs.metrics.plddt_mean >= 70 ? 'bg-blue-500/20 text-blue-400' :
@@ -509,8 +590,8 @@ export default function SubmitFasta() {
                              {jobOutputs.metrics.plddt_mean.toFixed(1)}
                            </span>
                          </div>
-                         <div className="bg-[#0f1117] px-3 py-2.5 border border-[#1e2535] rounded-[6px] flex flex-col gap-2">
-                           <span className="text-xs text-[#cbd5e1]">Fracción de residuos</span>
+                         <div className="bg-slate-50 dark:bg-slate-900/40 px-3 py-2.5 border border-slate-200 dark:border-slate-700/50 rounded-[6px] flex flex-col gap-2">
+                           <span className="text-xs text-slate-800 dark:text-slate-200">Fracción de residuos</span>
                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] uppercase font-medium tracking-wider">
                              <span className="text-[#2dd4bf]">Muy Alta: {(jobOutputs.metrics.fraction_plddt_above_90 * 100).toFixed(0)}%</span>
                              <span className="text-blue-400">Alta: {(jobOutputs.metrics.fraction_plddt_70_to_90 * 100).toFixed(0)}%</span>
@@ -520,13 +601,13 @@ export default function SubmitFasta() {
                          </div>
                          {jobOutputs.derived_insights && (
                            <>
-                             <div className="flex justify-between items-center bg-[#0f1117] px-3 py-2 border border-[#1e2535] rounded-[6px]">
-                               <span className="text-xs text-[#cbd5e1]">Solubilidad score</span>
-                               <span className="text-xs text-[#94a3b8]">{jobOutputs.derived_insights.solubility_score.toFixed(2)}</span>
+                             <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
+                               <span className="text-xs text-slate-800 dark:text-slate-200">Solubilidad score</span>
+                               <span className="text-xs text-slate-600 dark:text-slate-300">{jobOutputs.derived_insights.solubility_score.toFixed(2)}</span>
                              </div>
-                             <div className="flex justify-between items-center bg-[#0f1117] px-3 py-2 border border-[#1e2535] rounded-[6px]">
-                               <span className="text-xs text-[#cbd5e1]">Estado estabilidad</span>
-                               <span className="text-xs text-[#94a3b8] capitalize">{jobOutputs.derived_insights.stability_status}</span>
+                             <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
+                               <span className="text-xs text-slate-800 dark:text-slate-200">Estado estabilidad</span>
+                               <span className="text-xs text-slate-600 dark:text-slate-300 capitalize">{jobOutputs.derived_insights.stability_status}</span>
                              </div>
                            </>
                          )}
@@ -537,17 +618,17 @@ export default function SubmitFasta() {
                     <div>
                       <h4 className="text-[11px] font-semibold text-[#64748b] tracking-[0.08em] uppercase mb-3">Contabilidad HPC</h4>
                       <div className="flex flex-col gap-2.5">
-                         <div className="flex justify-between items-center bg-[#0f1117] px-3 py-2 border border-[#1e2535] rounded-[6px]">
-                           <span className="text-xs text-[#cbd5e1]">CPU Hours</span>
-                           <span className="text-xs text-[#94a3b8]">{jobAccounting.cpu_hours.toFixed(2)} h</span>
+                         <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
+                           <span className="text-xs text-slate-800 dark:text-slate-200">CPU Hours</span>
+                           <span className="text-xs text-slate-600 dark:text-slate-300">{jobAccounting.cpu_hours.toFixed(2)} h</span>
                          </div>
-                         <div className="flex justify-between items-center bg-[#0f1117] px-3 py-2 border border-[#1e2535] rounded-[6px]">
-                           <span className="text-xs text-[#cbd5e1]">GPU Hours</span>
-                           <span className="text-xs text-[#94a3b8]">{jobAccounting.gpu_hours.toFixed(2)} h</span>
+                         <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
+                           <span className="text-xs text-slate-800 dark:text-slate-200">GPU Hours</span>
+                           <span className="text-xs text-slate-600 dark:text-slate-300">{jobAccounting.gpu_hours.toFixed(2)} h</span>
                          </div>
-                         <div className="flex justify-between items-center bg-[#0f1117] px-3 py-2 border border-[#1e2535] rounded-[6px]">
-                           <span className="text-xs text-[#cbd5e1]">Wall Time</span>
-                           <span className="text-xs text-[#94a3b8]">{jobAccounting.wall_time_seconds} s</span>
+                         <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
+                           <span className="text-xs text-slate-800 dark:text-slate-200">Wall Time</span>
+                           <span className="text-xs text-slate-600 dark:text-slate-300">{jobAccounting.wall_time_seconds} s</span>
                          </div>
                       </div>
                     </div>
@@ -556,7 +637,7 @@ export default function SubmitFasta() {
               )}
             </div>
           ) : (
-            <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-[#1e2535] bg-[#0f1117]">
+            <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-900/40">
               <div className="flex items-center gap-2">
                 <input
                   type="file"
@@ -581,7 +662,7 @@ export default function SubmitFasta() {
               <div className="flex flex-col items-end gap-1.5">
                 <button
                   type="submit"
-                  disabled={isSubmitting || !fastaContent.trim()}
+                  disabled={isSubmitting || !fastaContent.trim() || customResourceWarnings.length > 0}
                   className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-semibold rounded-md bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
                 >
                   {isSubmitting ? (
@@ -597,7 +678,7 @@ export default function SubmitFasta() {
                   )}
                 </button>
                 {isSubmitting && (
-                  <span className="text-[11px] text-[#64748b] italic">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 italic">
                     La API puede tardar hasta 30 s en responder si llevaba inactiva.
                   </span>
                 )}
@@ -611,6 +692,25 @@ export default function SubmitFasta() {
       <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">
         La secuencia se enviará al clúster <strong className="text-slate-500 dark:text-slate-400">CESGA FinisTerrae III</strong> para predicción con AlphaFold 2. La API puede tardar 20–30 s en responder si estaba inactiva.
       </p>
+
+      {/* Flotante de Pruebas */}
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-1.5 p-3 bg-amber-50 dark:bg-slate-800 border-2 border-amber-400 dark:border-amber-600 rounded-lg shadow-xl max-w-[200px] text-xs opacity-70 hover:opacity-100 transition-opacity">
+        <div className="text-amber-600 dark:text-amber-500 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5">
+          <FlaskConical className="w-3 h-3" />
+          Debug: Ejemplos
+        </div>
+        <p className="text-[9px] text-slate-500 leading-tight mb-1">Uso exclusivo pruebas locales. Ignorar en PROD.</p>
+        {PROTEIN_SAMPLES.map((protein) => (
+          <button
+            key={protein.tag}
+            type="button"
+            onClick={() => handleChipClick(protein)}
+            className="text-left px-2 py-1.5 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-amber-400 font-medium truncate"
+          >
+            {protein.name}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
