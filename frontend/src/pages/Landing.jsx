@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../lib/firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import {
-  Dna, Zap, Bot, Share2, ArrowRight, Upload, Cpu, Eye,
-  Server, Check, Users, BrainCircuit, FolderOpen, Bell,
-  FlaskConical, AtSign, Shield, BarChart3,
+  Bot, ArrowRight, Upload, Cpu, Eye,
+  Users, BrainCircuit, Bell,
+  FlaskConical, BarChart3,
 } from "lucide-react";
 import logoUrl from "../assets/logo.png";
 import heroVideo from "../assets/hero.mp4";
@@ -90,79 +90,49 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── MÉTRICAS ── */}
-      <section className="border-y border-white/5 py-16 px-4 bg-slate-900/30">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            { value: "500×", label: "más rápido que cómputo local", color: "text-primary-400", glow: "rgba(99,102,241,0.15)" },
-            { value: "< 1 min", label: "de configuración para empezar", color: "text-emerald-400", glow: "rgba(52,211,153,0.15)" },
-            { value: "0", label: "instalaciones requeridas", color: "text-amber-400", glow: "rgba(251,191,36,0.15)" },
-            { value: "A100", label: "GPUs del FinisTerrae III", color: "text-rose-400", glow: "rgba(251,113,133,0.15)" },
-          ].map((m) => (
-            <div key={m.label} className="flex flex-col items-center gap-2">
-              <p className={`text-5xl lg:text-6xl font-extrabold tracking-tight ${m.color}`} style={{ textShadow: `0 0 40px ${m.glow}` }}>{m.value}</p>
-              <p className="text-xs text-slate-500 leading-snug max-w-[120px]">{m.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* ── STACK ── */}
-      <section className="py-8 px-4">
-        <p className="text-center text-xs text-slate-600 uppercase tracking-widest mb-6 font-medium">Potenciado por</p>
-        <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-4 max-w-4xl mx-auto">
-          {[
-            { label: "CESGA FinisTerrae III", sub: "HPC" },
-            { label: "AlphaFold 2", sub: "Predicción" },
-            { label: "Google Gemini 1.5 Pro", sub: "IA conversacional" },
-            { label: "n8n", sub: "Orquestación AI" },
-            { label: "Firebase", sub: "Auth + DB" },
-            { label: "pdbe-molstar", sub: "Visor 3D" },
-          ].map((t) => (
-            <div key={t.label} className="text-center">
-              <p className="text-sm font-semibold text-slate-300">{t.label}</p>
-              <p className="text-[11px] text-slate-600">{t.sub}</p>
-            </div>
-          ))}
+      <section className="py-10 px-4 border-y border-white/5">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-center text-[11px] text-slate-600 uppercase tracking-widest mb-6 font-medium">Construido sobre</p>
+          <div className="flex flex-wrap justify-center items-center gap-3">
+            {[
+              { label: "CESGA FinisTerrae III", color: "border-blue-500/30 text-blue-300" },
+              { label: "AlphaFold 2", color: "border-emerald-500/30 text-emerald-300" },
+              { label: "Google Gemini", color: "border-primary-500/30 text-primary-300" },
+              { label: "n8n", color: "border-orange-500/30 text-orange-300" },
+              { label: "Firebase", color: "border-amber-500/30 text-amber-300" },
+              { label: "pdbe-molstar", color: "border-rose-500/30 text-rose-300" },
+            ].map((t) => (
+              <span key={t.label} className={`px-4 py-1.5 rounded-full border bg-white/5 text-xs font-medium backdrop-blur-sm ${t.color}`}>
+                {t.label}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
-
-      <div className="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent mx-8" />
 
       {/* ── CÓMO FUNCIONA ── */}
-      <section className="py-24 px-4 sm:px-6">
+      <section className="py-32 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-white mb-4">Tres pasos. Cero instalaciones.</h2>
-            <p className="text-slate-400 max-w-xl mx-auto">Todo el ciclo de predicción estructural gestionado por LocalFold. El investigador solo aporta la ciencia.</p>
+          <div className="text-center mb-20">
+            <p className="text-xs text-primary-400 uppercase tracking-widest font-semibold mb-3">El flujo</p>
+            <h2 className="text-4xl lg:text-5xl font-extrabold text-white">Tres pasos. Cero instalaciones.</h2>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            <div className="hidden md:block absolute top-10 left-[calc(16.6%)] right-[calc(16.6%)] h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              {
-                step: "01", icon: <Upload className="w-6 h-6" />, color: "text-amber-400",
-                title: "Sube tu FASTA",
-                desc: "Pega la secuencia o arrastra el fichero. El nombre se detecta automáticamente del header UniProt. Sin scripts, sin SSH.",
-              },
-              {
-                step: "02", icon: <Cpu className="w-6 h-6" />, color: "text-primary-400",
-                title: "El CESGA computa",
-                desc: "LocalFold negocia con Slurm, reserva nodos GPU A100 y ejecuta AlphaFold 2 en el FinisTerrae III de forma transparente.",
-              },
-              {
-                step: "03", icon: <Eye className="w-6 h-6" />, color: "text-emerald-400",
-                title: "Analiza y colabora",
-                desc: "Visor 3D interactivo, heatmap PAE, análisis IA con ProteIA y workspace colaborativo para compartir con tu equipo.",
-              },
+              { step: "01", icon: <Upload className="w-5 h-5" />, color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20", title: "Sube tu FASTA", desc: "Pega la secuencia o arrastra el fichero. El nombre se detecta automáticamente del header UniProt." },
+              { step: "02", icon: <Cpu className="w-5 h-5" />, color: "text-primary-400", bg: "bg-primary-500/10 border-primary-500/20", title: "El CESGA computa", desc: "LocalFold reserva nodos GPU A100 y ejecuta AlphaFold 2 en el FinisTerrae III de forma transparente." },
+              { step: "03", icon: <Eye className="w-5 h-5" />, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", title: "Analiza y colabora", desc: "Visor 3D con pLDDT, heatmap PAE, análisis IA con ProteIA y workspace colaborativo en tiempo real." },
             ].map((item) => (
-              <div key={item.step} className="relative flex flex-col items-center text-center">
-                <div className={`w-20 h-20 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-6 ${item.color} relative z-10`}>
+              <div key={item.step} className="relative flex flex-col gap-5 p-8 rounded-2xl bg-slate-900/40 border border-white/5 hover:border-white/10 transition-colors">
+                <span className="absolute top-6 right-6 text-7xl font-black text-white/[0.04] leading-none select-none">{item.step}</span>
+                <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${item.bg} ${item.color}`}>
                   {item.icon}
-                  <span className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-slate-800 border border-slate-700 text-xs font-bold text-slate-400 flex items-center justify-center">{item.step}</span>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                <div>
+                  <h3 className="text-base font-bold text-white mb-2">{item.title}</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -170,205 +140,178 @@ export default function Landing() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section className="py-8 px-4 sm:px-6">
+      <section className="py-16 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-white mb-3">Todo lo que necesita un laboratorio moderno</h2>
-            <p className="text-slate-400 text-sm max-w-lg mx-auto">Desde la predicción hasta la publicación, sin cambiar de herramienta.</p>
+          <div className="text-center mb-14">
+            <p className="text-xs text-primary-400 uppercase tracking-widest font-semibold mb-3">Capacidades</p>
+            <h2 className="text-4xl lg:text-5xl font-extrabold text-white">Todo en una sola herramienta</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <FeatureCard
-              icon={<Bot className="w-6 h-6 text-emerald-400" />}
-              title="ProteIA — Copiloto IA"
-              desc="Lee pLDDT, solubilidad e inestabilidad y te traduce los datos técnicos a conclusiones biológicas accionables en lenguaje natural."
-              accent="from-emerald-500"
-            />
-            <FeatureCard
-              icon={<BrainCircuit className="w-6 h-6 text-primary-400" />}
-              title="ProteIA — Asistente RAG"
-              desc='IA especializada en biología estructural. Escribe @ para adjuntar el contexto de cualquier predicción propia y obtener análisis personalizados.'
-              accent="from-primary-500"
-            />
-            <FeatureCard
-              icon={<Users className="w-6 h-6 text-blue-400" />}
-              title="Proyectos colaborativos"
-              desc="Crea workspaces de equipo, invita colaboradores por email y centraliza todas las predicciones del grupo en un solo lugar."
-              accent="from-blue-500"
-            />
-            <FeatureCard
-              icon={<BarChart3 className="w-6 h-6 text-amber-400" />}
-              title="Visor 3D + PAE heatmap"
-              desc="Estructura molecular interactiva con coloreado por confianza y matriz de error de alineación predicho para análisis de dominios."
-              accent="from-amber-500"
-            />
-            <FeatureCard
-              icon={<Bell className="w-6 h-6 text-rose-400" />}
-              title="Notificaciones en tiempo real"
-              desc="Recibe alertas del sistema cuando una predicción se completa o falla, aunque tengas la pestaña en segundo plano."
-              accent="from-rose-500"
-            />
-            <FeatureCard
-              icon={<FlaskConical className="w-6 h-6 text-violet-400" />}
-              title="Informe PDF automático"
-              desc="Genera en un clic un informe con estructura 3D, métricas de confianza, propiedades biológicas y análisis de ProteIA listo para publicar."
-              accent="from-violet-500"
-            />
+            <FeatureCard icon={<Bot className="w-6 h-6 text-emerald-400" />} title="ProteIA — Copiloto IA" desc="Lee pLDDT, solubilidad e inestabilidad y traduce los datos técnicos a conclusiones biológicas accionables." accent="from-emerald-500" />
+            <FeatureCard icon={<BrainCircuit className="w-6 h-6 text-primary-400" />} title="ProteIA — Asistente RAG" desc="Escribe @ para adjuntar el contexto de cualquier predicción. Análisis personalizados, no respuestas genéricas." accent="from-primary-500" />
+            <FeatureCard icon={<Users className="w-6 h-6 text-blue-400" />} title="Proyectos colaborativos" desc="Invita colaboradores por email y centraliza todas las predicciones del grupo en un workspace compartido." accent="from-blue-500" />
+            <FeatureCard icon={<BarChart3 className="w-6 h-6 text-amber-400" />} title="Visor 3D + PAE heatmap" desc="Estructura molecular interactiva con coloreado por confianza y matriz de error de alineación predicho." accent="from-amber-500" />
+            <FeatureCard icon={<Bell className="w-6 h-6 text-rose-400" />} title="Notificaciones en tiempo real" desc="Recibe alertas cuando una predicción completa o falla, aunque tengas la pestaña en segundo plano." accent="from-rose-500" />
+            <FeatureCard icon={<FlaskConical className="w-6 h-6 text-violet-400" />} title="Informe PDF automático" desc="Genera en un clic un informe con estructura 3D, métricas de confianza y análisis de ProteIA." accent="from-violet-500" />
           </div>
         </div>
       </section>
 
-      {/* ── COMPARATIVA ── */}
+      {/* ── PROTEIA HIGHLIGHT ── */}
       <section className="py-24 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-white mb-4">Cómputo local vs CESGA HPC</h2>
-            <p className="text-slate-400 max-w-xl mx-auto">Las GPUs A100 del FinisTerrae III no son un lujo, son una necesidad para la biología moderna. Con LocalFold son accesibles para todos.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <Server className="w-5 h-5 text-slate-400" />
-                <span className="font-semibold text-slate-300">Portátil de laboratorio</span>
-              </div>
-              <ul className="space-y-4">
-                {[
-                  "Hasta 3 semanas de cómputo por predicción",
-                  "Requiere GPU NVIDIA + 3 TB en disco",
-                  "Configuración Linux + Docker + 20 dependencias",
-                  "Bloquea el equipo durante días",
-                  "Sin interfaz — solo línea de comandos",
-                ].map((text, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-slate-400">
-                    <span className="text-red-500 mt-0.5 shrink-0">✕</span>
-                    {text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="bg-primary-950/30 border border-primary-800/40 rounded-2xl p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-primary-600 text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest rounded-bl-xl">Recomendado</div>
-              <div className="flex items-center gap-3 mb-6">
-                <Zap className="w-5 h-5 text-primary-400" />
-                <span className="font-semibold text-primary-300">LocalFold + CESGA HPC</span>
-              </div>
-              <ul className="space-y-4">
-                {[
-                  "Predicción completa en minutos, no semanas",
-                  "Sin instalaciones. 100% desde el navegador",
-                  "Nodos GPU A100 dedicados en FinisTerrae III",
-                  "Interfaz visual con IA integrada",
-                  "Colaboración de equipo incluida",
-                ].map((text, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-slate-200">
-                    <Check className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
-                    {text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── PARA QUIÉN ── */}
-      <section className="py-16 px-4 sm:px-6 border-y border-white/5">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-white mb-3">Diseñado para investigadores reales</h2>
-            <p className="text-slate-400 text-sm max-w-lg mx-auto">LocalFold no asume que sabes Linux. Asume que sabes biología.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                who: "Bioquímicos y biólogos moleculares",
-                icon: <FlaskConical className="w-5 h-5 text-emerald-400" />,
-                use: "Predice la estructura de tu proteína de interés sin tocar la terminal. ProteIA interpreta los resultados en el contexto de tu experimento.",
-              },
-              {
-                who: "Grupos de investigación",
-                icon: <FolderOpen className="w-5 h-5 text-blue-400" />,
-                use: "Centraliza todas las predicciones del lab en proyectos colaborativos. Cada miembro ve los resultados del equipo en tiempo real.",
-              },
-              {
-                who: "Usuarios de CESGA",
-                icon: <Shield className="w-5 h-5 text-amber-400" />,
-                use: "Aprovecha al máximo tu asignación de horas de cómputo sin configurar entornos. LocalFold gestiona Slurm y los recursos GPU por ti.",
-              },
-            ].map((item) => (
-              <div key={item.who} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-                <div className="flex items-center gap-2.5 mb-3">
-                  {item.icon}
-                  <h3 className="font-bold text-white text-sm">{item.who}</h3>
-                </div>
-                <p className="text-slate-400 text-sm leading-relaxed">{item.use}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── RAG HIGHLIGHT ── */}
-      <section className="py-24 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-slate-900 to-primary-950/40 border border-primary-800/30 rounded-3xl p-10 md:p-14 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary-600/10 blur-[80px] rounded-full pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row gap-10 items-start">
-              <div className="shrink-0 w-16 h-16 rounded-2xl bg-primary-900/50 border border-primary-700/50 flex items-center justify-center">
-                <BrainCircuit className="w-8 h-8 text-primary-400" />
-              </div>
-              <div>
-                <p className="text-[11px] font-bold text-primary-400 uppercase tracking-widest mb-2">Nuevo</p>
-                <h2 className="text-2xl lg:text-3xl font-extrabold text-white mb-4">ProteIA — tu asistente con contexto propio</h2>
-                <p className="text-slate-300 leading-relaxed mb-6">
-                  Especializada en biología estructural con base de conocimiento local. Escribe <strong className="text-primary-300">@</strong> seguido del nombre de cualquier predicción o proyecto para adjuntar sus datos como contexto — ProteIA analiza tus resultados concretos, no respuestas genéricas.
+          <div className="relative rounded-3xl overflow-hidden border border-primary-800/30 bg-gradient-to-br from-slate-900 via-primary-950/20 to-slate-900 p-10 md:p-14">
+            <div className="absolute -top-20 -right-20 w-80 h-80 bg-primary-600/8 blur-[100px] rounded-full pointer-events-none" />
+            <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-cyan-600/8 blur-[100px] rounded-full pointer-events-none" />
+            <div className="relative z-10 flex flex-col lg:flex-row gap-12 items-start">
+              {/* Left: copy */}
+              <div className="flex-1 min-w-0">
+                <h2 className="text-3xl lg:text-4xl font-extrabold text-white mb-4">
+                  Un asistente que conoce<br /><span className="text-primary-300">tus</span> proteínas
+                </h2>
+                <p className="text-slate-400 leading-relaxed max-w-md">
+                  Menciona <code className="text-primary-300 bg-primary-900/40 px-1.5 py-0.5 rounded text-sm">@proyecto</code> o <code className="text-primary-300 bg-primary-900/40 px-1.5 py-0.5 rounded text-sm">@proteína</code> para que ProteIA analice tus datos reales — no literatura genérica. Desde comparar riesgos entre candidatos hasta identificar dianas terapéuticas.
                 </p>
-                <div className="flex flex-wrap gap-3">
-                  {[
-                    { icon: <AtSign className="w-3.5 h-3.5" />, text: "@ para referenciar predicciones" },
-                    { icon: <FolderOpen className="w-3.5 h-3.5" />, text: "Contexto de proyectos completos" },
-                    { icon: <BrainCircuit className="w-3.5 h-3.5" />, text: "Base de conocimiento especializada" },
-                  ].map((t) => (
-                    <span key={t.text} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-900/50 border border-primary-700/50 text-primary-300 text-xs font-medium">
-                      {t.icon}{t.text}
-                    </span>
-                  ))}
+              </div>
+              {/* Right: fake chat */}
+              <div className="w-full lg:w-[440px] shrink-0 rounded-2xl bg-slate-950/80 border border-white/10 overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/5">
+                  <BrainCircuit className="w-4 h-4 text-primary-400" />
+                  <span className="text-xs font-semibold text-slate-300">ProteIA</span>
+                  <span className="ml-auto flex items-center gap-1 text-[10px] text-emerald-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />en línea
+                  </span>
+                </div>
+                <div className="p-4 space-y-3">
+                  {/* User message */}
+                  <div className="flex justify-end">
+                    <div className="bg-primary-600/80 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[90%] text-xs leading-relaxed">
+                      <span className="text-primary-200 font-mono font-semibold">@Proyecto_ELA</span> de las 5 proteínas predichas, ¿cuál representa mayor riesgo de agregación patológica?
+                    </div>
+                  </div>
+                  {/* ProteIA response */}
+                  <div className="flex justify-start gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-primary-900 border border-primary-700 flex items-center justify-center shrink-0 mt-0.5">
+                      <BrainCircuit className="w-3 h-3 text-primary-400" />
+                    </div>
+                    <div className="bg-slate-800/80 text-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[90%] text-xs leading-relaxed space-y-2">
+                      <p><span className="text-rose-400 font-semibold">TDP-43 (RRM2)</span> es la candidata de mayor riesgo. Presenta un <span className="text-amber-400 font-medium">pLDDT medio de 58.4</span> con una región intrínsecamente desordenada de 156 residuos en el C-terminal y alta exposición de parches hidrofóbicos.</p>
+                      <p className="text-slate-400">Este patrón es el mecanismo central de toxicidad en ELA y FTLD. Las otras cuatro muestran estructuras más compactas con menor propensión a nucleación.</p>
+                      <p className="text-primary-300 font-medium">Recomiendo priorizar TDP-43 como diana terapéutica.</p>
+                    </div>
+                  </div>
+                  {/* Typing indicator */}
+                  <div className="flex items-center gap-1.5 px-2 py-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-600 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-600 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-600 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ── QUOTE ── */}
-      <section className="py-16 px-4 border-y border-white/5">
-        <div className="max-w-3xl mx-auto text-center space-y-4">
-          <p className="text-slate-500 text-sm uppercase tracking-widest font-medium">Por qué lo construimos</p>
-          <blockquote className="text-2xl lg:text-3xl font-bold text-white leading-relaxed">
-            "El Premio Nobel de AlphaFold debería poder aprovecharlo <span className="text-primary-400">cualquier investigador</span>, no solo los que saben Linux."
-          </blockquote>
-          <p className="text-slate-400 text-sm">— Equipo LocalFold, Impacthon 2026</p>
         </div>
       </section>
 
       {/* ── CTA FINAL ── */}
-      <section className="py-24 px-4 sm:px-6">
-        <div className="max-w-2xl mx-auto text-center space-y-8">
-          <h2 className="text-4xl font-extrabold text-white">¿Listo para plegar proteínas?</h2>
-          <p className="text-slate-400">Accede con tu cuenta de Google. Sin tarjeta de crédito. Sin instalaciones.<br />El CESGA hace la computación, tú haces la ciencia.</p>
+      <section className="border-t border-white/5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16 flex flex-col sm:flex-row items-center justify-between gap-8">
+          <div>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-white mb-1">¿Listo para predecir tu primera proteína?</h2>
+            <p className="text-slate-500 text-sm">Sin instalaciones · Sin terminal · CESGA FinisTerrae III</p>
+          </div>
           <button
             onClick={handleLogin}
-            className="inline-flex items-center gap-2 px-10 py-4 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold text-lg shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] transition-all hover:scale-105 active:scale-95"
+            className="shrink-0 flex items-center gap-2 px-8 py-3.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold text-sm shadow-[0_0_30px_-8px_rgba(99,102,241,0.5)] transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
           >
-            Comenzar gratis con Google
-            <ArrowRight className="w-5 h-5" />
+            Empezar con Google
+            <ArrowRight className="w-4 h-4" />
           </button>
-          <p className="text-xs text-slate-600">Proyecto desarrollado durante el Impacthon 2026 en colaboración con el CESGA.</p>
         </div>
       </section>
 
+      {/* ── FOOTER ── */}
+      <footer className="border-t border-white/5 py-10 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2.5">
+            <img src={logoUrl} className="w-6 h-6 object-contain" alt="LocalFold" />
+            <span className="font-bold text-white text-sm">Local<span className="text-primary-500">Fold</span></span>
+            <span className="text-slate-700 text-sm">—</span>
+            <span className="text-slate-500 text-xs">Predicción proteica en el navegador</span>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-xs text-slate-600">
+            <span>Impacthon 2026</span>
+            <span className="hidden sm:block w-px h-3 bg-slate-800" />
+            <span>GDG Santiago de Compostela</span>
+            <span className="hidden sm:block w-px h-3 bg-slate-800" />
+            <span>CESGA FinisTerrae III</span>
+          </div>
+        </div>
+      </footer>
+
     </div>
+  );
+}
+
+function useCountUp(target, duration = 2000, started = false) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!started || target === 0) { setCount(target); return; }
+    let start = null;
+    const step = (ts) => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      setCount(Math.floor(progress * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [started, target, duration]);
+  return count;
+}
+
+function MetricCard({ value, suffix }) {
+  const ref = useRef(null);
+  const [started, setStarted] = useState(false);
+  const count = useCountUp(value, 1800, started);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setStarted(true); observer.disconnect(); } },
+      { threshold: 0.4 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return <span ref={ref}>{count}{suffix}</span>;
+}
+
+function MetricsSection() {
+  const metrics = [
+    { value: 500, suffix: "×", label: "más rápido que cómputo local", from: "#6366f1", to: "#a5b4fc" },
+    { value: 1, prefix: "< ", suffix: " min", label: "de configuración", from: "#34d399", to: "#6ee7b7" },
+    { value: 0, suffix: "", label: "instalaciones requeridas", from: "#fbbf24", to: "#fde68a" },
+    { value: 100, suffix: "%", label: "desde el navegador", from: "#f87171", to: "#fca5a5" },
+  ];
+
+  return (
+    <section className="py-20 px-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/5">
+          {metrics.map((m, i) => (
+            <div key={m.label} className={`flex flex-col items-center text-center gap-2 px-6 py-4 ${i % 2 === 0 ? "" : ""}`}>
+              <span
+                className="text-6xl lg:text-7xl font-black tracking-tighter leading-none"
+                style={{ background: `linear-gradient(135deg, ${m.from}, ${m.to})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+              >
+                {m.prefix}<MetricCard value={m.value} suffix={m.suffix} from={m.from} to={m.to} />
+              </span>
+              <p className="text-sm text-slate-500 leading-snug max-w-[130px]">{m.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 

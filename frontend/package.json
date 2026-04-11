@@ -15,7 +15,9 @@
     "lucide-react": "^1.8.0",
     "pdbe-molstar": "^3.11.0",
     "react": "^19.2.4",
+    "react-countup": "^6.5.3",
     "react-dom": "^19.2.4",
+    "react-intersection-observer": "^10.0.3",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.14.0"
   },
