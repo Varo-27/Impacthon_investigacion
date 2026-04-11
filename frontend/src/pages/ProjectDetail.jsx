@@ -125,9 +125,7 @@ export default function ProjectDetail() {
   }, [jobs, search, sortKey]);
 
   const currentSort = SORT_OPTIONS.find((o) => o.key === sortKey);
-  const myRole  = project?.members?.find((m) => m.uid === user?.uid)?.role ?? null;
-  const isOwner = myRole === "owner";
-  const canEdit = myRole === "owner" || myRole === "editor";
+  const isOwner = project?.members?.find((m) => m.uid === user?.uid)?.role === "owner";
 
   if (notFound) return (
     <div className="flex flex-col items-center justify-center w-full h-full gap-4 text-slate-400">
@@ -172,6 +170,7 @@ export default function ProjectDetail() {
           >
             <Plus className="w-3.5 h-3.5" /> Nueva predicción
           </button>
+
         </div>
       </div>
 
@@ -182,7 +181,7 @@ export default function ProjectDetail() {
             {project.members.map((m, i) => (
               <div
                 key={m.uid}
-                title={`${m.displayName || m.email}${m.role === "owner" ? " (propietario)" : ""}`}
+                title={`${m.displayName || m.email}${m.role === "owner" ? " (propietario)" : " (miembro)"}`}
                 className="relative"
                 style={{ marginLeft: i === 0 ? 0 : -6 }}
               >

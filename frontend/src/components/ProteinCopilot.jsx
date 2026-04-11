@@ -8,7 +8,7 @@ import ReactMarkdown from "react-markdown";
 function streamText(fullText, onChunk, onDone) {
   let i = 0;
   let raf;
-  const CHARS_PER_FRAME = 8;
+  const CHARS_PER_FRAME = 2;
 
   const tick = () => {
     if (i >= fullText.length) { onDone(); return; }
@@ -149,9 +149,13 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
                 )}
                 {msg.role === "ai" ? (
                   <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:my-2">
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
-                    {msg.streaming && (
-                      <span className="inline-block w-0.5 h-4 bg-primary-500 ml-0.5 align-middle animate-pulse" />
+                    {msg.streaming ? (
+                      <span className="whitespace-pre-wrap">
+                        {msg.text}
+                        <span className="inline-block w-0.5 h-[1em] bg-primary-500 align-text-bottom animate-pulse ml-px" />
+                      </span>
+                    ) : (
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
                     )}
                   </div>
                 ) : (

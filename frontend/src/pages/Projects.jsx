@@ -273,7 +273,7 @@ export default function Projects() {
           uid: user.uid,
           email: user.email,
           displayName: user.displayName || user.email,
-          role: "editor",
+          role: "member",
         }),
       });
       await updateDoc(doc(db, "invitations", inv.id), { status: "accepted" });

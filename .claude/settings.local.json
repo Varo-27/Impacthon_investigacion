@@ -5,7 +5,8 @@
       "Bash(gh auth:*)",
       "Bash(git clone:*)",
       "Bash(cp -r \"C:/Users/sonde/AppData/Local/Temp/awesome-copilot/skills/penpot-uiux-design\" \"C:/Users/sonde/.claude/skills/\")",
-      "Bash(cp -r \"C:/Users/sonde/AppData/Local/Temp/awesome-copilot/skills/web-design-reviewer\" \"C:/Users/sonde/.claude/skills/\")"
+      "Bash(cp -r \"C:/Users/sonde/AppData/Local/Temp/awesome-copilot/skills/web-design-reviewer\" \"C:/Users/sonde/.claude/skills/\")",
+      "Bash(curl:*)"
     ]
   }
 }

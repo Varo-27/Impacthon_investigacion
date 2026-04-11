@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Download, X, Maximize2, FileText, Loader2, Dna, ArrowRight, FlaskConical } from "lucide-react";
+import { Download, X, Maximize2, FileText, Loader2, Dna, ArrowRight, FlaskConical, AlertTriangle, RefreshCw } from "lucide-react";
 import { copilotApi } from "../api/copilotApi";
 import "pdbe-molstar/build/pdbe-molstar-light.css";
 import PAEHeatmap from "../components/PAEHeatmap";
@@ -20,6 +20,8 @@ export default function Viewer() {
   const [waitingForAi, setWaitingForAi] = useState(false);
   const paeReportRef = useRef(null);
   const [panelWidth, setPanelWidth] = useState(300);
+  const [fetchError, setFetchError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const isDragging = useRef(false);
 
   const handleResizeStart = (e) => {
@@ -350,6 +352,7 @@ ${bioHtml}
 
     const fetchAndInitViewer = async () => {
       if (!jobId) return;
+      setFetchError(false);
 
       let customUrl = null;
       let data = {};
@@ -376,27 +379,28 @@ ${bioHtml}
         } else {
           try {
             const resp = await fetch(`https://api-mock-cesga.onrender.com/jobs/${jobId}/outputs`);
-            if (resp.ok) {
-              const out = await resp.json();
-              data = {
-                name: out.protein_metadata?.protein_name || jobId,
-                plddt: out.structural_data?.confidence?.plddt_mean || 85.0,
-                pdbFileUrl: out.structural_data?.pdb_file || null,
-                biological: out.biological_data || null,
-                uniprot: out.protein_metadata?.uniprot_id || null,
-                organism: out.protein_metadata?.organism || null,
-                paeMatrix: out.structural_data?.confidence?.pae_matrix || null,
-                plddtHistogram: out.structural_data?.confidence?.plddt_histogram || null,
-              };
-              if (data.pdbFileUrl) {
-                // The API returns the raw text content of the PDB, not a URL.
-                // We convert it to a Blob and get an Object URL so Molstar can 'fetch' it.
-                const blob = new Blob([data.pdbFileUrl], { type: 'text/plain' });
-                customUrl = URL.createObjectURL(blob);
-              }
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const out = await resp.json();
+            data = {
+              name: out.protein_metadata?.protein_name || jobId,
+              plddt: out.structural_data?.confidence?.plddt_mean || 85.0,
+              pdbFileUrl: out.structural_data?.pdb_file || null,
+              biological: out.biological_data || null,
+              uniprot: out.protein_metadata?.uniprot_id || null,
+              organism: out.protein_metadata?.organism || null,
+              paeMatrix: out.structural_data?.confidence?.pae_matrix || null,
+              plddtHistogram: out.structural_data?.confidence?.plddt_histogram || null,
+            };
+            if (data.pdbFileUrl) {
+              // The API returns the raw text content of the PDB, not a URL.
+              // We convert it to a Blob and get an Object URL so Molstar can 'fetch' it.
+              const blob = new Blob([data.pdbFileUrl], { type: 'text/plain' });
+              customUrl = URL.createObjectURL(blob);
             }
           } catch (e) {
             console.error("Error fetching job outputs", e);
+            if (!isCancelled) setFetchError(true);
+            return;
           }
       }
 
@@ -451,7 +455,7 @@ ${bioHtml}
         }
       }
     };
-  }, [jobId]);
+  }, [jobId, retryKey]);
 
   /* pLDDT helpers — computed before any early return so hooks aren't skipped */
   const plddt = jobData?.plddt ?? 0;
@@ -539,8 +543,30 @@ ${bioHtml}
           <div className="absolute left-0 top-1/2 -translate-y-1/2 h-12 w-1 rounded-full bg-slate-300 dark:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
 
+        {/* Error state */}
+        {fetchError && (
+          <div className="flex flex-col items-center justify-center flex-1 p-6 text-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Error al cargar los datos</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">
+                No se pudo conectar con la API de CESGA. Comprueba tu conexión o inténtalo de nuevo.
+              </p>
+            </div>
+            <button
+              onClick={() => { setFetchError(false); setJobData(null); setIsLoaded(false); setRetryKey(k => k + 1); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Reintentar
+            </button>
+          </div>
+        )}
+
         {/* Protein header */}
-        <div className="px-4 pt-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+        {!fetchError && <div className="px-4 pt-4 pb-3 border-b border-slate-100 dark:border-slate-800">
           <h2 className="font-semibold text-slate-900 dark:text-white text-sm leading-snug truncate">
             {jobData?.name || "Cargando…"}
           </h2>
@@ -554,10 +580,10 @@ ${bioHtml}
               </span>
             )}
           </div>
-        </div>
+        </div>}
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-100 dark:border-slate-800 shrink-0">
+        {!fetchError && <div className="flex border-b border-slate-100 dark:border-slate-800 shrink-0">
           {[["details", "Estructura"], ["copilot", "Proteia"]].map(([key, label]) => (
             <button
               key={key}
@@ -571,10 +597,10 @@ ${bioHtml}
               {label}
             </button>
           ))}
-        </div>
+        </div>}
 
         {/* Tab content */}
-        <div className="flex-1 overflow-y-auto">
+        {!fetchError && <div className="flex-1 overflow-y-auto">
 
           {activeTab === "details" && (
             <div className="p-4 space-y-4">
@@ -690,10 +716,10 @@ ${bioHtml}
               />
             </div>
           )}
-        </div>
+        </div>}
 
         {/* Downloads footer */}
-        <div className="shrink-0 border-t border-slate-100 dark:border-slate-800 p-3 space-y-2 bg-slate-50 dark:bg-slate-900">
+        {!fetchError && <div className="shrink-0 border-t border-slate-100 dark:border-slate-800 p-3 space-y-2 bg-slate-50 dark:bg-slate-900">
           <button
             onClick={handleDownloadReport}
             disabled={!jobData || waitingForAi}
@@ -721,7 +747,7 @@ ${bioHtml}
               </button>
             ))}
           </div>
-        </div>
+        </div>}
 
       </div>{/* end right panel */}
 

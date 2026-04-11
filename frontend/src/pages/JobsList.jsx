@@ -29,6 +29,12 @@ const SORT_OPTIONS = [
 
 const AUTO_REFRESH_MS = 30_000;
 
+function notify(title, body) {
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification(title, { body, icon: "/logo.png" });
+  }
+}
+
 export default function JobsList() {
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -48,6 +54,13 @@ export default function JobsList() {
 
   /* Track previous statuses to detect transitions */
   const prevStatuses = useRef({});
+
+  /* ── Pedir permiso de notificaciones al cargar ── */
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
 
   /* ── Auth ── */
   useEffect(() => {
@@ -69,14 +82,16 @@ export default function JobsList() {
         relativeDate: formatRelative(d.data().createdAt?.toDate()),
       })).sort((a, b) => b._ts - a._ts);
 
-      /* Detect status transitions → toast */
+      /* Detect status transitions → toast + browser notification */
       data.forEach((job) => {
         const prev = prevStatuses.current[job.id];
         if (prev && prev !== job.status) {
           if (job.status === "COMPLETED") {
             addToast(`✓ "${job.proteinName}" ha completado la predicción.`, "success");
+            notify("Predicción completada", `"${job.proteinName}" ya está lista en LocalFold.`);
           } else if (job.status === "FAILED") {
             addToast(`"${job.proteinName}" falló en el clúster.`, "error");
+            notify("Error en la predicción", `"${job.proteinName}" falló en CESGA.`);
           } else if (job.status === "RUNNING") {
             addToast(`"${job.proteinName}" está procesándose en CESGA.`, "info");
           }

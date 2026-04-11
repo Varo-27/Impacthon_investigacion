@@ -37,12 +37,41 @@ MALWMRLLPLLALLALWGPDPAAAFVNQHLCGSHLVEALYLVCGERGFFYTPKTRREAEDLQVGQVELGGGPGAGSLQPL
   },
 ];
 
+/** Extrae un nombre legible del header FASTA.
+ *  - UniProt:  >sp|P00441|SODC_HUMAN Superoxide dismutase OS=Homo sapiens → "Superoxide dismutase"
+ *  - NCBI:     >gi|12345|ref|NP_123.1| Protein name [Homo sapiens]       → "Protein name"
+ *  - Simple:   >My protein                                                → "My protein"
+ */
+function parseFastaName(header) {
+  if (!header.startsWith(">")) return "Secuencia nueva";
+  const raw = header.slice(1).trim();
+
+  // UniProt: >sp|ACC|ENTRY_NAME description OS=...
+  const uniprotMatch = raw.match(/^(?:sp|tr|ref)\|[^|]+\|[^\s]+\s+(.+?)(?:\s+OS=.*)?$/);
+  if (uniprotMatch) return uniprotMatch[1].trim();
+
+  // NCBI gi: >gi|...|...|id| description [organism]
+  const ncbiMatch = raw.match(/^(?:gi\|\d+\|[^|]*\|[^|]+\|)\s*(.+?)(?:\s+\[.+\])?$/);
+  if (ncbiMatch) return ncbiMatch[1].trim();
+
+  // Cualquier pipe: descartar todo hasta el último pipe y usar el resto
+  if (raw.includes("|")) {
+    const afterLastPipe = raw.split("|").pop().trim();
+    const desc = afterLastPipe.split(/\s+OS=/)[0].trim();
+    if (desc.length > 2) return desc.length > 60 ? desc.slice(0, 60) + "…" : desc;
+  }
+
+  // Header simple — usar como está
+  return raw.length > 60 ? raw.slice(0, 60) + "…" : raw;
+}
+
 export default function SubmitFasta() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("project") || null;
   const [projectName, setProjectName] = useState(null);
   const [fastaContent, setFastaContent] = useState("");
+  const [customName, setCustomName] = useState("");
 
   /* Load project name if coming from a project */
   useEffect(() => {
@@ -59,9 +88,11 @@ export default function SubmitFasta() {
   const handleChipClick = (protein) => {
     if (activeChip === protein.tag) {
       setFastaContent("");
+      setCustomName("");
       setActiveChip(null);
     } else {
       setFastaContent(protein.fasta);
+      setCustomName(protein.name);
       setActiveChip(protein.tag);
     }
   };
@@ -97,10 +128,8 @@ export default function SubmitFasta() {
       }
 
       const lines = cleanFasta.split("\n");
-      let name = "Secuencia Nueva";
-      if (lines[0].startsWith(">")) {
-        name = lines[0].substring(1, 30) + (lines[0].length > 30 ? "…" : "");
-      }
+      const autoName = lines[0].startsWith(">") ? parseFastaName(lines[0]) : "Secuencia nueva";
+      const name = customName.trim() || autoName;
 
       if (auth.currentUser) {
         await addDoc(collection(db, "jobs"), {
@@ -117,6 +146,7 @@ export default function SubmitFasta() {
       setSubmitted(true);
       setFastaContent("");
       setActiveChip(null);
+      setCustomName("");
       setTimeout(() => setSubmitted(false), 4000);
     } catch (err) {
       console.error(err);
@@ -210,6 +240,22 @@ export default function SubmitFasta() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Nombre personalizado */}
+          <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center gap-3">
+            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">Nombre</label>
+            <input
+              type="text"
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+              placeholder={
+                fastaContent
+                  ? parseFastaName(fastaContent.split("\n")[0]) + " (autodetectado)"
+                  : "Opcional — se extrae del header FASTA"
+              }
+              className="flex-1 text-sm bg-transparent border-none outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-300 dark:placeholder:text-slate-600"
+            />
           </div>
 
           {/* FASTA textarea */}

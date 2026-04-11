@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Activity, Dna, LayoutDashboard, Sun, Moon, FolderOpen, Mail, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { Activity, Dna, LayoutDashboard, Sun, Moon, FolderOpen, Mail, LogOut, ChevronLeft, ChevronRight, BrainCircuit } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { db, auth } from "../lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
@@ -37,10 +37,11 @@ export default function Sidebar() {
   };
 
   const links = [
-    { name: "Visor 3D",      path: "/app",          icon: <Activity className="w-5 h-5" /> },
-    { name: "Nuevo Trabajo", path: "/app/submit",   icon: <Dna className="w-5 h-5" /> },
-    { name: "Mis Trabajos",  path: "/app/jobs",     icon: <LayoutDashboard className="w-5 h-5" /> },
-    { name: "Proyectos",     path: "/app/projects", icon: <FolderOpen className="w-5 h-5" />, badge: pendingInvites },
+    { name: "Visor 3D",      path: "/app",               icon: <Activity className="w-5 h-5" /> },
+    { name: "Nuevo Trabajo", path: "/app/submit",        icon: <Dna className="w-5 h-5" /> },
+    { name: "Mis Trabajos",  path: "/app/jobs",          icon: <LayoutDashboard className="w-5 h-5" /> },
+    { name: "Proyectos",     path: "/app/projects",      icon: <FolderOpen className="w-5 h-5" />, badge: pendingInvites },
+    { name: "Asistente IA",  path: "/app/assistant",     icon: <BrainCircuit className="w-5 h-5" /> },
   ];
 
   const initials = user?.displayName
