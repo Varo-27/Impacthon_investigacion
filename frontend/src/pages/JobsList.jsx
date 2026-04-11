@@ -55,7 +55,7 @@ function DeleteJobModal({ job, onClose, onConfirm }) {
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="flex-1 py-2 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+              className="flex-1 py-2 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
@@ -159,7 +159,7 @@ function MoveJobModal({ job, userId, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="flex-1 py-2 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               Cancelar
             </button>
@@ -476,7 +476,7 @@ export default function JobsList() {
               const projName = job.projectName ?? (job.projectId ? projectNames[job.projectId] : null);
 
               return (
-                <li key={job.id} className="group sm:grid sm:grid-cols-[1fr_120px_140px_96px] items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <li key={job.id} className="group sm:grid sm:grid-cols-[1fr_120px_140px_96px] items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
 
                   <div className="flex items-start gap-2.5 min-w-0">
                     <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${cfg.iconClass}`} />

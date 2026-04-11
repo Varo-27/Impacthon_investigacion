@@ -86,7 +86,7 @@ function CreateProjectModal({ onClose, onCreated, user }) {
             />
           </div>
           <div className="flex gap-2 pt-1">
-            <button type="button" onClick={onClose} className="flex-1 py-2 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <button type="button" onClick={onClose} className="flex-1 py-2 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
               Cancelar
             </button>
             <button
@@ -453,7 +453,7 @@ export default function Projects() {
                 return (
                   <li
                     key={p.id}
-                    className="group sm:grid sm:grid-cols-[1fr_120px_120px_80px] items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                    className="group sm:grid sm:grid-cols-[1fr_120px_120px_80px] items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <FolderOpen className="w-4 h-4 text-slate-400 shrink-0" />
@@ -532,7 +532,7 @@ export default function Projects() {
                   const isPending  = inv.status === "pending";
                   const isAccepted = inv.status === "accepted";
                   return (
-                    <li key={inv.id} className="sm:grid sm:grid-cols-[1fr_140px_100px_120px] items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <li key={inv.id} className="sm:grid sm:grid-cols-[1fr_140px_100px_120px] items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <Dna className="w-4 h-4 text-primary-400 shrink-0" />
                         <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{inv.projectName}</p>
