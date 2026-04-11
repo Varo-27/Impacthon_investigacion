@@ -5,6 +5,7 @@ import {
   Copy, Check,
 } from "lucide-react";
 import { ragApi } from "../api/ragApi";
+import { getJobOutputs } from "../lib/outputsCache";
 import { db, auth } from "../lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
@@ -159,13 +160,35 @@ export default function RAGAssistant() {
   };
 
   /* Select item from dropdown */
-  const selectReference = (item) => {
-    // Remove the @query from input
+  const selectReference = async (item) => {
     setInput((prev) => prev.replace(/@\w*$/, ""));
     setAtQuery(null);
-    if (!references.find((r) => r.id === item.id)) {
-      setReferences((prev) => [...prev, item]);
+    if (references.find((r) => r.id === item.id)) {
+      inputRef.current?.focus();
+      return;
     }
+
+    // Para jobs: enriquecer con outputs del CESGA (usa cache compartido con el Visor)
+    if (item.kind === "job" && item.data.jobId) {
+      try {
+        const outputs = await getJobOutputs(item.data.jobId);
+        item = {
+          ...item,
+          data: {
+            ...item.data,
+            plddt:          outputs.plddt      ?? item.data.plddt,
+            organism:       outputs.organism   ?? item.data.organism,
+            biological:     outputs.biological ?? item.data.biological,
+            uniprot:        outputs.uniprot    ?? null,
+            plddtHistogram: outputs.plddtHistogram ?? null,
+          },
+        };
+      } catch {
+        // Si falla, se usa la data de Firestore igualmente
+      }
+    }
+
+    setReferences((prev) => [...prev, item]);
     inputRef.current?.focus();
   };
 
@@ -230,7 +253,7 @@ export default function RAGAssistant() {
           <BrainCircuit className="w-5 h-5" />
         </div>
         <div>
-          <h1 className="text-sm font-bold text-slate-900 dark:text-white">Asistente RAG</h1>
+          <h1 className="text-sm font-bold text-slate-900 dark:text-white">ProteIA</h1>
           <p className="text-[11px] text-slate-400 dark:text-slate-500">
             Especializado en biología estructural · usa <strong className="font-semibold">@</strong> para referenciar tus predicciones o proyectos
           </p>
@@ -405,9 +428,8 @@ export default function RAGAssistant() {
                 if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
               }}
               placeholder="Pregunta sobre estructuras, proteínas… o escribe @ para adjuntar contexto"
-              disabled={busy}
               rows={1}
-              className="flex-1 resize-none bg-transparent border-none outline-none text-sm text-slate-900 dark:text-white placeholder:text-slate-400 disabled:opacity-60 leading-relaxed py-1"
+              className="flex-1 resize-none bg-transparent border-none outline-none text-sm text-slate-900 dark:text-white placeholder:text-slate-400 leading-relaxed py-1"
               style={{ maxHeight: "160px", overflowY: "auto" }}
             />
             <button

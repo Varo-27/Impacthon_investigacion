@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Download, X, Maximize2, FileText, Loader2, Dna, ArrowRight, FlaskConical, AlertTriangle, RefreshCw } from "lucide-react";
-import { copilotApi } from "../api/copilotApi";
+import { proteiaApi } from "../api/proteiaApi";
+import { getJobOutputs } from "../lib/outputsCache";
 import "pdbe-molstar/build/pdbe-molstar-light.css";
 import PAEHeatmap from "../components/PAEHeatmap";
 import ProteinCopilot from "../components/ProteinCopilot";
@@ -89,7 +90,7 @@ export default function Viewer() {
   // Pre-carga del resumen IA en cuanto llegan los datos del job (no esperar al clic)
   useEffect(() => {
     if (!jobId || !jobData || aiSummary) return;
-    copilotApi.getInitialSummary(jobId, jobData.name, jobData).then(setAiSummary);
+    proteiaApi.getInitialSummary(jobId, jobData.name, jobData).then(setAiSummary);
   }, [jobId, jobData]);
 
   const handleDownloadReport = async () => {
@@ -98,7 +99,7 @@ export default function Viewer() {
     if (!summary) {
       setWaitingForAi(true);
       try {
-        summary = await copilotApi.getInitialSummary(jobId, jobData.name, jobData);
+        summary = await proteiaApi.getInitialSummary(jobId, jobData.name, jobData);
         setAiSummary(summary);
       } finally {
         setWaitingForAi(false);
@@ -384,26 +385,21 @@ ${bioHtml}
           };
         } else {
           try {
-            const resp = await fetch(`https://api-mock-cesga.onrender.com/jobs/${jobId}/outputs`);
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            const out = await resp.json();
+            // getJobOutputs usa cache compartido — si el usuario ya abrió esta proteína
+            // en el Visor (o RAGAssistant la fetcheó al referenciarla), no hay petición de red.
+            const outputs = await getJobOutputs(jobId);
             data = {
-              name: out.protein_metadata?.protein_name || jobId,
-              plddt: out.structural_data?.confidence?.plddt_mean
-                  ?? out.structural_data?.confidence?.plddt_average
-                  ?? out.protein_metadata?.plddt_average
-                  ?? 85.0,
-              pdbFileUrl: out.structural_data?.pdb_file || null,
-              biological: out.biological_data || null,
-              uniprot: out.protein_metadata?.uniprot_id || null,
-              organism: out.protein_metadata?.organism || null,
-              paeMatrix: out.structural_data?.confidence?.pae_matrix || null,
-              plddtHistogram: out.structural_data?.confidence?.plddt_histogram || null,
+              name:           outputs.name           || jobId,
+              plddt:          outputs.plddt          ?? 85.0,
+              pdbFileUrl:     outputs.pdbFileUrl     || null,
+              biological:     outputs.biological     || null,
+              uniprot:        outputs.uniprot        || null,
+              organism:       outputs.organism       || null,
+              paeMatrix:      outputs.paeMatrix      || null,
+              plddtHistogram: outputs.plddtHistogram || null,
             };
             if (data.pdbFileUrl) {
-              // The API returns the raw text content of the PDB, not a URL.
-              // We convert it to a Blob and get an Object URL so Molstar can 'fetch' it.
-              const blob = new Blob([data.pdbFileUrl], { type: 'text/plain' });
+              const blob = new Blob([data.pdbFileUrl], { type: "text/plain" });
               customUrl = URL.createObjectURL(blob);
             }
           } catch (e) {

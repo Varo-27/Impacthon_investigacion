@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Bot, User, Sparkles, Copy, Check } from "lucide-react";
-import { copilotApi } from "../api/copilotApi";
+import { proteiaApi } from "../api/proteiaApi";
 import ReactMarkdown from "react-markdown";
 
 /* Streams `fullText` into `onChunk(partial)` then calls `onDone`.
@@ -93,7 +93,7 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
 
     (async () => {
       setIsWaiting(true);
-      const summary = await copilotApi.getInitialSummary(jobId, proteinName, statusData);
+      const summary = await proteiaApi.getInitialSummary(jobId, proteinName, statusData);
       if (cancelled) return;
       setIsWaiting(false);
       if (onSummaryReady) onSummaryReady(summary);
@@ -112,7 +112,7 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
     setMessages(prev => [...prev, { role: "user", text: userMsg }]);
 
     setIsWaiting(true);
-    const aiResponse = await copilotApi.sendChatMessage(jobId, userMsg, messages, statusData);
+    const aiResponse = await proteiaApi.sendChatMessage(jobId, userMsg, messages, statusData);
     setIsWaiting(false);
     startStream(aiResponse);
   };
@@ -130,7 +130,7 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
           </div>
           <div>
             <h3 className="text-sm font-bold dark:text-white">ProteIA</h3>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Gemini 1.5 Pro via n8n</p>
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Asistente de análisis estructural</p>
           </div>
         </div>
         <Sparkles className="w-4 h-4 text-primary-400 animate-pulse" />
