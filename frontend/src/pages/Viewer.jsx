@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Download, Share2, Layers, Zap, Info, Play, Camera, CheckCircle2 } from "lucide-react";
 import "pdbe-molstar/build/pdbe-molstar-light.css";
 
@@ -6,27 +7,72 @@ export default function Viewer() {
   const viewerContainerRef = useRef(null);
   const viewerInstanceRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [searchParams] = useSearchParams();
+  const jobId = searchParams.get("job");
+  const [jobData, setJobData] = useState(null);
 
   // Initialize PDBe Molstar Plugin
   useEffect(() => {
     let viewerInstance;
+    let isCancelled = false;
     
-    const initViewer = async () => {
+    const fetchAndInitViewer = async () => {
+      let customUrl = null;
+      let data = {
+        name: "Proteína de Demo",
+        plddt: 92.4,
+        pdbFileUrl: null
+      };
+
+      if (jobId) {
+        try {
+          const resp = await fetch(`https://api-mock-cesga.onrender.com/jobs/${jobId}/outputs`);
+          if (resp.ok) {
+            const out = await resp.json();
+            data = {
+              name: out.protein_metadata?.protein_name || jobId,
+              plddt: out.protein_metadata?.plddt_average || 85.0,
+              pdbFileUrl: out.structural_data?.pdb_file || null
+            };
+            if (data.pdbFileUrl) {
+              // The API returns the raw text content of the PDB, not a URL.
+              // We convert it to a Blob and get an Object URL so Molstar can 'fetch' it.
+              const blob = new Blob([data.pdbFileUrl], { type: 'text/plain' });
+              customUrl = URL.createObjectURL(blob);
+            }
+          }
+        } catch (e) {
+          console.error("Error fetching job outputs", e);
+        }
+      }
+      
+      if (isCancelled) return;
+      setJobData(data);
+
       if (typeof window !== "undefined" && viewerContainerRef.current) {
         try {
-          // Import dynamic to avoid SSR issues if they exist
-          const { PDBeMolstarPlugin } = await import("pdbe-molstar/build/pdbe-molstar-plugin");
+          await import("pdbe-molstar/build/pdbe-molstar-plugin");
           
-          viewerInstance = new PDBeMolstarPlugin();
+          if (!window.PDBeMolstarPlugin) {
+            throw new Error("PDBeMolstarPlugin not found on window object");
+          }
+          if (isCancelled) return;
+          
+          viewerInstance = new window.PDBeMolstarPlugin();
           viewerInstanceRef.current = viewerInstance;
           
           const options = {
-            moleculeId: "1cbs", // Example default molecule
-            hideControls: true, // We will build our custom simplified controls (Refactoring UI for target audience)
-            bgColor: { r: 255, g: 255, b: 255 }, // Will adjust via CSS if dark mode
+            hideControls: true, 
+            bgColor: { r: 255, g: 255, b: 255 }, 
             hideCanvasControls: ["expand", "selection", "animation"],
             visualStyle: "cartoon",
           };
+
+          if (customUrl) {
+            options.customData = { url: customUrl, format: 'pdb' };
+          } else {
+            options.moleculeId = "1cbs"; // Example default molecule
+          }
 
           viewerInstance.render(viewerContainerRef.current, options);
           setIsLoaded(true);
@@ -36,10 +82,10 @@ export default function Viewer() {
       }
     };
 
-    initViewer();
+    fetchAndInitViewer();
 
     return () => {
-      // Cleanup if possible
+      isCancelled = true;
       if (viewerInstance && viewerInstance.plugin) {
         try {
           viewerInstance.plugin.clear();
@@ -48,7 +94,7 @@ export default function Viewer() {
         }
       }
     };
-  }, []);
+  }, [jobId]);
 
   const handleScreenshot = () => {
     if (viewerInstanceRef.current) {
@@ -65,10 +111,10 @@ export default function Viewer() {
         {/* Top Floating Header overlay */}
         <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start pointer-events-none">
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md px-4 py-2.5 rounded-xl shadow border border-slate-200/50 dark:border-slate-700/50 pointer-events-auto">
-            <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">Ubiquitina (J-001)</h2>
+            <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm truncate max-w-[200px]">{jobData?.name || "Cargando..."}</h2>
             <div className="flex items-center gap-2 mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
               <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                <CheckCircle2 className="w-3 h-3" /> Alta Confianza (pLDDT: 92.4)
+                <CheckCircle2 className="w-3 h-3" /> Alta Confianza (pLDDT: {jobData ? jobData.plddt.toFixed(1) : "..."})
               </span>
             </div>
           </div>
@@ -146,10 +192,10 @@ export default function Viewer() {
             <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl space-y-3 border border-slate-100 dark:border-slate-800">
               <div className="flex justify-between items-center">
                 <span className="text-xs text-slate-500 dark:text-slate-400">pLDDT Promedio</span>
-                <span className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">92.4</span>
+                <span className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">{jobData ? jobData.plddt.toFixed(1) : "0.0"}</span>
               </div>
               <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500" style={{ width: '92.4%' }}></div>
+                <div className="h-full bg-emerald-500" style={{ width: `${jobData ? jobData.plddt : 0}%` }}></div>
               </div>
               <div className="pt-2 flex justify-between items-center">
                 <span className="text-xs text-slate-500 dark:text-slate-400">Matriz PAE</span>
