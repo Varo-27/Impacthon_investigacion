@@ -476,7 +476,7 @@ export default function JobsList() {
               const projName = job.projectName ?? (job.projectId ? projectNames[job.projectId] : null);
 
               return (
-                <li key={job.id} className="group sm:grid sm:grid-cols-[1fr_120px_140px_96px] items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
+                <li key={job.id} className="group sm:grid sm:grid-cols-[1fr_120px_140px_96px] items-center gap-2 px-4 py-3 bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
 
                   <div className="flex items-start gap-2.5 min-w-0">
                     <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${cfg.iconClass}`} />
