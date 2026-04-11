@@ -8,7 +8,7 @@ import { useToast } from "../contexts/ToastContext"; import JobsFilterPanel from
 const STATUS = {
   COMPLETED: { label: "Completed", Icon: CheckCircle2, iconClass: "text-purple-500 dark:text-purple-400", badge: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800/50" },
   RUNNING: { label: "Running", Icon: GitBranch, iconClass: "text-green-600 dark:text-green-400", badge: "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800/50" },
-  PENDING: { label: "Queued", Icon: Clock, iconClass: "text-slate-400 dark:text-slate-500", badge: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" },
+  PENDING: { label: "Queued", Icon: Clock, iconClass: "text-slate-500 dark:text-slate-400 dark:text-slate-500", badge: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" },
   FAILED: { label: "Failed", Icon: XCircle, iconClass: "text-red-500 dark:text-red-400", badge: "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50" },
 };
 
@@ -36,9 +36,9 @@ function DeleteJobModal({ job, onClose, onConfirm }) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
           <div>
             <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Eliminar predicción</h2>
-            <p className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[220px]">{job.proteinName}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-[220px]">{job.proteinName}</p>
           </div>
-          <button onClick={onClose} className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <button onClick={onClose} className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all duration-200 ease-in-out active:scale-[0.98]">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -55,14 +55,14 @@ function DeleteJobModal({ job, onClose, onConfirm }) {
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="flex-1 py-2 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+              className="flex-1 py-2 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 transition-all duration-200 ease-in-out active:scale-[0.98]"
             >
               Cancelar
             </button>
             <button
               onClick={handleDelete}
               disabled={busy}
-              className="flex-1 py-2 text-sm font-semibold rounded-md bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white transition-colors"
+              className="flex-1 py-2 text-sm font-semibold rounded-md bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white transition-all duration-200 ease-in-out active:scale-[0.98]"
             >
               {busy ? "Eliminando…" : "Eliminar"}
             </button>
@@ -131,9 +131,9 @@ function MoveJobModal({ job, userId, onClose }) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
           <div>
             <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Reasignar predicción</h2>
-            <p className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[220px]">{job.proteinName}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-[220px]">{job.proteinName}</p>
           </div>
-          <button onClick={onClose} className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <button onClick={onClose} className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all duration-200 ease-in-out active:scale-[0.98]">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -144,7 +144,7 @@ function MoveJobModal({ job, userId, onClose }) {
           <div>
             <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Proyecto destino</label>
             {loadingProjects ? (
-              <p className="text-xs text-slate-400">Cargando proyectos…</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Cargando proyectos…</p>
             ) : (
               <select
                 value={selected}
@@ -159,7 +159,7 @@ function MoveJobModal({ job, userId, onClose }) {
             )}
           </div>
           {currentLabel && (
-            <p className="text-[11px] text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Proyecto actual: <span className="font-medium text-slate-600 dark:text-slate-300">{currentLabel}</span>
             </p>
           )}
@@ -167,14 +167,14 @@ function MoveJobModal({ job, userId, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="flex-1 py-2 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 ease-in-out active:scale-[0.98]"
             >
               Cancelar
             </button>
             <button
               onClick={handleSave}
               disabled={busy || loadingProjects}
-              className="flex-1 py-2 text-sm font-semibold rounded-md bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white transition-colors"
+              className="flex-1 py-2 text-sm font-semibold rounded-md bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white transition-all duration-200 ease-in-out active:scale-[0.98]"
             >
               {busy ? "Guardando…" : "Guardar"}
             </button>
@@ -253,7 +253,7 @@ export default function JobsList() {
         if (prev && prev !== job.status) {
           if (job.status === "COMPLETED") {
             addToast(`✓ "${job.proteinName}" ha completado la predicción.`, "success");
-            notify("Predicción completada", `"${job.proteinName}" ya está lista en LocalFold.`);
+            notify("Predicción completada", `"${job.proteinName}" ya está lista en OmicaFold.`);
           } else if (job.status === "FAILED") {
             addToast(`"${job.proteinName}" falló en el clúster.`, "error");
             notify("Error en la predicción", `"${job.proteinName}" falló en CESGA.`);
@@ -420,7 +420,7 @@ export default function JobsList() {
           <button
             onClick={handleRefresh}
             title="Sync con CESGA API (Shift+Click para demo)"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 ease-in-out active:scale-[0.98]"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
             Sync
@@ -437,12 +437,12 @@ export default function JobsList() {
       {/* Toolbar */}
       <div className="flex flex-col gap-2 mb-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 dark:text-slate-400 pointer-events-none" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre, ID o proyecto…"
-            className="w-full pl-8 pr-3 py-1.5 text-sm rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors"
+            className="w-full pl-8 pr-3 py-1.5 text-sm rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors"
           />
         </div>
       </div>
@@ -464,7 +464,7 @@ export default function JobsList() {
         )}
 
         {loading && (
-          <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-400">
+          <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500 dark:text-slate-400">
             <RefreshCw className="w-4 h-4 animate-spin" /> Cargando…
           </div>
         )}
@@ -476,7 +476,7 @@ export default function JobsList() {
               {search ? "Sin resultados para esa búsqueda" : "No hay predicciones aquí"}
             </p>
             {!search && (
-              <p className="text-xs text-slate-400 mt-1 max-w-xs">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
                 Envía tu primera secuencia FASTA para empezar.
               </p>
             )}
@@ -492,7 +492,7 @@ export default function JobsList() {
               const projName = job.projectName ?? (job.projectId ? projectNames[job.projectId] : null);
 
               return (
-                <li key={job.id} className="group sm:grid sm:grid-cols-[1fr_120px_140px_96px] items-center gap-2 px-4 py-3 bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                <li key={job.id} className="group sm:grid sm:grid-cols-[1fr_120px_140px_96px] items-center gap-2 px-4 py-3 bg-white dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
 
                   <div className="flex items-start gap-2.5 min-w-0">
                     <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${cfg.iconClass}`} />
@@ -501,21 +501,21 @@ export default function JobsList() {
                         onClick={() => isCompleted && navigate(`/app?job=${job.cesgaJobId}`)}
                         disabled={!isCompleted}
                         className={`text-sm font-medium text-left leading-snug truncate max-w-full block transition-colors ${isCompleted
-                            ? "text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
-                            : "text-slate-700 dark:text-slate-300 cursor-default"
+                          ? "text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                          : "text-slate-700 dark:text-slate-300 cursor-default"
                           }`}
                       >
                         {job.proteinName}
                       </button>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-[11px] font-mono text-slate-400 dark:text-slate-500 truncate">
+                        <p className="text-xs font-mono text-slate-500 dark:text-slate-400 dark:text-slate-500 truncate">
                           {job.cesgaJobId?.substring(0, 22)}…
                         </p>
                         {/* Project badge */}
                         {projName && (
                           <button
                             onClick={() => navigate(`/app/projects/${job.projectId}`)}
-                            className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-colors shrink-0"
+                            className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-colors shrink-0"
                           >
                             <FolderOpen className="w-2.5 h-2.5" />
                             {projName}
@@ -570,8 +570,8 @@ export default function JobsList() {
                         {/* pLDDT badge if available */}
                         {job.plddt != null && (
                           <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold border ${job.plddt >= 90 ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800" :
-                              job.plddt >= 70 ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800" :
-                                "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800"
+                            job.plddt >= 70 ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800" :
+                              "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800"
                             }`}>
                             📊 pLDDT {job.plddt.toFixed(1)}
                           </span>
@@ -581,12 +581,12 @@ export default function JobsList() {
                   </div>
 
                   <div className="mt-1.5 sm:mt-0">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${cfg.badge}`}>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.badge}`}>
                       {cfg.label}
                     </span>
                   </div>
 
-                  <span className="hidden sm:block text-xs text-slate-400 dark:text-slate-500 truncate">
+                  <span className="hidden sm:block text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 truncate">
                     {job.relativeDate}
                   </span>
 
@@ -594,7 +594,7 @@ export default function JobsList() {
                     <button
                       onClick={() => setMoveJob(job)}
                       title="Reasignar proyecto"
-                      className="p-1.5 rounded text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+                      className="p-1.5 rounded text-slate-500 dark:text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
                     >
                       <ArrowRightLeft className="w-3.5 h-3.5" />
                     </button>
@@ -602,7 +602,7 @@ export default function JobsList() {
                       <button
                         onClick={() => handleShare(job.cesgaJobId)}
                         title="Copiar enlace"
-                        className="p-1.5 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors"
+                        className="p-1.5 rounded text-slate-500 dark:text-slate-400 hover:text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors"
                       >
                         {copiedId === job.cesgaJobId ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Share2 className="w-3.5 h-3.5" />}
                       </button>
@@ -610,7 +610,7 @@ export default function JobsList() {
                     {isCompleted && (
                       <button
                         onClick={() => navigate(`/app?job=${job.cesgaJobId}`)}
-                        className="px-2.5 py-1 text-xs font-semibold rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                        className="px-2.5 py-1 text-xs font-semibold rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                       >
                         Ver 3D
                       </button>
@@ -618,7 +618,7 @@ export default function JobsList() {
                     <button
                       onClick={() => setDeleteJob(job)}
                       title="Eliminar predicción"
-                      className="p-1.5 rounded text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      className="p-1.5 rounded text-slate-500 dark:text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -631,7 +631,7 @@ export default function JobsList() {
       </div>
 
       {!loading && jobs.length > 0 && (
-        <p className="text-xs text-slate-400 text-center mt-3">
+        <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-3">
           {visible.length} de {jobs.length} predicción{jobs.length !== 1 ? "es" : ""} · auto-sync cada 30s
         </p>
       )}

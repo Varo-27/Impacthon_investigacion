@@ -40,7 +40,7 @@ const SUGGESTIONS = [
 const STATUS_ICON = {
   COMPLETED: <CheckCircle2 className="w-3.5 h-3.5 text-purple-500" />,
   RUNNING: <GitBranch className="w-3.5 h-3.5 text-green-500" />,
-  PENDING: <Clock className="w-3.5 h-3.5 text-slate-400" />,
+  PENDING: <Clock className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />,
   FAILED: <XCircle className="w-3.5 h-3.5 text-red-500" />,
 };
 
@@ -79,7 +79,7 @@ function CopyButton({ text }) {
   return (
     <button
       onClick={copy}
-      className="self-start flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors opacity-0 group-hover/msg:opacity-100"
+      className="self-start flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 opacity-0 group-hover/msg:opacity-100 transition-all duration-200 ease-in-out active:scale-[0.98]"
     >
       {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
       {copied ? "Copiado" : "Copiar"}
@@ -121,7 +121,7 @@ function ContextPanel({ allItems, references, onToggle, onClose }) {
           <>
             <button
               onMouseDown={(e) => { e.preventDefault(); setView("jobs-folders"); }}
-              className="w-full flex items-center justify-between px-3 py-3 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+              className="w-full flex items-center justify-between px-3 py-3 outline-none hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
@@ -131,17 +131,17 @@ function ContextPanel({ allItems, references, onToggle, onClose }) {
                   <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
                     Predicciones individuales
                   </span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     Añade trabajos específicos como contexto
                   </span>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-slate-400" />
+              <ChevronRight className="w-5 h-5 text-slate-500 dark:text-slate-400" />
             </button>
             <div className="h-px bg-slate-100 dark:bg-slate-700" />
             <button
               onMouseDown={(e) => { e.preventDefault(); setView("projects-list"); }}
-              className="w-full flex items-center justify-between px-3 py-3 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+              className="w-full flex items-center justify-between px-3 py-3 outline-none hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
@@ -151,12 +151,12 @@ function ContextPanel({ allItems, references, onToggle, onClose }) {
                   <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
                     Proyectos completos
                   </span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     Añade un proyecto entero y sus trabajos
                   </span>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-slate-400" />
+              <ChevronRight className="w-5 h-5 text-slate-500 dark:text-slate-400" />
             </button>
           </>
         );
@@ -168,31 +168,31 @@ function ContextPanel({ allItems, references, onToggle, onClose }) {
               <button
                 key={folder.id}
                 onMouseDown={(e) => { e.preventDefault(); setSelectedProjectId(folder.id); setView("jobs-list"); }}
-                className="w-full flex items-center justify-between px-4 py-3 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left border-b last:border-b-0 border-slate-100 dark:border-slate-700"
+                className="w-full flex items-center justify-between px-4 py-3 outline-none hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors text-left border-b last:border-b-0 border-slate-100 dark:border-slate-700"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <FolderOpen className="w-4 h-4 text-primary-400 shrink-0" />
                   <div className="flex flex-col min-w-0">
                     <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{folder.label}</span>
-                    <span className="text-[10px] text-slate-400">{folder.jobCount} predicciones</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{folder.jobCount} predicciones</span>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
               </button>
             ))}
             {jobFolders.length > 0 && <div className="h-px bg-slate-100 dark:bg-slate-700" />}
             <button
               onMouseDown={(e) => { e.preventDefault(); setSelectedProjectId("unassigned"); setView("jobs-list"); }}
-              className="w-full flex items-center justify-between px-4 py-3 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+              className="w-full flex items-center justify-between px-4 py-3 outline-none hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors text-left"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <Layers className="w-4 h-4 text-slate-400 shrink-0" />
+                <Layers className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
                 <div className="flex flex-col min-w-0">
                   <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">Sin proyecto asignado</span>
-                  <span className="text-[10px] text-slate-400">{unassignedJobs.length} predicciones</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">{unassignedJobs.length} predicciones</span>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+              <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
             </button>
           </>
         );
@@ -203,23 +203,23 @@ function ContextPanel({ allItems, references, onToggle, onClose }) {
           : jobs.filter((j) => j.projectId === selectedProjectId);
 
         if (list.length === 0) {
-          return <p className="px-3 py-5 text-sm text-slate-400 text-center">No hay predicciones en esta carpeta.</p>;
+          return <p className="px-3 py-5 text-sm text-slate-500 dark:text-slate-400 text-center">No hay predicciones en esta carpeta.</p>;
         }
 
         return list.map((item) => (
           <button
             key={item.id}
             onMouseDown={(e) => { e.preventDefault(); onToggle(item); }}
-            className="w-full flex items-center gap-3 px-3 py-2 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+            className="w-full flex items-center gap-3 px-3 py-2 outline-none hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors text-left"
           >
             <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected(item.id) ? "bg-primary-600 border-primary-600" : "border-slate-300 dark:border-slate-600"
               }`}>
               {isSelected(item.id) && <Check className="w-3 h-3 text-white" />}
             </div>
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <span className="shrink-0">{STATUS_ICON[item.status] ?? <Dna className="w-3.5 h-3.5 text-slate-400" />}</span>
+              <span className="shrink-0">{STATUS_ICON[item.status] ?? <Dna className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />}</span>
               <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{item.label}</span>
-              <span className="text-[10px] text-slate-400 shrink-0">{item.status}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">{item.status}</span>
             </div>
           </button>
         ));
@@ -227,13 +227,13 @@ function ContextPanel({ allItems, references, onToggle, onClose }) {
 
       case "projects-list":
         if (projects.length === 0) {
-          return <p className="px-3 py-5 text-sm text-slate-400 text-center">No hay proyectos.</p>;
+          return <p className="px-3 py-5 text-sm text-slate-500 dark:text-slate-400 text-center">No hay proyectos.</p>;
         }
         return projects.map((item) => (
           <button
             key={item.id}
             onMouseDown={(e) => { e.preventDefault(); onToggle(item); }}
-            className="w-full flex items-center gap-3 px-3 py-2 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+            className="w-full flex items-center gap-3 px-3 py-2 outline-none hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors text-left"
           >
             <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected(item.id)
               ? "bg-primary-600 border-primary-600"
@@ -244,7 +244,7 @@ function ContextPanel({ allItems, references, onToggle, onClose }) {
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <FolderOpen className="w-3.5 h-3.5 text-primary-400 shrink-0" />
               <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{item.label}</span>
-              <span className="text-[10px] text-slate-400 shrink-0">proyecto</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">proyecto</span>
             </div>
           </button>
         ));
@@ -279,7 +279,7 @@ function ContextPanel({ allItems, references, onToggle, onClose }) {
         </div>
         <button
           onMouseDown={(e) => { e.preventDefault(); onClose(); }}
-          className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shrink-0"
+          className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shrink-0"
         >
           <X className="w-4 h-4" />
         </button>
@@ -646,7 +646,7 @@ export default function RAGAssistant() {
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="text-sm font-bold text-slate-900 dark:text-white">ProteIA</h1>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">
             Especializado en biología estructural · usa{" "}
             <strong className="font-semibold">@</strong> o{" "}
             <strong className="font-semibold">+</strong> para adjuntar contexto
@@ -656,7 +656,7 @@ export default function RAGAssistant() {
           <button
             onClick={handleNewConversation}
             title="Nueva conversación"
-            className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors"
+            className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all duration-200 ease-in-out active:scale-[0.98]"
           >
             <RotateCcw className="w-3 h-3" />
             Nueva conversación
@@ -681,7 +681,7 @@ export default function RAGAssistant() {
             </div>
             <div className="space-y-1.5 max-w-md">
               <h2 className="text-base font-semibold text-slate-700 dark:text-slate-200">¿En qué puedo ayudarte?</h2>
-              <p className="text-sm text-slate-400 dark:text-slate-500 leading-relaxed">
+              <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 leading-relaxed">
                 Soy un asistente especializado en biología estructural. Escribe{" "}
                 <strong className="text-slate-500 dark:text-slate-400">@</strong> o usa el botón{" "}
                 <strong className="text-slate-500 dark:text-slate-400">+</strong> para adjuntar el contexto de una predicción o proyecto.
@@ -720,7 +720,7 @@ export default function RAGAssistant() {
                   {msg.refs?.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-2">
                       {msg.refs.map((r, i) => (
-                        <span key={i} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-medium">
+                        <span key={i} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-xs font-medium">
                           {r.type === "job" ? <Dna className="w-2.5 h-2.5" /> : <FolderOpen className="w-2.5 h-2.5" />}
                           {r.proteinName || r.name}
                         </span>
@@ -772,8 +772,8 @@ export default function RAGAssistant() {
               className="absolute bottom-full mb-2 left-0 right-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg overflow-hidden z-30 max-h-56 overflow-y-auto"
             >
               <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-700 flex items-center gap-1.5">
-                <AtSign className="w-3 h-3 text-slate-400" />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Referenciar contexto</span>
+                <AtSign className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Referenciar contexto</span>
               </div>
               {filteredItems.map((item, idx) => (
                 <button
@@ -785,17 +785,17 @@ export default function RAGAssistant() {
                   }}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 transition-colors text-left ${idx === activeIndex
                     ? "bg-primary-50 dark:bg-primary-900/20"
-                    : "hover:bg-slate-50 dark:hover:bg-slate-700"
+                    : "hover:bg-slate-100 dark:hover:bg-slate-700"
                     }`}
                 >
                   <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 bg-slate-100 dark:bg-slate-700">
                     {item.kind === "job"
-                      ? (STATUS_ICON[item.status] ?? <Dna className="w-3.5 h-3.5 text-slate-400" />)
+                      ? (STATUS_ICON[item.status] ?? <Dna className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />)
                       : <FolderOpen className="w-3.5 h-3.5 text-primary-400" />}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{item.label}</p>
-                    <p className="text-[10px] text-slate-400 truncate">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                       {item.kind === "job" ? `Predicción · ${item.status}` : "Proyecto colaborativo"}
                     </p>
                   </div>
@@ -820,7 +820,7 @@ export default function RAGAssistant() {
               {references.map((r) => (
                 <span
                   key={r.id}
-                  className="flex items-center gap-1.5 pl-2 pr-1 py-0.5 rounded-full bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800 text-[11px] font-medium text-primary-700 dark:text-primary-300"
+                  className="flex items-center gap-1.5 pl-2 pr-1 py-0.5 rounded-full bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800 text-xs font-medium text-primary-700 dark:text-primary-300"
                 >
                   {r.kind === "job" ? <Dna className="w-3 h-3" /> : <FolderOpen className="w-3 h-3" />}
                   {r.label}
@@ -865,18 +865,18 @@ export default function RAGAssistant() {
               onKeyDown={handleKeyDown}
               placeholder="Pregunta sobre estructuras, proteínas… o escribe @ para adjuntar contexto"
               rows={1}
-              className="flex-1 resize-none bg-transparent border-none outline-none text-sm text-slate-900 dark:text-white placeholder:text-slate-400 leading-relaxed py-1"
+              className="flex-1 resize-none bg-transparent border-none outline-none text-sm text-slate-900 dark:text-white placeholder:text-slate-500 dark:text-slate-400 leading-relaxed py-1"
               style={{ maxHeight: "160px", overflowY: "auto" }}
             />
             <button
               type="submit"
               disabled={!input.trim() || busy}
-              className="shrink-0 mb-1 w-8 h-8 flex items-center justify-center bg-primary-600 hover:bg-primary-500 disabled:bg-slate-300 dark:disabled:bg-slate-600 text-white rounded-lg transition-colors"
+              className="shrink-0 mb-1 w-8 h-8 flex items-center justify-center bg-primary-600 hover:bg-primary-500 disabled:bg-slate-300 dark:disabled:bg-slate-600 text-white rounded-lg transition-all duration-200 ease-in-out active:scale-[0.98]"
             >
               <Send className="w-4 h-4" />
             </button>
           </form>
-          <p className="text-center text-[10px] text-slate-400 dark:text-slate-600 mt-2">
+          <p className="text-center text-xs text-slate-500 dark:text-slate-400 dark:text-slate-600 mt-2">
             Enter para enviar · Shift+Enter para nueva línea · @ o + para añadir contexto
           </p>
         </div>

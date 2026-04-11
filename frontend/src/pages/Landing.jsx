@@ -37,12 +37,12 @@ export default function Landing() {
       <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "bg-slate-950/80 backdrop-blur-md border-b border-white/5" : "bg-transparent"}`}>
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src={logoUrl} className="w-8 h-8 object-contain" alt="LocalFold" />
-            <span className="text-xl font-bold tracking-tight text-white">Local<span className="text-primary-500">Fold</span></span>
+            <img src={logoUrl} className="w-8 h-8 object-contain" alt="OmicaFold" />
+            <span className="text-xl font-bold tracking-tight text-white">Omica<span className="text-primary-500">Fold</span></span>
           </div>
           <button
             onClick={handleLogin}
-            className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+            className="text-sm font-medium text-slate-300 hover:text-white transition-all duration-200 ease-in-out active:scale-[0.98]"
           >
             Iniciar sesión →
           </button>
@@ -81,7 +81,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <button
               onClick={handleLogin}
-              className="flex items-center gap-2 px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold text-lg shadow-[0_0_40px_-10px_rgba(99,102,241,0.6)] transition-all hover:scale-105 active:scale-95"
+              className="flex items-center gap-2 px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold text-lg shadow-[0_0_40px_-10px_rgba(99,102,241,0.6)] hover:scale-105 transition-all duration-200 ease-in-out active:scale-[0.98]"
             >
               Empezar con Google
               <ArrowRight className="w-5 h-5" />
@@ -121,7 +121,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { step: "01", icon: <Upload className="w-5 h-5" />, color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20", title: "Sube tu FASTA", desc: "Pega la secuencia o arrastra el fichero. El nombre se detecta automáticamente del header UniProt." },
-              { step: "02", icon: <Cpu className="w-5 h-5" />, color: "text-primary-400", bg: "bg-primary-500/10 border-primary-500/20", title: "El CESGA computa", desc: "LocalFold reserva nodos GPU A100 y ejecuta AlphaFold 2 en el FinisTerrae III de forma transparente." },
+              { step: "02", icon: <Cpu className="w-5 h-5" />, color: "text-primary-400", bg: "bg-primary-500/10 border-primary-500/20", title: "El CESGA computa", desc: "OmicaFold reserva nodos GPU A100 y ejecuta AlphaFold 2 en el FinisTerrae III de forma transparente." },
               { step: "03", icon: <Eye className="w-5 h-5" />, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", title: "Analiza y colabora", desc: "Visor 3D con pLDDT, heatmap PAE, análisis IA con ProteIA y workspace colaborativo en tiempo real." },
             ].map((item) => (
               <div key={item.step} className="relative flex flex-col gap-5 p-8 rounded-2xl bg-slate-900/40 border border-white/5 hover:border-white/10 transition-colors">
@@ -222,7 +222,7 @@ export default function Landing() {
           </div>
           <button
             onClick={handleLogin}
-            className="shrink-0 flex items-center gap-2 px-8 py-3.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold text-sm shadow-[0_0_30px_-8px_rgba(99,102,241,0.5)] transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
+            className="shrink-0 flex items-center gap-2 px-8 py-3.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold text-sm shadow-[0_0_30px_-8px_rgba(99,102,241,0.5)] hover:scale-105 whitespace-nowrap transition-all duration-200 ease-in-out active:scale-[0.98]"
           >
             Empezar con Google
             <ArrowRight className="w-4 h-4" />
@@ -234,8 +234,8 @@ export default function Landing() {
       <footer className="border-t border-white/5 py-10 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
-            <img src={logoUrl} className="w-6 h-6 object-contain" alt="LocalFold" />
-            <span className="font-bold text-white text-sm">Local<span className="text-primary-500">Fold</span></span>
+            <img src={logoUrl} className="w-6 h-6 object-contain" alt="OmicaFold" />
+            <span className="font-bold text-white text-sm">Omica<span className="text-primary-500">Fold</span></span>
             <span className="text-slate-700 text-sm">—</span>
             <span className="text-slate-500 text-xs">Predicción proteica en el navegador</span>
           </div>

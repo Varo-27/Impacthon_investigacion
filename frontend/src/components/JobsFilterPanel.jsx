@@ -121,7 +121,7 @@ export default function JobsFilterPanel({
 
         {/* Longitud Máxima */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Longitud Máxima (aa)
           </label>
           <input
@@ -135,7 +135,7 @@ export default function JobsFilterPanel({
               updateFilters(regularProjects, selectedCategories, hasNoProject, e.target.value, textSearch);
             }}
             min="0"
-            className="px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-500 dark:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
         </div>
       </div>
@@ -144,11 +144,11 @@ export default function JobsFilterPanel({
       <div className="flex flex-col sm:flex-row gap-3 items-end">
         {/* Búsqueda por nombre/organismo/tag */}
         <div className="flex-1 flex flex-col gap-1.5">
-          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Nombre / Organismo / Tag
           </label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 dark:text-slate-400 pointer-events-none" />
             <input
               type="text"
               placeholder="human, calcium, fluorescent..."
@@ -159,7 +159,7 @@ export default function JobsFilterPanel({
                 const regularProjects = selectedProjects.filter(p => p !== "__no_project__");
                 updateFilters(regularProjects, selectedCategories, hasNoProject, maxLength, e.target.value);
               }}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-500 dark:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors"
             />
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function JobsFilterPanel({
         {hasActiveFilters && (
           <button
             onClick={resetFilters}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors text-sm font-medium whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 text-sm font-medium whitespace-nowrap transition-all duration-200 ease-in-out active:scale-[0.98]"
           >
             <X className="w-4 h-4" />
             Limpiar

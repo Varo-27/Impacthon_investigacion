@@ -59,16 +59,16 @@ export default function Sidebar() {
         {isOpen && (
           <Link
             to="/"
-            className="flex items-center gap-2 font-bold text-base text-primary-600 dark:text-primary-400 whitespace-nowrap tracking-tight hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
+            className="flex items-center gap-2 font-bold text-base text-primary-600 dark:text-primary-400 whitespace-nowrap tracking-tight hover:text-primary-500 dark:hover:text-primary-300 transition-all duration-200 ease-in-out active:scale-[0.98]"
             title="Ir a la página de inicio"
           >
-            <img src={logoUrl} className="w-6 h-6 object-contain" alt="LocalFold" />
-            LocalFold
+            <img src={logoUrl} className="w-6 h-6 object-contain" alt="OmicaFold" />
+            OmicaFold
           </Link>
         )}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors ${!isOpen ? "mx-auto" : ""}`}
+          className={`p-1.5 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors ${!isOpen ? "mx-auto" : ""}`}
           title={isOpen ? "Colapsar" : "Expandir"}
         >
           {isOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -102,7 +102,7 @@ export default function Sidebar() {
                 <>
                   <span className="text-sm font-medium whitespace-nowrap flex-1">{link.name}</span>
                   {link.badge > 0 && (
-                    <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-[10px] font-bold">
+                    <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-bold">
                       <Mail className="w-2.5 h-2.5" />
                       {link.badge}
                     </span>
@@ -131,7 +131,7 @@ export default function Sidebar() {
         {user && (
           <div className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md ${isOpen ? "" : "justify-center"}`}>
             {/* Avatar */}
-            <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 text-[11px] font-bold flex items-center justify-center shrink-0 border border-primary-200 dark:border-primary-800">
+            <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 text-xs font-bold flex items-center justify-center shrink-0 border border-primary-200 dark:border-primary-800">
               {initials}
             </div>
             {isOpen && (
@@ -140,7 +140,7 @@ export default function Sidebar() {
                   {user.displayName || user.email}
                 </p>
                 {user.displayName && (
-                  <p className="text-[10px] text-slate-400 truncate leading-tight">{user.email}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">{user.email}</p>
                 )}
               </div>
             )}
@@ -148,7 +148,7 @@ export default function Sidebar() {
               <button
                 onClick={handleSignOut}
                 title="Cerrar sesión"
-                className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
+                className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0 transition-all duration-200 ease-in-out active:scale-[0.98]"
               >
                 <LogOut className="w-3.5 h-3.5" />
               </button>
@@ -161,7 +161,7 @@ export default function Sidebar() {
           <button
             onClick={handleSignOut}
             title="Cerrar sesión"
-            className="w-full flex items-center justify-center py-2 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            className="w-full flex items-center justify-center py-2 rounded-md text-slate-500 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 ease-in-out active:scale-[0.98]"
           >
             <LogOut className="w-[18px] h-[18px]" />
           </button>

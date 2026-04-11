@@ -31,7 +31,7 @@ function CopyButton({ text }) {
   return (
     <button
       onClick={copy}
-      className="self-start flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors opacity-0 group-hover/msg:opacity-100"
+      className="self-start flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 opacity-0 group-hover/msg:opacity-100 transition-all duration-200 ease-in-out active:scale-[0.98]"
     >
       {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
       {copied ? "Copiado" : "Copiar"}
@@ -254,7 +254,7 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
           <button
             type="submit"
             disabled={!input.trim() || busy}
-            className="absolute right-2 top-1.5 p-1.5 bg-primary-600 hover:bg-primary-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-lg transition-colors"
+            className="absolute right-2 top-1.5 p-1.5 bg-primary-600 hover:bg-primary-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-lg transition-all duration-200 ease-in-out active:scale-[0.98]"
           >
             <Send className="w-4 h-4" />
           </button>
