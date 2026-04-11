@@ -67,19 +67,6 @@ function parseFastaName(header) {
   return raw.length > 60 ? raw.slice(0, 60) + "…" : raw;
 }
 
-const FUNCTIONAL_CATEGORIES = [
-  "enzyme",
-  "transport",
-  "signaling",
-  "immune",
-  "hormone",
-  "reporter",
-  "structural",
-  "oncology",
-  "dna-replication",
-];
-
-const COMMON_TAGS = ["calcium", "human", "fluorescent", "structural", "antimicrobial", "therapeutic"];
 
 function enrichJobWhenCompleted(jobId, cesgaJobId, proteinName) {
   setTimeout(async () => {
@@ -144,8 +131,6 @@ export default function SubmitFasta() {
   const [multiSubmitSuccess, setMultiSubmitSuccess] = useState(0);
 
   /* Nuevos campos para filtrado */
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedTags, setSelectedTags] = useState([]);
 
   /* Load project name if coming from a project */
   useEffect(() => {
@@ -347,7 +332,7 @@ export default function SubmitFasta() {
             proteinId: catalogProtein.protein_id || null,
             uniprot: catalogProtein.uniprot_id || null,
             pdbId: catalogProtein.pdb_id || null,
-            category: catalogProtein.category || selectedCategory || null,
+            category: catalogProtein.category || null,
             organism: catalogProtein.organism || null,
             molecularWeight: catalogProtein.molecular_weight_kda || null,
           };
@@ -599,60 +584,6 @@ export default function SubmitFasta() {
           </div>
 
 
-
-          {/* Categoría y Tags */}
-          <div className="px-4 py-5 bg-white dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-700/50">
-            <h3 className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 tracking-[0.08em] uppercase mb-3">
-              Información adicional (opcional)
-            </h3>
-
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* Categoría Funcional */}
-              <div className="flex-1">
-                <label className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-medium mb-1.5 block">Categoría Funcional</label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-600 focus:border-[#3b82f6] rounded-[6px] px-3 py-2 text-sm outline-none text-slate-800 dark:text-slate-200 transition-colors duration-150"
-                >
-                  <option value="">Sin categoría</option>
-                  {FUNCTIONAL_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat} className="capitalize">
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Tags */}
-              <div className="flex-1">
-                <label className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-medium mb-1.5 block">Tags (separados por coma)</label>
-                <input
-                  type="text"
-                  placeholder="calcium, human, fluorescent..."
-                  value={selectedTags.join(", ")}
-                  onChange={(e) => setSelectedTags(e.target.value.split(",").map(t => t.trim()).filter(Boolean))}
-                  className="w-full bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-600 focus:border-[#3b82f6] rounded-[6px] px-3 py-2 text-sm outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150"
-                />
-                {selectedTags.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {selectedTags.map((tag, idx) => (
-                      <div key={idx} className="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => setSelectedTags(selectedTags.filter((_, i) => i !== idx))}
-                          className="ml-1 hover:text-blue-900 dark:hover:text-blue-100"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
 
           {/* FASTA textarea */}
           <div className="relative">
