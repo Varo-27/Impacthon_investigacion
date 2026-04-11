@@ -478,25 +478,24 @@ export default function SubmitFasta() {
                 if (preset === 'Baja') label = 'Baja fiabilidad';
 
                 return (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => setResourcePreset(preset)}
-                    className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-150 ease-in-out border outline-none ${
-                      isSelected
-                        ? "border-[#2dd4bf] text-[#2dd4bf] bg-[rgba(45,212,191,0.07)]"
-                        : "border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50 dark:bg-transparent"
-                    }`}
-                  >
-                    {label}
+                  <div key={preset} className="relative mt-4">
                     {preset === 'Alta' && (
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-sm uppercase tracking-wider font-bold ${
-                        isSelected ? "bg-[#2dd4bf]/20 text-[#2dd4bf]" : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-                      }`}>
+                      <span className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#2dd4bf] text-slate-900 shadow-sm">
                         Recomendado
                       </span>
                     )}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setResourcePreset(preset)}
+                      className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-150 ease-in-out border outline-none ${
+                        isSelected
+                          ? "border-[#2dd4bf] text-[#2dd4bf] bg-[rgba(45,212,191,0.07)]"
+                          : "border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50 dark:bg-transparent"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  </div>
                 );
               })}
             </div>
