@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { UploadCloud, CheckCircle2, AlertTriangle, FlaskConical, Dna, ArrowRight, FolderOpen, X } from "lucide-react";
+import { UploadCloud, CheckCircle2, AlertTriangle, FlaskConical, Dna, ArrowRight, FolderOpen, X, ChevronDown } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { db, auth } from "../lib/firebase";
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from "firebase/firestore";
@@ -145,6 +145,7 @@ export default function SubmitFasta() {
   const [errorMsg, setErrorMsg] = useState(null);
 
   const [resourcePreset, setResourcePreset] = useState("Alta");
+  const [resourcesOpen, setResourcesOpen] = useState(false);
   const [customResources, setCustomResources] = useState({ cpu: "", gpu: "", memory: "", runtime: "" });
 
   const CUSTOM_LIMITS = {
@@ -503,24 +504,36 @@ export default function SubmitFasta() {
             {/* Preset Info / Custom Form */}
             {resourcePreset !== 'Personalizado' ? (
               <div>
-                <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 rounded-[10px] py-[14px] px-[18px] flex flex-wrap lg:flex-nowrap items-center justify-between gap-4">
-                  {[
-                    { label: "CPU", value: `${PRESET_RESOURCES[resourcePreset].cpu} cores` },
-                    { label: "GPU (GB)", value: `${PRESET_RESOURCES[resourcePreset].gpu} GB` },
-                    { label: "Memoria", value: `${PRESET_RESOURCES[resourcePreset].mem} GB` },
-                    { label: "Max runtime", value: `${PRESET_RESOURCES[resourcePreset].runtime} s` },
-                    { label: "Resolución 3D", value: PRESET_RESOURCES[resourcePreset].res }
-                  ].map((field, idx) => (
-                    <div key={idx} className="flex flex-col gap-1">
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-medium">{field.label}</span>
-                      <span className="text-[14px] font-medium text-slate-700 dark:text-slate-200">{field.value}</span>
+                <button
+                  type="button"
+                  onClick={() => setResourcesOpen((o) => !o)}
+                  className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors mb-2"
+                >
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${resourcesOpen ? "rotate-180" : ""}`} />
+                  {resourcesOpen ? "Ocultar especificaciones" : "Ver especificaciones"}
+                </button>
+                {resourcesOpen && (
+                  <>
+                    <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 rounded-[10px] py-[14px] px-[18px] flex flex-wrap lg:flex-nowrap items-center justify-between gap-4">
+                      {[
+                        { label: "CPU", value: `${PRESET_RESOURCES[resourcePreset].cpu} cores` },
+                        { label: "GPU (GB)", value: `${PRESET_RESOURCES[resourcePreset].gpu} GB` },
+                        { label: "Memoria", value: `${PRESET_RESOURCES[resourcePreset].mem} GB` },
+                        { label: "Max runtime", value: `${PRESET_RESOURCES[resourcePreset].runtime} s` },
+                        { label: "Resolución 3D", value: PRESET_RESOURCES[resourcePreset].res }
+                      ].map((field, idx) => (
+                        <div key={idx} className="flex flex-col gap-1">
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-medium">{field.label}</span>
+                          <span className="text-[14px] font-medium text-slate-700 dark:text-slate-200">{field.value}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                {PRESET_RESOURCES[resourcePreset].note && (
-                  <p className="mt-2 text-[12px] text-[#4b5872]">
-                    {PRESET_RESOURCES[resourcePreset].note}
-                  </p>
+                    {PRESET_RESOURCES[resourcePreset].note && (
+                      <p className="mt-2 text-[12px] text-[#4b5872]">
+                        {PRESET_RESOURCES[resourcePreset].note}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             ) : (
