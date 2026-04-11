@@ -48,29 +48,32 @@ export const proteiaApi = {
 
   async sendChatMessage(jobId, message, chatHistory = [], proteinContext = {}) {
     try {
+      const payload = {
+        session_id: `job_${jobId}`,
+        chatInput: message,
+        history: chatHistory.map((m) => ({
+          role: m.role === "ai" ? "assistant" : "user",
+          content: m.text,
+        })),
+        protein_context: {
+          job_id: jobId,
+          protein_name: proteinContext.name || "Proteína desconocida",
+          plddt: proteinContext.plddt || null,
+          organism: proteinContext.organism || null,
+          uniprot: proteinContext.uniprot || null,
+          solubility: proteinContext.biological?.solubility_score || null,
+          instability: proteinContext.biological?.instability_index || null,
+          toxicity_alerts: proteinContext.biological?.toxicity_alerts || [],
+          secondary_structure: proteinContext.biological?.secondary_structure_prediction || null,
+          sequence_properties: proteinContext.biological?.sequence_properties || null,
+        },
+      };
+      console.log("ProteIA API enviando payload:", payload);
+      
       const response = await fetch(PROTEIA_CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session_id: `job_${jobId}`,
-          chatInput: message,
-          history: chatHistory.map((m) => ({
-            role: m.role === "ai" ? "assistant" : "user",
-            content: m.text,
-          })),
-          protein_context: {
-            job_id: jobId,
-            protein_name: proteinContext.name || "Proteína desconocida",
-            plddt: proteinContext.plddt || null,
-            organism: proteinContext.organism || null,
-            uniprot: proteinContext.uniprot || null,
-            solubility: proteinContext.biological?.solubility_score || null,
-            instability: proteinContext.biological?.instability_index || null,
-            toxicity_alerts: proteinContext.biological?.toxicity_alerts || [],
-            secondary_structure: proteinContext.biological?.secondary_structure_prediction || null,
-            sequence_properties: proteinContext.biological?.sequence_properties || null,
-          },
-        }),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();

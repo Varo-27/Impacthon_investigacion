@@ -388,6 +388,7 @@ ${bioHtml}
             // getJobOutputs usa cache compartido — si el usuario ya abrió esta proteína
             // en el Visor (o RAGAssistant la fetcheó al referenciarla), no hay petición de red.
             const outputs = await getJobOutputs(jobId);
+            console.log("Viewer: datos fetched para jobId", jobId, outputs);
             data = {
               name:           outputs.name           || jobId,
               plddt:          outputs.plddt          ?? 85.0,
@@ -708,11 +709,43 @@ ${bioHtml}
                 )}
               </div>
 
+              {/* Downloads footer - Only in Details tab */}
+              <div className="pt-2 space-y-2 border-t border-slate-100 dark:border-slate-800 mt-4">
+                <button
+                  onClick={handleDownloadReport}
+                  disabled={!jobData || waitingForAi}
+                  className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-md bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
+                >
+                  {waitingForAi
+                    ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Esperando análisis IA…</>
+                    : <><FileText className="w-3.5 h-3.5" /> {aiSummary ? "Generar informe PDF ✓" : "Generar informe PDF"}</>}
+                </button>
+
+                <div className="flex gap-1.5">
+                  {[
+                    { label: "PDB",  onClick: handleDownloadPdb,  disabled: !jobData?.pdbFileUrl },
+                    { label: "JSON", onClick: handleDownloadJson, disabled: !jobData },
+                    { label: downloadingLogs ? "…" : "Logs", onClick: handleDownloadLogs, disabled: !jobId || downloadingLogs },
+                  ].map(({ label, onClick, disabled }) => (
+                    <button
+                      key={label}
+                      onClick={onClick}
+                      disabled={disabled}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[11px] font-semibold rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Download className="w-3 h-3" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
             </div>
           )}
 
           {activeTab === "copilot" && (
-            <div className="h-full" style={{ minHeight: "400px" }}>
+            <div className="h-full">
+              {console.log("Viewer pasando a ProteinCopilot jobData:", jobData)}
               <ProteinCopilot
                 jobId={jobId}
                 proteinName={jobData?.name}
@@ -721,37 +754,6 @@ ${bioHtml}
               />
             </div>
           )}
-        </div>}
-
-        {/* Downloads footer */}
-        {!fetchError && <div className="shrink-0 border-t border-slate-100 dark:border-slate-800 p-3 space-y-2 bg-slate-50 dark:bg-slate-900">
-          <button
-            onClick={handleDownloadReport}
-            disabled={!jobData || waitingForAi}
-            className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-md bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
-          >
-            {waitingForAi
-              ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Esperando análisis IA…</>
-              : <><FileText className="w-3.5 h-3.5" /> {aiSummary ? "Generar informe PDF ✓" : "Generar informe PDF"}</>}
-          </button>
-
-          <div className="flex gap-1.5">
-            {[
-              { label: "PDB",  onClick: handleDownloadPdb,  disabled: !jobData?.pdbFileUrl },
-              { label: "JSON", onClick: handleDownloadJson, disabled: !jobData },
-              { label: downloadingLogs ? "…" : "Logs", onClick: handleDownloadLogs, disabled: !jobId || downloadingLogs },
-            ].map(({ label, onClick, disabled }) => (
-              <button
-                key={label}
-                onClick={onClick}
-                disabled={disabled}
-                className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[11px] font-semibold rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <Download className="w-3 h-3" />
-                {label}
-              </button>
-            ))}
-          </div>
         </div>}
 
       </div>{/* end right panel */}

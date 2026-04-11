@@ -44,8 +44,45 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
   const [input,      setInput]      = useState("");
   const [isWaiting,  setIsWaiting]  = useState(false);  // waiting for API
   const [isStreaming,setIsStreaming] = useState(false);  // animating text
+  const [enrichedData, setEnrichedData] = useState(statusData); // datos completos
   const scrollRef  = useRef(null);
   const cancelStream = useRef(null);
+
+  // Cargar datos completos cuando se monta o cambia jobId
+  useEffect(() => {
+    if (!jobId) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        console.log("ProteinCopilot: cargando datos completos del CESGA para", jobId);
+        const response = await fetch(`https://api-mock-cesga.onrender.com/jobs/${jobId}/outputs`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const cesga = await response.json();
+        
+        if (!cancelled) {
+          const full = {
+            name: cesga.protein_metadata?.protein_name || statusData?.name,
+            plddt: cesga.structural_data?.confidence?.plddt_mean || statusData?.plddt,
+            organism: cesga.protein_metadata?.organism || statusData?.organism,
+            uniprot: cesga.protein_metadata?.uniprot_id || statusData?.uniprot,
+            biological: cesga.biological_data || statusData?.biological,
+            pdbFileUrl: cesga.structural_data?.pdb_file || statusData?.pdbFileUrl,
+            paeMatrix: cesga.structural_data?.confidence?.pae_matrix || statusData?.paeMatrix,
+            plddtHistogram: cesga.structural_data?.confidence?.plddt_histogram || statusData?.plddtHistogram,
+          };
+          console.log("✅ ProteinCopilot: datos COMPLETOS cargados", full);
+          setEnrichedData(full);
+        }
+      } catch (err) {
+        console.error("❌ ProteinCopilot: error cargando datos:", err);
+        console.log("⚠️  usando statusData de fallback:", statusData);
+        setEnrichedData(statusData);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [jobId]); // Solo jobId como dependencia
 
   const scrollToBottom = useCallback(() => {
     if (scrollRef.current) {
@@ -88,12 +125,13 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
 
   /* Initial summary */
   useEffect(() => {
-    if (!jobId) return;
+    if (!jobId || !enrichedData) return;
     let cancelled = false;
 
     (async () => {
       setIsWaiting(true);
-      const summary = await proteiaApi.getInitialSummary(jobId, proteinName, statusData);
+      console.log("ProteinCopilot: generando resumen con enrichedData:", enrichedData);
+      const summary = await proteiaApi.getInitialSummary(jobId, proteinName, enrichedData);
       if (cancelled) return;
       setIsWaiting(false);
       if (onSummaryReady) onSummaryReady(summary);
@@ -101,7 +139,7 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
     })();
 
     return () => { cancelled = true; };
-  }, [jobId]);
+  }, [jobId, enrichedData, proteinName]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -112,7 +150,8 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
     setMessages(prev => [...prev, { role: "user", text: userMsg }]);
 
     setIsWaiting(true);
-    const aiResponse = await proteiaApi.sendChatMessage(jobId, userMsg, messages, statusData);
+    console.log("📤 ProteinCopilot enviando mensaje con enrichedData:", enrichedData);
+    const aiResponse = await proteiaApi.sendChatMessage(jobId, userMsg, messages, enrichedData || statusData);
     setIsWaiting(false);
     startStream(aiResponse);
   };
@@ -120,10 +159,10 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
   const busy = isWaiting || isStreaming;
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 overflow-hidden">
+    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900">
 
       {/* Header */}
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between">
+      <div className="shrink-0 p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400">
             <Bot className="w-5 h-5" />
@@ -136,7 +175,7 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
         <Sparkles className="w-4 h-4 text-primary-400 animate-pulse" />
       </div>
 
-      {/* Messages */}
+      {/* Messages - Only this scrolls */}
       <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-200 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 dark:hover:[&::-webkit-scrollbar-thumb]:bg-slate-600"
@@ -201,8 +240,8 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
         )}
       </div>
 
-      {/* Input */}
-      <form onSubmit={handleSend} className="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+      {/* Input - Fixed at bottom */}
+      <form onSubmit={handleSend} className="shrink-0 p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
         <div className="relative">
           <input
             type="text"
