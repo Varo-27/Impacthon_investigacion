@@ -128,7 +128,7 @@ export default function Landing() {
               {
                 step: "03", icon: <Eye className="w-6 h-6" />, color: "text-emerald-400",
                 title: "Analiza y colabora",
-                desc: "Visor 3D interactivo, heatmap PAE, análisis IA con Proteia y workspace colaborativo para compartir con tu equipo.",
+                desc: "Visor 3D interactivo, heatmap PAE, análisis IA con ProteIA y workspace colaborativo para compartir con tu equipo.",
               },
             ].map((item) => (
               <div key={item.step} className="relative flex flex-col items-center text-center">
@@ -154,13 +154,13 @@ export default function Landing() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <FeatureCard
               icon={<Bot className="w-6 h-6 text-emerald-400" />}
-              title="Proteia — Copiloto IA"
+              title="ProteIA — Copiloto IA"
               desc="Lee pLDDT, solubilidad e inestabilidad y te traduce los datos técnicos a conclusiones biológicas accionables en lenguaje natural."
             />
             <FeatureCard
               icon={<BrainCircuit className="w-6 h-6 text-primary-400" />}
-              title="Asistente RAG especializado"
-              desc='IA entrenada en literatura de biología estructural. Escribe @ para adjuntar el contexto de cualquier predicción propia y obtener análisis personalizados.'
+              title="ProteIA — Asistente RAG"
+              desc='IA especializada en biología estructural. Escribe @ para adjuntar el contexto de cualquier predicción propia y obtener análisis personalizados.'
             />
             <FeatureCard
               icon={<Users className="w-6 h-6 text-blue-400" />}
@@ -180,7 +180,7 @@ export default function Landing() {
             <FeatureCard
               icon={<FlaskConical className="w-6 h-6 text-violet-400" />}
               title="Informe PDF automático"
-              desc="Genera en un clic un informe con estructura 3D, métricas de confianza, propiedades biológicas y análisis de Proteia listo para publicar."
+              desc="Genera en un clic un informe con estructura 3D, métricas de confianza, propiedades biológicas y análisis de ProteIA listo para publicar."
             />
           </div>
         </div>
@@ -253,7 +253,7 @@ export default function Landing() {
               {
                 who: "Bioquímicos y biólogos moleculares",
                 icon: <FlaskConical className="w-5 h-5 text-emerald-400" />,
-                use: "Predice la estructura de tu proteína de interés sin tocar la terminal. Proteia interpreta los resultados en el contexto de tu experimento.",
+                use: "Predice la estructura de tu proteína de interés sin tocar la terminal. ProteIA interpreta los resultados en el contexto de tu experimento.",
               },
               {
                 who: "Grupos de investigación",
@@ -289,9 +289,9 @@ export default function Landing() {
               </div>
               <div>
                 <p className="text-[11px] font-bold text-primary-400 uppercase tracking-widest mb-2">Nuevo</p>
-                <h2 className="text-2xl lg:text-3xl font-extrabold text-white mb-4">Asistente RAG con contexto propio</h2>
+                <h2 className="text-2xl lg:text-3xl font-extrabold text-white mb-4">ProteIA — tu asistente con contexto propio</h2>
                 <p className="text-slate-300 leading-relaxed mb-6">
-                  Un asistente especializado en biología estructural con base de conocimiento local. Escribe <strong className="text-primary-300">@</strong> seguido del nombre de cualquier predicción o proyecto para adjuntar sus datos como contexto — el asistente analiza tus resultados concretos, no respuestas genéricas.
+                  Especializada en biología estructural con base de conocimiento local. Escribe <strong className="text-primary-300">@</strong> seguido del nombre de cualquier predicción o proyecto para adjuntar sus datos como contexto — ProteIA analiza tus resultados concretos, no respuestas genéricas.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   {[

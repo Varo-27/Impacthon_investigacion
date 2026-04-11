@@ -129,7 +129,7 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
             <Bot className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold dark:text-white">Proteia</h3>
+            <h3 className="text-sm font-bold dark:text-white">ProteIA</h3>
             <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Gemini 1.5 Pro via n8n</p>
           </div>
         </div>

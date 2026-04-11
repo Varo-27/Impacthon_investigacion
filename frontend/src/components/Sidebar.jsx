@@ -41,7 +41,7 @@ export default function Sidebar() {
     { name: "Nuevo Trabajo", path: "/app/submit",        icon: <Dna className="w-5 h-5" /> },
     { name: "Mis Trabajos",  path: "/app/jobs",          icon: <LayoutDashboard className="w-5 h-5" /> },
     { name: "Proyectos",     path: "/app/projects",      icon: <FolderOpen className="w-5 h-5" />, badge: pendingInvites },
-    { name: "Asistente IA",  path: "/app/assistant",     icon: <BrainCircuit className="w-5 h-5" /> },
+    { name: "ProteIA",        path: "/app/assistant",     icon: <BrainCircuit className="w-5 h-5" /> },
   ];
 
   const initials = user?.displayName

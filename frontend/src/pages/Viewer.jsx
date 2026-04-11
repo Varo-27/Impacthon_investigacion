@@ -324,16 +324,22 @@ ${bioHtml}
     if (!jobId) return;
     setDownloadingLogs(true);
     try {
-      const resp = await fetch(`https://api-mock-cesga.onrender.com/jobs/${jobId}/status`);
-      const data = await resp.json();
+      // Status for timing info, outputs for actual logs
+      const [statusResp, outputsResp] = await Promise.all([
+        fetch(`https://api-mock-cesga.onrender.com/jobs/${jobId}/status`),
+        fetch(`https://api-mock-cesga.onrender.com/jobs/${jobId}/outputs`),
+      ]);
+      const status = await statusResp.json();
+      const outputs = outputsResp.ok ? await outputsResp.json() : null;
+
       const logLines = [
         `Job ID:    ${jobId}`,
-        `Status:    ${data.status}`,
-        `Started:   ${data.started_at || "—"}`,
-        `Completed: ${data.completed_at || "—"}`,
-        `Duration:  ${data.duration_seconds != null ? data.duration_seconds + "s" : "—"}`,
+        `Status:    ${status.status}`,
+        `Started:   ${status.started_at || "—"}`,
+        `Completed: ${status.completed_at || "—"}`,
+        `CPUs:      ${status.cpus ?? "—"}   GPUs: ${status.gpus ?? "—"}   RAM: ${status.memory_gb ?? "—"} GB`,
         "",
-        ...(data.logs ? data.logs : ["(no logs available)"]),
+        outputs?.logs || "(no logs available)",
       ];
       const safeName = (jobData?.name || jobId).replace(/[^a-z0-9]/gi, "_");
       downloadFile(logLines.join("\n"), `${safeName}_logs.txt`);
@@ -383,7 +389,10 @@ ${bioHtml}
             const out = await resp.json();
             data = {
               name: out.protein_metadata?.protein_name || jobId,
-              plddt: out.structural_data?.confidence?.plddt_mean || 85.0,
+              plddt: out.structural_data?.confidence?.plddt_mean
+                  ?? out.structural_data?.confidence?.plddt_average
+                  ?? out.protein_metadata?.plddt_average
+                  ?? 85.0,
               pdbFileUrl: out.structural_data?.pdb_file || null,
               biological: out.biological_data || null,
               uniprot: out.protein_metadata?.uniprot_id || null,
