@@ -85,6 +85,18 @@ Estructura del vídeo continuo (~5 min, sin audio o música muy sutil):
 ### Hilo narrativo central
 La conexión emocional es lo más importante. No vendemos una herramienta — contamos una historia. El storytelling es el núcleo de la presentación, no un adorno.
 
+### Esto no es un reto. Es una misión.
+Un reto se gana el sábado. Una misión trasciende el hackathon.
+
+LocalFold no nació para ganar una competición — nació porque existe un problema real que frena el progreso científico y hay personas que sufren mientras ese progreso tarda. Eso es una misión.
+
+La presentación debe transmitir esa diferencia desde el primer segundo. No estamos aquí para impresionar a un jurado. Estamos aquí porque creemos que esto importa de verdad.
+
+**Cómo se nota en la presentación:**
+- El tono no es el de un pitch de startup — es el de alguien que ha encontrado algo en lo que cree
+- No cerrar con "esperamos seguir desarrollando esto" — cerrar con *por qué esto tiene que existir*
+- La demo no es una demostración de features — es la prueba de que la misión es posible
+
 ### Referencia: Demis Hassabis y el documental de Google
 Uno de los miembros del equipo vio un documental de Google sobre Demis Hassabis que fue una fuente de inspiración directa para este proyecto. Hassabis habla de la IA no como un fin en sí mismo, sino como el instrumento más poderoso que ha tenido la humanidad para entender el universo — y en particular, para resolver problemas biológicos que llevan décadas sin solución.
 
