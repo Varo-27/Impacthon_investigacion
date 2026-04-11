@@ -193,8 +193,6 @@ export default function JobsList() {
   const [copiedId,   setCopiedId]   = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [search,     setSearch]     = useState("");
-  const [sortKey,    setSortKey]    = useState("date_desc");
-  const [sortOpen,   setSortOpen]   = useState(false);
   const [moveJob,    setMoveJob]    = useState(null); // job a reasignar
   const [deleteJob,  setDeleteJob]  = useState(null); // job a eliminar
   
@@ -274,7 +272,7 @@ export default function JobsList() {
       });
     });
     return () => unsub();
-  }, [userId]);
+  }, [userId, addToast, projectNames]);
 
   /* ── Cargar proyectos del usuario para el filtro ── */
   useEffect(() => {
@@ -297,7 +295,9 @@ export default function JobsList() {
           if (data.status !== job.status)
             await updateDoc(doc(db, "jobs", job.id), { status: data.status });
         }
-      } catch (_) {}
+      } catch (e) {
+        console.error("Error refreshing job status:", e);
+      }
     }
   };
 

@@ -91,7 +91,7 @@ function enrichJobWhenCompleted(jobId, cesgaJobId, proteinName) {
       if (proteinMatch) {
         updateData.proteinId = proteinMatch.protein_id || null;
         updateData.pdbId = proteinMatch.pdb_id || null;
-        updateData.category = proteinMatch.category || null;
+        updateData.functionalCategory = proteinMatch.category || null;
         
         // Si tiene ID, obtener detalles completos
         if (proteinMatch.protein_id) {

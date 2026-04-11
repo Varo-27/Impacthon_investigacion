@@ -97,7 +97,7 @@ export function extractProteinMetadata(proteinData) {
     pdbId: proteinData.pdb_id || null,
     
     // Información básica
-    category: proteinData.category || null,
+    functionalCategory: proteinData.category || null,
     organism: proteinData.organism || null,
     aaLength: proteinData.length || null,
     
