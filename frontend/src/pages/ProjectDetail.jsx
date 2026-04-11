@@ -2,14 +2,14 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { db, auth } from "../lib/firebase";
 import {
-  collection, query, where, onSnapshot, doc, getDoc,
-  updateDoc, addDoc,
+  collection, query, where, onSnapshot, doc,
+  updateDoc, addDoc, deleteField, serverTimestamp,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   ArrowLeft, RefreshCw, CheckCircle2, Clock, XCircle, GitBranch,
   Dna, Search, ChevronsUpDown, Check, Share2, Crown, Users,
-  UserPlus, Plus,
+  UserPlus, Plus, FolderMinus,
 } from "lucide-react";
 import { InviteModal } from "./Projects";
 
@@ -64,13 +64,14 @@ export default function ProjectDetail() {
     return () => unsub();
   }, []);
 
-  /* Project doc */
+  /* Project doc — live listener so member changes reflect immediately */
   useEffect(() => {
     if (!id) return;
-    getDoc(doc(db, "projects", id)).then((snap) => {
+    const unsub = onSnapshot(doc(db, "projects", id), (snap) => {
       if (!snap.exists()) { setNotFound(true); setLoading(false); return; }
       setProject({ id: snap.id, ...snap.data() });
     });
+    return () => unsub();
   }, [id]);
 
   /* Jobs for this project */
@@ -100,6 +101,18 @@ export default function ProjectDetail() {
       } catch (_) {}
     }
     setRefreshing(false);
+  };
+
+  const handleRemoveFromProject = async (jobId) => {
+    try {
+      await updateDoc(doc(db, "jobs", jobId), {
+        projectId:   deleteField(),
+        projectName: deleteField(),
+        updatedAt:   serverTimestamp(),
+      });
+    } catch (e) {
+      console.error("Error al quitar el job del proyecto:", e);
+    }
   };
 
   const handleShare = (cesgaJobId) => {
@@ -249,7 +262,7 @@ export default function ProjectDetail() {
       {/* Jobs panel */}
       <div className="rounded-lg border border-slate-300 dark:border-slate-700 overflow-hidden">
         {!loading && visible.length > 0 && (
-          <div className="hidden sm:grid grid-cols-[1fr_120px_140px_96px] items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <div className="hidden sm:grid grid-cols-[1fr_120px_140px_128px] items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             <span>Predicción</span><span>Estado</span><span>Fecha</span><span />
           </div>
         )}
@@ -283,7 +296,7 @@ export default function ProjectDetail() {
               const { Icon } = cfg;
               const isCompleted = job.status === "COMPLETED";
               return (
-                <li key={job.id} className="group sm:grid sm:grid-cols-[1fr_120px_140px_96px] items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <li key={job.id} className="group sm:grid sm:grid-cols-[1fr_120px_140px_128px] items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                   <div className="flex items-start gap-2.5 min-w-0">
                     <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${cfg.iconClass}`} />
                     <div className="min-w-0">
@@ -310,6 +323,13 @@ export default function ProjectDetail() {
                   </div>
                   <span className="hidden sm:block text-xs text-slate-400 dark:text-slate-500 truncate">{job.relativeDate}</span>
                   <div className="hidden sm:flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => handleRemoveFromProject(job.id)}
+                      title="Quitar del proyecto"
+                      className="p-1.5 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                      <FolderMinus className="w-3.5 h-3.5" />
+                    </button>
                     {isCompleted && (
                       <>
                         <button onClick={() => handleShare(job.cesgaJobId)} title="Copiar enlace" className="p-1.5 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors">
