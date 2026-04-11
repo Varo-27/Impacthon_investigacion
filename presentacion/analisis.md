@@ -1,5 +1,9 @@
 # Análisis estratégico — LocalFold
 
+> **Esto no es un reto. Es una misión.**
+> Un reto se gana el sábado. Una misión trasciende el hackathon.
+> LocalFold existe porque hay un problema real que frena el progreso científico, y hay personas que sufren mientras ese progreso tarda.
+
 ---
 
 ## 1. Problema
@@ -64,12 +68,23 @@ ProteIA es el componente de mayor diferenciación. Es un asistente de IA especia
 
 ---
 
-## 6. Impacto esperado
+## 6. Impacto real
 
-- **Reducción del tiempo** entre idea experimental y predicción estructural: de días a minutos
-- **Democratización del acceso** a HPC para perfiles no técnicos
-- **Aceleración del ciclo de descubrimiento** en enfermedades como ELA, Alzheimer, Parkinson donde las proteínas mal plegadas son mecanismo central
-- **Colaboración interdisciplinar** entre biólogos, químicos y bioinformáticos en un mismo workspace
+LocalFold no hace nueva ciencia. No mejora AlphaFold. Lo que hace es **eliminar la fricción** entre un investigador y una herramienta que ya existe. El impacto no es el descubrimiento — es la velocidad a la que puede llegar.
+
+**Y la velocidad en ciencia médica se traduce en vidas.**
+
+### Dónde el impacto es más tangible
+En enfermedades donde las proteínas mal plegadas son el mecanismo central — ELA, Alzheimer, Parkinson, Huntington. En España: ~800.000 personas con Alzheimer, ~4.000 nuevos casos de ELA al año. Los grupos que investigan estas enfermedades en la USC, CSIC o CiMUS son exactamente el usuario de LocalFold.
+
+### Impacto concreto y medible
+- **Tiempo:** cada predicción que antes requería días de configuración HPC, con LocalFold está lista en minutos
+- **Acceso:** investigadores sin perfil técnico pueden usar AlphaFold 2 sin depender del departamento IT
+- **Colaboración:** equipos multidisciplinares trabajando sobre los mismos resultados en tiempo real
+- **Conocimiento:** ProteIA democratiza la interpretación estructural — ya no hace falta ser bioinformático para entender los resultados
+
+### El techo real
+El impacto a largo plazo depende de que CESGA y las instituciones adopten LocalFold en producción. Como prototipo demuestra que es posible y necesario. El siguiente paso es institucional — y ese paso, si se da, cambia cómo se hace ciencia en Galicia y en España.
 
 ---
 
