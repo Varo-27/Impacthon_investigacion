@@ -368,8 +368,6 @@ export default function SubmitFasta() {
             updatedAt: serverTimestamp(),
             fastaContent: seq.cleanFasta,
             aaLength: seq.aaCount,
-            ...(selectedCategory ? { functionalCategory: selectedCategory } : {}),
-            ...(selectedTags.length > 0 ? { tags: selectedTags } : {}),
             ...(projectId ? { projectId, ...(projectName ? { projectName } : {}) } : {}),
             // Datos enriquecidos del catálogo
             ...enrichmentData,
