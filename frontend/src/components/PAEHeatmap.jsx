@@ -37,11 +37,29 @@ export default function PAEHeatmap({ matrix, className = "" }) {
         if (norm < 0) norm = 0;
         
         // Simple distinct gradient from deep emerald to soft white
-        // Dark: 2, 70, 50
-        // Light: 250, 250, 250
-        const r = Math.round(2 + (norm * (250 - 2)));
-        const g = Math.round(70 + (norm * (250 - 70)));
-        const b = Math.round(50 + (norm * (250 - 50)));
+        let r, g, b;
+        
+        // AlphaFold color scheme logic:
+        // Dark blue: 0, 83, 214 (Very Low Error)
+        // Light blue: 101, 203, 243
+        // Yellow: 255, 219, 19
+        // Orange/Red: 255, 125, 69 (High Error)
+        if (norm < 0.33) {
+           const t = norm / 0.33;
+           r = Math.round(0 + t * (101 - 0));
+           g = Math.round(83 + t * (203 - 83));
+           b = Math.round(214 + t * (243 - 214));
+        } else if (norm < 0.66) {
+           const t = (norm - 0.33) / 0.33;
+           r = Math.round(101 + t * (255 - 101));
+           g = Math.round(203 + t * (219 - 203));
+           b = Math.round(243 + t * (19 - 243));
+        } else {
+           const t = (norm - 0.66) / 0.34;
+           r = Math.round(255 + t * (255 - 255));
+           g = Math.round(219 + t * (125 - 219));
+           b = Math.round(19 + t * (69 - 19));
+        }
         
         const idx = (y * n + x) * 4;
         data[idx] = r;     // Red

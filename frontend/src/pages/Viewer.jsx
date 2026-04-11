@@ -13,8 +13,6 @@ export default function Viewer() {
   const [jobData, setJobData] = useState(null);
   const [activeTab, setActiveTab] = useState("view");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeColor, setActiveColor] = useState("plddt"); // 'plddt' | 'chain'
-  const [activeRepresentation, setActiveRepresentation] = useState("cartoon"); // 'cartoon' | 'surface' | 'ball-and-stick'
 
   // Initialize PDBe Molstar Plugin
 
@@ -76,6 +74,8 @@ export default function Viewer() {
             bgColor: { r: 255, g: 255, b: 255 }, 
             hideCanvasControls: ["expand", "selection", "animation", "controlToggle", "controlInfo"],
             visualStyle: "cartoon",
+            // Keep AF specific parsing for the Blue->Red B-factor scale
+            alphafoldView: true, 
           };
 
           if (customUrl) {
@@ -85,6 +85,7 @@ export default function Viewer() {
           }
 
           viewerInstance.render(viewerContainerRef.current, options);
+          
           setIsLoaded(true);
         } catch (err) {
           console.error("Failed to load Mol* viewer:", err);
@@ -106,27 +107,28 @@ export default function Viewer() {
     };
   }, [jobId]);
 
-  const handleRepresentationChange = (e) => {
-    const style = e.target.value;
-    setActiveRepresentation(style);
-    if (viewerInstanceRef.current && viewerInstanceRef.current.visual) {
-      viewerInstanceRef.current.visual.update({ visualStyle: style });
-    }
-  };
-
-  const handleColorChange = (theme) => {
-    setActiveColor(theme);
-    if (viewerInstanceRef.current && viewerInstanceRef.current.visual) {
-      if (theme === 'plddt') {
-        viewerInstanceRef.current.visual.update({ colorTheme: 'b-factor' });
-      } else {
-        viewerInstanceRef.current.visual.update({ colorTheme: 'chain-id' });
-      }
-    }
-  };
-
   return (
-    <div className="flex w-full h-full relative overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <div className="flex w-full h-full relative overflow-hidden bg-slate-50 dark:bg-slate-900 viewer-container">
+      {/* CSS Override to forcefully hide Molstar's AlphaFold Bloatware UI */}
+      <style>{`
+        /* Forcefully hide layout regions injected by alphafoldView */
+        .viewer-container .msp-layout-region-left,
+        .viewer-container .msp-layout-region-right,
+        .viewer-container .msp-layout-region-bottom {
+          display: none !important;
+        }
+        
+        /* Hide the annoying corner toggle buttons that the AF mode forces */
+        .viewer-container .msp-layout-toggle {
+          display: none !important;
+        }
+        
+        /* Keep viewport taking full space */
+        .viewer-container .msp-layout-standard {
+          grid-template-columns: 0fr 1fr 0fr !important;
+          grid-template-rows: 0fr 1fr 0fr !important;
+        }
+      `}</style>
       
       {/* 3D Main Viewer Area */}
       <div className="flex-1 relative h-full flex flex-col">
@@ -177,43 +179,44 @@ export default function Viewer() {
 
         <div className="p-5 flex flex-col gap-6 flex-1">
           {activeTab === 'view' && (
-            <>
-              {/* Opciones Simplificadas de Representación */}
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs">
-                  Representación
-                </label>
-                <select 
-                  value={activeRepresentation}
-                  onChange={handleRepresentationChange}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200 cursor-pointer"
-                >
-                  <option value="cartoon">Cintas (Cartoon) - Recomendado</option>
-                  <option value="surface">Superficie molecular</option>
-                  <option value="ball-and-stick">Bolas y varillas</option>
-                </select>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs flex justify-between">
-                  Coloreado <Info className="w-4 h-4 text-slate-400" />
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button 
-                    onClick={() => handleColorChange('plddt')}
-                    className={`py-2 px-3 font-medium text-sm rounded-lg transition-colors border ${activeColor === 'plddt' ? 'border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600'}`}
-                  >
-                    pLDDT (Calidad)
-                  </button>
-                  <button 
-                    onClick={() => handleColorChange('chain')}
-                    className={`py-2 px-3 font-medium text-sm rounded-lg transition-colors border ${activeColor === 'chain' ? 'border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600'}`}
-                  >
-                    Cadenas
-                  </button>
+            <div className="space-y-4">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs">
+                Leyenda de Colores (pLDDT)
+              </label>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                La estructura se colorea según la confianza de la predicción de AlphaFold para cada residuo.
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full flex-shrink-0" style={{background: "#0053D6"}}></span>
+                  <div>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Muy alta (&gt; 90)</span>
+                    <p className="text-xs text-slate-400">Estructura casi segura</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full flex-shrink-0" style={{background: "#65CBF3"}}></span>
+                  <div>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Alta (70–90)</span>
+                    <p className="text-xs text-slate-400">Generalmente correcta</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full flex-shrink-0" style={{background: "#FFDB13"}}></span>
+                  <div>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Baja (50–70)</span>
+                    <p className="text-xs text-slate-400">Tomar con cautela</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full flex-shrink-0" style={{background: "#FF7D45"}}></span>
+                  <div>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Muy baja (&lt; 50)</span>
+                    <p className="text-xs text-slate-400">Región probablemente desordenada</p>
+                  </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
 
           {activeTab === 'details' && (
@@ -327,16 +330,16 @@ export default function Viewer() {
                    </p>
                    <div className="space-y-2 text-xs">
                      <div className="flex items-center gap-2">
-                       <span className="w-4 h-4 block rounded bg-[#024632]"></span> Error Mínimo (&lt;5Å)
+                       <span className="w-4 h-4 block rounded bg-[#0053D6]"></span> Error Mínimo (&lt;5Å)
                      </div>
                      <div className="flex items-center gap-2">
-                       <span className="w-4 h-4 block rounded bg-[#358d72]"></span> Confianza Media
+                       <span className="w-4 h-4 block rounded bg-[#65CBF3]"></span> Confianza Media
                      </div>
                      <div className="flex items-center gap-2">
-                       <span className="w-4 h-4 block rounded bg-[#a4d4c4]"></span> Confianza Baja
+                       <span className="w-4 h-4 block rounded bg-[#FFDB13]"></span> Confianza Baja
                      </div>
                      <div className="flex items-center gap-2">
-                       <span className="w-4 h-4 block rounded bg-[#fafafa] border border-slate-200 dark:border-slate-600"></span> Error Alto (&gt;30Å)
+                       <span className="w-4 h-4 block rounded bg-[#FF7D45]"></span> Error Alto (&gt;30Å)
                      </div>
                    </div>
                 </div>
