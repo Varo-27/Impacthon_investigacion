@@ -115,7 +115,7 @@ export function extractProteinMetadata(proteinData) {
       : null,
     
     // Keywords/Tags del catálogo
-    keywords: Array.isArray(proteinData.keywords) ? proteinData.keywords : [],
+    tags: Array.isArray(proteinData.keywords) ? proteinData.keywords : [],
     
     // Información taxonómica si está disponible
     taxonomy: proteinData.taxonomy 
