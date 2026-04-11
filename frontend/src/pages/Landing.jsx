@@ -8,6 +8,7 @@ import {
   FlaskConical, AtSign, Shield, BarChart3,
 } from "lucide-react";
 import logoUrl from "../assets/logo.png";
+import heroVideo from "../assets/hero.mp4";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -33,24 +34,37 @@ export default function Landing() {
     <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col font-sans selection:bg-primary-500/30">
 
       {/* Navbar */}
-      <nav className={`flex justify-between items-center p-6 lg:px-12 fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "bg-slate-950/80 backdrop-blur-md border-b border-white/5" : "bg-transparent"}`}>
-        <div className="flex items-center gap-2">
-          <img src={logoUrl} className="w-8 h-8 object-contain" alt="LocalFold" />
-          <span className="text-xl font-bold tracking-tight text-white">Local<span className="text-primary-500">Fold</span></span>
+      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "bg-slate-950/80 backdrop-blur-md border-b border-white/5" : "bg-transparent"}`}>
+        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src={logoUrl} className="w-8 h-8 object-contain" alt="LocalFold" />
+            <span className="text-xl font-bold tracking-tight text-white">Local<span className="text-primary-500">Fold</span></span>
+          </div>
+          <button
+            onClick={handleLogin}
+            className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+          >
+            Iniciar sesión →
+          </button>
         </div>
-        <button
-          onClick={handleLogin}
-          className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
-        >
-          Iniciar sesión →
-        </button>
       </nav>
 
       {/* ── HERO ── */}
-      <section className="flex flex-col items-center justify-center text-center px-4 sm:px-6 pt-40 pb-16 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-primary-600/10 blur-[140px] rounded-full pointer-events-none" />
+      <section className="flex flex-col items-center justify-center text-center px-4 sm:px-6 relative overflow-hidden min-h-screen">
+        {/* Video background */}
+        <video
+          src={heroVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        />
+        {/* Overlay gradients */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-transparent to-slate-950 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/40 via-transparent to-slate-950/40 pointer-events-none" />
 
-        <div className="z-10 max-w-4xl space-y-8">
+        <div className="relative z-10 max-w-4xl space-y-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/10 border border-primary-500/20 text-primary-400 text-sm font-medium">
             <span className="flex h-2 w-2 rounded-full bg-primary-500 animate-pulse" />
             Impacthon 2026 · CESGA FinisTerrae III
@@ -77,17 +91,17 @@ export default function Landing() {
       </section>
 
       {/* ── MÉTRICAS ── */}
-      <section className="border-y border-white/5 py-12 px-4">
+      <section className="border-y border-white/5 py-16 px-4 bg-slate-900/30">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { value: "500×", label: "más rápido que cómputo local", color: "text-primary-400" },
-            { value: "< 1 min", label: "de configuración para empezar", color: "text-emerald-400" },
-            { value: "0", label: "instalaciones requeridas", color: "text-amber-400" },
-            { value: "A100", label: "GPUs del FinisTerrae III", color: "text-rose-400" },
+            { value: "500×", label: "más rápido que cómputo local", color: "text-primary-400", glow: "rgba(99,102,241,0.15)" },
+            { value: "< 1 min", label: "de configuración para empezar", color: "text-emerald-400", glow: "rgba(52,211,153,0.15)" },
+            { value: "0", label: "instalaciones requeridas", color: "text-amber-400", glow: "rgba(251,191,36,0.15)" },
+            { value: "A100", label: "GPUs del FinisTerrae III", color: "text-rose-400", glow: "rgba(251,113,133,0.15)" },
           ].map((m) => (
-            <div key={m.label}>
-              <p className={`text-3xl lg:text-4xl font-extrabold ${m.color}`}>{m.value}</p>
-              <p className="text-xs text-slate-500 mt-1 leading-snug">{m.label}</p>
+            <div key={m.label} className="flex flex-col items-center gap-2">
+              <p className={`text-5xl lg:text-6xl font-extrabold tracking-tight ${m.color}`} style={{ textShadow: `0 0 40px ${m.glow}` }}>{m.value}</p>
+              <p className="text-xs text-slate-500 leading-snug max-w-[120px]">{m.label}</p>
             </div>
           ))}
         </div>
@@ -112,6 +126,8 @@ export default function Landing() {
           ))}
         </div>
       </section>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent mx-8" />
 
       {/* ── CÓMO FUNCIONA ── */}
       <section className="py-24 px-4 sm:px-6">
@@ -165,31 +181,37 @@ export default function Landing() {
               icon={<Bot className="w-6 h-6 text-emerald-400" />}
               title="ProteIA — Copiloto IA"
               desc="Lee pLDDT, solubilidad e inestabilidad y te traduce los datos técnicos a conclusiones biológicas accionables en lenguaje natural."
+              accent="from-emerald-500"
             />
             <FeatureCard
               icon={<BrainCircuit className="w-6 h-6 text-primary-400" />}
               title="ProteIA — Asistente RAG"
               desc='IA especializada en biología estructural. Escribe @ para adjuntar el contexto de cualquier predicción propia y obtener análisis personalizados.'
+              accent="from-primary-500"
             />
             <FeatureCard
               icon={<Users className="w-6 h-6 text-blue-400" />}
               title="Proyectos colaborativos"
               desc="Crea workspaces de equipo, invita colaboradores por email y centraliza todas las predicciones del grupo en un solo lugar."
+              accent="from-blue-500"
             />
             <FeatureCard
               icon={<BarChart3 className="w-6 h-6 text-amber-400" />}
               title="Visor 3D + PAE heatmap"
               desc="Estructura molecular interactiva con coloreado por confianza y matriz de error de alineación predicho para análisis de dominios."
+              accent="from-amber-500"
             />
             <FeatureCard
               icon={<Bell className="w-6 h-6 text-rose-400" />}
               title="Notificaciones en tiempo real"
               desc="Recibe alertas del sistema cuando una predicción se completa o falla, aunque tengas la pestaña en segundo plano."
+              accent="from-rose-500"
             />
             <FeatureCard
               icon={<FlaskConical className="w-6 h-6 text-violet-400" />}
               title="Informe PDF automático"
               desc="Genera en un clic un informe con estructura 3D, métricas de confianza, propiedades biológicas y análisis de ProteIA listo para publicar."
+              accent="from-violet-500"
             />
           </div>
         </div>
@@ -350,10 +372,12 @@ export default function Landing() {
   );
 }
 
-function FeatureCard({ icon, title, desc }) {
+function FeatureCard({ icon, title, desc, accent = "from-primary-500" }) {
   return (
-    <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl text-left hover:border-slate-700 transition-colors">
-      <div className="w-11 h-11 rounded-xl bg-slate-800 flex items-center justify-center mb-4 border border-slate-700/50">
+    <div className="group relative bg-slate-900/60 border border-slate-800 p-6 rounded-2xl text-left hover:border-slate-600 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/40 transition-all duration-300 overflow-hidden">
+      {/* colored top line */}
+      <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${accent} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+      <div className="w-11 h-11 rounded-xl bg-slate-800/80 flex items-center justify-center mb-4 border border-slate-700/50 group-hover:bg-slate-800 transition-colors">
         {icon}
       </div>
       <h3 className="text-base font-bold text-slate-200 mb-2">{title}</h3>
