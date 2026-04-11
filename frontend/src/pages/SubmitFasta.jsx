@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { UploadCloud, FileText, CheckCircle, AlertTriangle } from "lucide-react";
+import { db, auth } from "../lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function SubmitFasta() {
   const [fastaContent, setFastaContent] = useState("");
@@ -49,18 +51,21 @@ export default function SubmitFasta() {
         name = lines[0].substring(1, 30) + (lines[0].length > 30 ? "..." : "");
       }
 
-      // Guardarlo en LocalStorage para traquearlo
-      const existingJobs = JSON.parse(localStorage.getItem("localFoldJobs") || "[]");
-      const newJob = {
-        id: data.job_id,
-        name: name,
-        status: data.status || "PENDING",
-        time: "Recién enviado",
-        date: new Date().toLocaleDateString()
-      };
-
-      existingJobs.unshift(newJob);
-      localStorage.setItem("localFoldJobs", JSON.stringify(existingJobs));
+      // GUARDAR EN FIRESTORE (Google Cloud)
+      // Vinculamos el trabajo al ID único del usuario logueado
+      if (auth.currentUser) {
+        await addDoc(collection(db, "jobs"), {
+          userId: auth.currentUser.uid,
+          cesgaJobId: data.job_id,
+          proteinName: name,
+          status: data.status || "PENDING",
+          createdAt: serverTimestamp(),
+          fastaContent: cleanFasta // Guardamos la secuencia por seguridad/historial
+        });
+        console.log("Trabajo guardado en Firestore con éxito ✅");
+      } else {
+        console.warn("No hay usuario autenticado. El trabajo se ha enviado pero no se verá en tu historial.");
+      }
 
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 4000);

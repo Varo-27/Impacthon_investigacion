@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Download, Share2, Layers, Zap, Info, Play, Camera, CheckCircle2, X, Maximize2 } from "lucide-react";
 import "pdbe-molstar/build/pdbe-molstar-light.css";
 import PAEHeatmap from "../components/PAEHeatmap";
+import ProteinCopilot from "../components/ProteinCopilot";
 
 export default function Viewer() {
   const viewerContainerRef = useRef(null);
@@ -173,7 +174,13 @@ export default function Viewer() {
             className={`flex-1 py-4 text-sm font-semibold transition-all border-b-2 ${activeTab === 'details' ? 'border-primary-500 text-primary-600 dark:text-primary-400 bg-slate-50/50 dark:bg-slate-800/50' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
             onClick={() => setActiveTab('details')}
           >
-            Info y Biología
+            Info
+          </button>
+          <button 
+            className={`flex-1 py-4 text-sm font-semibold transition-all border-b-2 ${activeTab === 'copilot' ? 'border-primary-500 text-primary-600 dark:text-primary-400 bg-slate-50/50 dark:bg-slate-800/50' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
+            onClick={() => setActiveTab('copilot')}
+          >
+            Copilot IA
           </button>
         </div>
 
@@ -291,6 +298,16 @@ export default function Viewer() {
                 </div>
               )}
             </>
+          )}
+
+          {activeTab === 'copilot' && (
+            <div className="flex-1 -mx-5 -mb-5 h-full">
+              <ProteinCopilot 
+                jobId={jobId} 
+                proteinName={jobData?.name} 
+                statusData={jobData} 
+              />
+            </div>
           )}
         </div>
 

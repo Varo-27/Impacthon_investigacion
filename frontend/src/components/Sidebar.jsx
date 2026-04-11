@@ -9,9 +9,9 @@ export default function Sidebar() {
   const { theme, toggleTheme } = useTheme();
 
   const links = [
-    { name: "Visor 3D", path: "/", icon: <Activity className="w-5 h-5" /> },
-    { name: "Nuevo Trabajo", path: "/submit", icon: <Dna className="w-5 h-5" /> },
-    { name: "Mis Trabajos", path: "/jobs", icon: <LayoutDashboard className="w-5 h-5" /> },
+    { name: "Visor 3D", path: "/app", icon: <Activity className="w-5 h-5" /> },
+    { name: "Nuevo Trabajo", path: "/app/submit", icon: <Dna className="w-5 h-5" /> },
+    { name: "Mis Trabajos", path: "/app/jobs", icon: <LayoutDashboard className="w-5 h-5" /> },
   ];
 
   return (

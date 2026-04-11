@@ -216,9 +216,41 @@ export async function generateProteinSummary(proteinContext) {
     return null; // Fallback: simplemente no mostramos el resumen
   }
 }
+}
 ```
 
 > **Ventaja de Seguridad:** La `VITE_GEMINI_API_KEY` vive segura dentro de la nube de n8n. React solo conoce la URL del Webhook.
+
+---
+
+## 7. Arquitectura del Workflow en n8n (Dos Flujos)
+
+Para mayor robustez y facilidad de construcción en el Hackathon, separaremos la IA en dos flujos independientes en tu panel de n8n:
+
+### Flujo 1: Resumen Automático
+```text
+[ Webhook Node POST /summary ]
+       ↓
+[ Basic LLM Chain ] (Rápido, estático, devuelve JSON {"text": "..."})
+       ↓
+[ Respond to Webhook ]
+```
+
+### Flujo 2: Chat Interactivo (Agente Memoria)
+```text
+[ Webhook Node POST /chat ]
+       ↓
+[ AI Agent Node ] (Usa herramientas y piensa)
+   ├─ Entrada de Memoria: [ Window Buffer Memory ]
+   └─ Configuración: Session ID = `={{ $json.body.session_id }}`
+       ↓
+[ Respond to Webhook ]
+```
+
+### Gestión de la Memoria (Flujo 2)
+1. El frontend de React le inventa un ID único al chat (ej: `session_id: "chat_83745"` usando el ID del CESGA).
+2. React envía ese ID en el JSON al Webhook `/chat`.
+3. El Agente lee el `session_id` y recupera la conversación temporal de la RAM de n8n.
 
 ### Flujo en ResultsPage:
 
