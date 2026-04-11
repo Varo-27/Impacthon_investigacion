@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { RefreshCw, CheckCircle2, Clock, XCircle, Share2, Check, Dna, GitBranch, Search, ChevronsUpDown, FolderOpen } from "lucide-react";
+import { RefreshCw, CheckCircle2, Clock, XCircle, Share2, Check, Dna, GitBranch, Search, ChevronsUpDown, FolderOpen, Filter, X as CloseX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { db, auth } from "../lib/firebase";
 import { collection, query, where, onSnapshot, doc, updateDoc, addDoc, getDoc } from "firebase/firestore";
@@ -48,6 +48,17 @@ export default function JobsList() {
   const [search,     setSearch]     = useState("");
   const [sortKey,    setSortKey]    = useState("date_desc");
   const [sortOpen,   setSortOpen]   = useState(false);
+  
+  // Advanced filters
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedProjects, setSelectedProjects] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [minLength, setMinLength] = useState("");
+  const [maxLength, setMaxLength] = useState("");
+  const [advancedSearch, setAdvancedSearch] = useState("");
+  
+  const CATEGORIES = ["enzyme", "transport", "signaling", "immune", "hormone", "reporter", "structural", "oncology", "dna-replication"];
+  const TAGS = ["calcium", "human", "fluorescent"];
 
   /* projectId → name cache */
   const [projectNames, setProjectNames] = useState({});
@@ -168,6 +179,34 @@ export default function JobsList() {
     let list = [...jobs];
     if (filter === "open")   list = list.filter((j) => j.status === "PENDING" || j.status === "RUNNING");
     if (filter === "closed") list = list.filter((j) => j.status === "COMPLETED" || j.status === "FAILED");
+    
+    // Advanced filters
+    if (selectedProjects.length > 0) {
+      list = list.filter((j) => selectedProjects.includes(j.projectId));
+    }
+    
+    if (selectedCategories.length > 0) {
+      list = list.filter((j) => j.category && selectedCategories.includes(j.category));
+    }
+    
+    if (minLength || maxLength) {
+      list = list.filter((j) => {
+        const len = j.length || 0;
+        const min = minLength ? parseInt(minLength) : 0;
+        const max = maxLength ? parseInt(maxLength) : Infinity;
+        return len >= min && len <= max;
+      });
+    }
+    
+    if (advancedSearch.trim()) {
+      const term = advancedSearch.toLowerCase();
+      list = list.filter((j) =>
+        j.proteinName?.toLowerCase().includes(term) ||
+        (j.organism && j.organism.toLowerCase().includes(term)) ||
+        (j.tags && j.tags?.some(tag => tag.toLowerCase().includes(term)))
+      );
+    }
+    
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter((j) =>
@@ -185,7 +224,7 @@ export default function JobsList() {
       default:          list.sort((a, b) => b._ts - a._ts);
     }
     return list;
-  }, [jobs, filter, search, sortKey, projectNames]);
+  }, [jobs, filter, search, sortKey, projectNames, selectedProjects, selectedCategories, minLength, maxLength, advancedSearch]);
 
   const counts = {
     all:    jobs.length,
@@ -220,18 +259,63 @@ export default function JobsList() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-2 mb-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nombre, ID o proyecto…"
-            className="w-full pl-8 pr-3 py-1.5 text-sm rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors"
-          />
+      <div className="flex flex-col gap-3 mb-3">
+        {/* Search and filters row */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nombre, ID o proyecto…"
+              className="w-full pl-8 pr-3 py-1.5 text-sm rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors"
+            />
+          </div>
+
+          <button
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              showAdvancedFilters
+                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-700"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-700"
+            }`}
+            title="Mostrar/ocultar filtros avanzados"
+          >
+            <Filter className="w-3.5 h-3.5" />
+            Filtros
+          </button>
+
+          <div className="relative shrink-0">
+            <button
+              onClick={() => setSortOpen((v) => !v)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full"
+            >
+              <ChevronsUpDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span className="truncate">{currentSort?.label}</span>
+            </button>
+            {sortOpen && (
+              <div className="absolute right-0 top-full mt-1 z-20 w-44 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg overflow-hidden">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => { setSortKey(opt.key); setSortOpen(false); }}
+                    className={`flex items-center justify-between w-full px-3 py-2 text-sm text-left transition-colors ${
+                      sortKey === opt.key
+                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    {opt.label}
+                    {sortKey === opt.key && <Check className="w-3.5 h-3.5" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center rounded-md border border-slate-300 dark:border-slate-600 overflow-hidden bg-white dark:bg-slate-800 shrink-0">
+        {/* Status filters row */}
+        <div className="flex items-center rounded-md border border-slate-300 dark:border-slate-600 overflow-hidden bg-white dark:bg-slate-800 shrink-0 w-fit">
           {FILTERS.map((f) => (
             <button
               key={f.key}
@@ -252,33 +336,111 @@ export default function JobsList() {
           ))}
         </div>
 
-        <div className="relative shrink-0">
-          <button
-            onClick={() => setSortOpen((v) => !v)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full"
-          >
-            <ChevronsUpDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span className="truncate">{currentSort?.label}</span>
-          </button>
-          {sortOpen && (
-            <div className="absolute right-0 top-full mt-1 z-20 w-44 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg overflow-hidden">
-              {SORT_OPTIONS.map((opt) => (
-                <button
-                  key={opt.key}
-                  onClick={() => { setSortKey(opt.key); setSortOpen(false); }}
-                  className={`flex items-center justify-between w-full px-3 py-2 text-sm text-left transition-colors ${
-                    sortKey === opt.key
-                      ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium"
-                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
-                  }`}
-                >
-                  {opt.label}
-                  {sortKey === opt.key && <Check className="w-3.5 h-3.5" />}
-                </button>
-              ))}
+        {/* Advanced Filters Panel */}
+        {showAdvancedFilters && (
+          <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Por proyecto */}
+              <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 block">Por proyecto</label>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {Object.entries(projectNames).map(([id, name]) => (
+                    <label key={id} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedProjects.includes(id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedProjects([...selectedProjects, id]);
+                          } else {
+                            setSelectedProjects(selectedProjects.filter(p => p !== id));
+                          }
+                        }}
+                        className="rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-xs text-slate-700 dark:text-slate-300 truncate">{name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Categoría funcional */}
+              <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 block">Categoría</label>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {CATEGORIES.map((cat) => (
+                    <label key={cat} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(cat)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedCategories([...selectedCategories, cat]);
+                          } else {
+                            setSelectedCategories(selectedCategories.filter(c => c !== cat));
+                          }
+                        }}
+                        className="rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-xs text-slate-700 dark:text-slate-300 capitalize">{cat}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Longitud de aminoácidos */}
+              <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 block">Longitud (aa)</label>
+                <div className="space-y-2">
+                  <input
+                    type="number"
+                    placeholder="Mín."
+                    value={minLength}
+                    onChange={(e) => setMinLength(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Máx."
+                    value={maxLength}
+                    onChange={(e) => setMaxLength(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  />
+                </div>
+              </div>
+
+              {/* Búsqueda avanzada */}
+              <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 block">Nombre/Organismo/Tag</label>
+                <input
+                  type="text"
+                  placeholder="ej: human, calcium..."
+                  value={advancedSearch}
+                  onChange={(e) => setAdvancedSearch(e.target.value)}
+                  className="w-full px-3 py-1.5 text-xs rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                />
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Tags: {TAGS.join(", ")}</div>
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Limpiar filtros */}
+            <div className="flex justify-end pt-2 border-t border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => {
+                  setSelectedProjects([]);
+                  setSelectedCategories([]);
+                  setMinLength("");
+                  setMaxLength("");
+                  setAdvancedSearch("");
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-slate-400 dark:bg-slate-600 hover:bg-slate-500 dark:hover:bg-slate-700 text-white transition-colors"
+              >
+                <CloseX className="w-3.5 h-3.5" />
+                Limpiar filtros
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Main panel */}
