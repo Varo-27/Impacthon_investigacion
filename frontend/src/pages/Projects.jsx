@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { db, auth } from "../lib/firebase";
 import {
   collection, query, where, onSnapshot, addDoc, updateDoc, doc,
-  serverTimestamp, arrayUnion, getDocs,
+  serverTimestamp, arrayUnion, getDocs, or
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import {
@@ -14,23 +14,23 @@ import { useNavigate } from "react-router-dom";
 /* ── helpers ── */
 function formatRelative(date) {
   if (!date) return "—";
-  const diff  = Date.now() - date.getTime();
-  const mins  = Math.floor(diff / 60000);
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
-  const days  = Math.floor(diff / 86400000);
-  if (mins  < 1)  return "ahora mismo";
-  if (mins  < 60) return `hace ${mins} min`;
+  const days = Math.floor(diff / 86400000);
+  if (mins < 1) return "ahora mismo";
+  if (mins < 60) return `hace ${mins} min`;
   if (hours < 24) return `hace ${hours}h`;
-  if (days  < 30) return `hace ${days}d`;
+  if (days < 30) return `hace ${days}d`;
   return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
 }
 
 /* ── Modal crear proyecto ── */
 function CreateProjectModal({ onClose, onCreated, user }) {
-  const [name, setName]   = useState("");
-  const [desc, setDesc]   = useState("");
-  const [busy, setBusy]   = useState(false);
-  const [err,  setErr]    = useState(null);
+  const [name, setName] = useState("");
+  const [desc, setDesc] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -106,9 +106,9 @@ function CreateProjectModal({ onClose, onCreated, user }) {
 /* ── Modal invitar miembro ── */
 export function InviteModal({ project, user, onClose }) {
   const [email, setEmail] = useState("");
-  const [busy,  setBusy]  = useState(false);
-  const [done,  setDone]  = useState(false);
-  const [err,   setErr]   = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+  const [err, setErr] = useState(null);
 
   const handleInvite = async (e) => {
     e.preventDefault();
@@ -163,7 +163,7 @@ export function InviteModal({ project, user, onClose }) {
           </button>
         </div>
         <form onSubmit={handleInvite} className="p-5 space-y-3">
-          {err  && <p className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-md border border-red-200 dark:border-red-800">{err}</p>}
+          {err && <p className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-md border border-red-200 dark:border-red-800">{err}</p>}
           {done && <p className="text-xs text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-md border border-emerald-200 dark:border-emerald-800">Invitación enviada a <strong>{email || "ese usuario"}</strong>.</p>}
 
           <div className="relative">
@@ -212,18 +212,18 @@ export function InviteModal({ project, user, onClose }) {
 /* ── Main page ── */
 export default function Projects() {
   const navigate = useNavigate();
-  const [user,        setUser]        = useState(null);
-  const [projects,    setProjects]    = useState([]);
+  const [user, setUser] = useState(null);
+  const [projects, setProjects] = useState([]);
   const [invitations, setInvitations] = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [tab,         setTab]         = useState("projects");
-  const [showCreate,  setShowCreate]  = useState(false);
-  const [inviteFor,   setInviteFor]   = useState(null); // project object
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("projects");
+  const [showCreate, setShowCreate] = useState(false);
+  const [inviteFor, setInviteFor] = useState(null); // project object
 
   // Filter states
-  const [searchTerm,  setSearchTerm]  = useState("");
-  const [roleFilter,  setRoleFilter]  = useState("all");
-  const [dateFilter,  setDateFilter]  = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
 
   /* Auth */
   useEffect(() => {
@@ -237,7 +237,14 @@ export default function Projects() {
   /* Projects where user is a member */
   useEffect(() => {
     if (!user) return;
-    const q = query(collection(db, "projects"), where("memberIds", "array-contains", user.uid));
+    const q = query(
+      collection(db, "projects"),
+      or(
+        where("memberIds", "array-contains", user.uid),
+        where("ownerId", "==", user.uid),
+        where("userId", "==", user.uid)
+      )
+    );
     const unsub = onSnapshot(q, (snap) => {
       const all = snap.docs
         .map((d) => ({ id: d.id, ...d.data(), _ts: d.data().createdAt?.toMillis() || 0 }))
@@ -364,26 +371,24 @@ export default function Projects() {
       <div className="flex items-center rounded-md border border-slate-300 dark:border-slate-600 overflow-hidden bg-white dark:bg-slate-800 mb-4 w-fit">
         {[
           { key: "projects", label: "Mis proyectos", count: tab === "projects" ? filteredProjects.length : projects.length },
-          { key: "inbox",    label: "Buzón",          count: pendingCount },
+          { key: "inbox", label: "Buzón", count: pendingCount },
         ].map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-r last:border-r-0 border-slate-300 dark:border-slate-600 ${
-              tab === t.key
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-r last:border-r-0 border-slate-300 dark:border-slate-600 ${tab === t.key
                 ? "bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750"
-            }`}
+              }`}
           >
             {t.label}
             {t.count > 0 && (
-              <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                t.key === "inbox" && t.count > 0
+              <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${t.key === "inbox" && t.count > 0
                   ? "bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300"
                   : tab === t.key
-                  ? "bg-slate-300 dark:bg-slate-600 text-slate-700 dark:text-slate-200"
-                  : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
-              }`}>
+                    ? "bg-slate-300 dark:bg-slate-600 text-slate-700 dark:text-slate-200"
+                    : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                }`}>
                 {t.count}
               </span>
             )}
@@ -529,7 +534,7 @@ export default function Projects() {
               </div>
               <ul className="divide-y divide-slate-200 dark:divide-slate-700/60">
                 {invitations.map((inv) => {
-                  const isPending  = inv.status === "pending";
+                  const isPending = inv.status === "pending";
                   const isAccepted = inv.status === "accepted";
                   return (
                     <li key={inv.id} className="sm:grid sm:grid-cols-[1fr_140px_100px_120px] items-center gap-2 px-4 py-3 bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
@@ -543,11 +548,10 @@ export default function Projects() {
                       </span>
 
                       <div className="hidden sm:block">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${
-                          isPending  ? "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400"
-                          : isAccepted ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
-                          : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500"
-                        }`}>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${isPending ? "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400"
+                            : isAccepted ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
+                              : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500"
+                          }`}>
                           {isPending ? "Pendiente" : isAccepted ? "Aceptada" : "Rechazada"}
                         </span>
                       </div>
@@ -586,7 +590,7 @@ export default function Projects() {
         <CreateProjectModal
           user={user}
           onClose={() => setShowCreate(false)}
-          onCreated={() => {}}
+          onCreated={() => { }}
         />
       )}
       {inviteFor && user && (

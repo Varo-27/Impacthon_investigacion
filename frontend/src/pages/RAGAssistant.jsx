@@ -368,7 +368,7 @@ export default function RAGAssistant() {
         collection(db, "projects"),
         (snap) => {
           const projects = snap.docs
-            .filter((d) => d.data().members?.some((m) => m.uid === user.uid))
+            .filter((d) => d.data().members?.some((m) => m.uid === user.uid) || d.data().memberIds?.includes(user.uid) || d.data().ownerId === user.uid || d.data().userId === user.uid)
             .map((d) => ({
               id: d.id,
               kind: "project",

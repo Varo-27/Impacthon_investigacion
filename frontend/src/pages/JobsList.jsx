@@ -2,14 +2,14 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { RefreshCw, CheckCircle2, Clock, XCircle, Share2, Check, Dna, GitBranch, Search, FolderOpen, X, ArrowRightLeft, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { db, auth } from "../lib/firebase";
-import { collection, query, where, onSnapshot, doc, updateDoc, addDoc, getDoc, getDocs, deleteField, serverTimestamp, deleteDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, updateDoc, addDoc, getDoc, getDocs, deleteField, serverTimestamp, deleteDoc, or } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { useToast } from "../contexts/ToastContext";import JobsFilterPanel from "../components/JobsFilterPanel";
+import { useToast } from "../contexts/ToastContext"; import JobsFilterPanel from "../components/JobsFilterPanel";
 const STATUS = {
   COMPLETED: { label: "Completed", Icon: CheckCircle2, iconClass: "text-purple-500 dark:text-purple-400", badge: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800/50" },
-  RUNNING:   { label: "Running",   Icon: GitBranch,    iconClass: "text-green-600 dark:text-green-400",   badge: "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800/50" },
-  PENDING:   { label: "Queued",    Icon: Clock,        iconClass: "text-slate-400 dark:text-slate-500",   badge: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" },
-  FAILED:    { label: "Failed",    Icon: XCircle,      iconClass: "text-red-500 dark:text-red-400",       badge: "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50" },
+  RUNNING: { label: "Running", Icon: GitBranch, iconClass: "text-green-600 dark:text-green-400", badge: "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800/50" },
+  PENDING: { label: "Queued", Icon: Clock, iconClass: "text-slate-400 dark:text-slate-500", badge: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" },
+  FAILED: { label: "Failed", Icon: XCircle, iconClass: "text-red-500 dark:text-red-400", badge: "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50" },
 };
 
 
@@ -78,11 +78,19 @@ function MoveJobModal({ job, userId, onClose }) {
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [selected, setSelected] = useState(job.projectId ?? "");
-  const [busy,     setBusy]     = useState(false);
-  const [err,      setErr]      = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(null);
 
   useEffect(() => {
-    getDocs(query(collection(db, "projects"), where("memberIds", "array-contains", userId)))
+    const q = query(
+      collection(db, "projects"),
+      or(
+        where("memberIds", "array-contains", userId),
+        where("ownerId", "==", userId),
+        where("userId", "==", userId)
+      )
+    );
+    getDocs(q)
       .then((snap) => {
         setProjects(snap.docs.map((d) => ({ id: d.id, name: d.data().name })));
         setLoadingProjects(false);
@@ -96,16 +104,16 @@ function MoveJobModal({ job, userId, onClose }) {
     try {
       if (selected === "") {
         await updateDoc(doc(db, "jobs", job.id), {
-          projectId:   deleteField(),
+          projectId: deleteField(),
           projectName: deleteField(),
-          updatedAt:   serverTimestamp(),
+          updatedAt: serverTimestamp(),
         });
       } else {
         const proj = projects.find((p) => p.id === selected);
         await updateDoc(doc(db, "jobs", job.id), {
-          projectId:   selected,
+          projectId: selected,
           projectName: proj?.name ?? "",
-          updatedAt:   serverTimestamp(),
+          updatedAt: serverTimestamp(),
         });
       }
       onClose();
@@ -187,15 +195,15 @@ export default function JobsList() {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
-  const [jobs,       setJobs]       = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [userId,     setUserId]     = useState(null);
-  const [copiedId,   setCopiedId]   = useState(null);
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [search,     setSearch]     = useState("");
-  const [moveJob,    setMoveJob]    = useState(null); // job a reasignar
-  const [deleteJob,  setDeleteJob]  = useState(null); // job a eliminar
-  
+  const [search, setSearch] = useState("");
+  const [moveJob, setMoveJob] = useState(null); // job a reasignar
+  const [deleteJob, setDeleteJob] = useState(null); // job a eliminar
+
   /* Nuevos estados para filtrado */
   const [projects, setProjects] = useState([]);
   const [filters, setFilters] = useState({
@@ -277,7 +285,15 @@ export default function JobsList() {
   /* ── Cargar proyectos del usuario para el filtro ── */
   useEffect(() => {
     if (!userId) return;
-    getDocs(query(collection(db, "projects"), where("memberIds", "array-contains", userId)))
+    const q = query(
+      collection(db, "projects"),
+      or(
+        where("memberIds", "array-contains", userId),
+        where("ownerId", "==", userId),
+        where("userId", "==", userId)
+      )
+    );
+    getDocs(q)
       .then((snap) => {
         setProjects(snap.docs.map((d) => ({ id: d.id, name: d.data().name })));
       })
@@ -336,9 +352,9 @@ export default function JobsList() {
     try {
       const jobSnap = await getDoc(doc(db, "jobs", jobId));
       const jobName = jobSnap.data()?.proteinName || "Predicción";
-      
+
       await deleteDoc(doc(db, "jobs", jobId));
-      
+
       addToast(`✗ "${jobName}" ha sido eliminada.`, "success");
     } catch (e) {
       console.error("Error deleting job:", e);
@@ -350,7 +366,7 @@ export default function JobsList() {
   /* ── Derived list with filtering ── */
   const visible = useMemo(() => {
     let list = [...jobs];
-    
+
     /* Filtro de búsqueda original */
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -360,7 +376,7 @@ export default function JobsList() {
         (j.projectId && (j.projectName ?? projectNames[j.projectId])?.toLowerCase().includes(q))
       );
     }
-    
+
     /* Filtro de proyecto (incluyendo sin proyecto) */
     if (filters.projects.length > 0 || filters.includeNoProject) {
       list = list.filter((j) => {
@@ -369,17 +385,17 @@ export default function JobsList() {
         return false;
       });
     }
-    
+
     /* Filtro de categoría funcional (múltiples) */
     if (filters.categories.length > 0) {
       list = list.filter((j) => filters.categories.includes(j.functionalCategory));
     }
-    
+
     /* Filtro de longitud máxima de aa */
     if (filters.maxLength) {
       list = list.filter((j) => (j.aaLength ?? 0) <= filters.maxLength);
     }
-    
+
     /* Filtro de búsqueda por nombre/organismo/tags */
     if (filters.textSearch.trim()) {
       const q = filters.textSearch.toLowerCase();
@@ -389,7 +405,7 @@ export default function JobsList() {
         (j.tags && j.tags.some(tag => tag.toLowerCase().includes(q)))
       );
     }
-    
+
     list.sort((a, b) => b._ts - a._ts);
     return list;
   }, [jobs, search, projectNames, filters]);
@@ -484,11 +500,10 @@ export default function JobsList() {
                       <button
                         onClick={() => isCompleted && navigate(`/app?job=${job.cesgaJobId}`)}
                         disabled={!isCompleted}
-                        className={`text-sm font-medium text-left leading-snug truncate max-w-full block transition-colors ${
-                          isCompleted
+                        className={`text-sm font-medium text-left leading-snug truncate max-w-full block transition-colors ${isCompleted
                             ? "text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
                             : "text-slate-700 dark:text-slate-300 cursor-default"
-                        }`}
+                          }`}
                       >
                         {job.proteinName}
                       </button>
@@ -507,7 +522,7 @@ export default function JobsList() {
                           </button>
                         )}
                       </div>
-                      
+
                       {/* Additional info row: category, organism, tags */}
                       <div className="flex flex-wrap items-center gap-1.5 mt-1">
                         {/* Category badge */}
@@ -516,49 +531,48 @@ export default function JobsList() {
                             🏷️ {job.functionalCategory}
                           </span>
                         )}
-                        
+
                         {/* Organism badge */}
                         {job.organism && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                             🧬 {job.organism.split(" ").slice(0, 2).join(" ")}
                           </span>
                         )}
-                        
+
                         {/* AA Length info */}
                         {job.aaLength && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800">
                             ⚖️ {job.aaLength} aa
                           </span>
                         )}
-                        
+
                         {/* PDB ID if available */}
                         {job.pdbId && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
                             🔗 {job.pdbId}
                           </span>
                         )}
-                        
+
                         {/* Tags */}
                         {job.tags && job.tags.length > 0 && (
                           <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
                             {job.tags.slice(0, 2).join(", ")}{job.tags.length > 2 ? "..." : ""}
                           </span>
                         )}
-                        
+
                         {/* Molecular Weight if available */}
                         {job.molecularWeight != null && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800">
                             ⚛️ {job.molecularWeight} kDa
                           </span>
                         )}
-                        
+
                         {/* pLDDT badge if available */}
                         {job.plddt != null && (
-                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold border ${
-                            job.plddt >= 90 ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800" :
-                            job.plddt >= 70 ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800" :
-                            "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800"
-                          }`}>
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold border ${job.plddt >= 90 ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800" :
+                              job.plddt >= 70 ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800" :
+                                "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800"
+                            }`}>
                             📊 pLDDT {job.plddt.toFixed(1)}
                           </span>
                         )}
@@ -643,13 +657,13 @@ export default function JobsList() {
 
 function formatRelative(date) {
   if (!date) return "—";
-  const diff  = Date.now() - date.getTime();
-  const mins  = Math.floor(diff / 60000);
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
-  const days  = Math.floor(diff / 86400000);
-  if (mins  < 1)  return "ahora mismo";
-  if (mins  < 60) return `hace ${mins} min`;
+  const days = Math.floor(diff / 86400000);
+  if (mins < 1) return "ahora mismo";
+  if (mins < 60) return `hace ${mins} min`;
   if (hours < 24) return `hace ${hours}h`;
-  if (days  < 30) return `hace ${days}d`;
+  if (days < 30) return `hace ${days}d`;
   return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
 }
