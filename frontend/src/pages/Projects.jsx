@@ -43,6 +43,7 @@ function CreateProjectModal({ onClose, onCreated, user }) {
         description: desc.trim(),
         ownerId: user.uid,
         members: [{ uid: user.uid, email: user.email, displayName: user.displayName || user.email, role: "owner" }],
+        memberIds: [user.uid],
         createdAt: serverTimestamp(),
       });
       onCreated(ref.id);
@@ -236,13 +237,10 @@ export default function Projects() {
   /* Projects where user is a member */
   useEffect(() => {
     if (!user) return;
-    // Firestore doesn't support partial array-contains on objects; query by ownerId OR fetch all and filter client-side.
-    // Simplest approach: listen to all projects and filter by member uid.
-    const q2 = query(collection(db, "projects"));
-    const unsub = onSnapshot(q2, (snap) => {
+    const q = query(collection(db, "projects"), where("memberIds", "array-contains", user.uid));
+    const unsub = onSnapshot(q, (snap) => {
       const all = snap.docs
         .map((d) => ({ id: d.id, ...d.data(), _ts: d.data().createdAt?.toMillis() || 0 }))
-        .filter((p) => p.members?.some((m) => m.uid === user.uid))
         .sort((a, b) => b._ts - a._ts);
       setProjects(all);
       setLoading(false);
@@ -271,7 +269,7 @@ export default function Projects() {
   /* Accept invitation */
   const handleAccept = async (inv) => {
     try {
-      // Add user to project members
+      // Add user to project members (both rich objects for UI and flat uid for queries)
       await updateDoc(doc(db, "projects", inv.projectId), {
         members: arrayUnion({
           uid: user.uid,
@@ -279,6 +277,7 @@ export default function Projects() {
           displayName: user.displayName || user.email,
           role: "member",
         }),
+        memberIds: arrayUnion(user.uid),
       });
       await updateDoc(doc(db, "invitations", inv.id), { status: "accepted" });
     } catch (e) {

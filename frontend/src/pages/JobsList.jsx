@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { RefreshCw, CheckCircle2, Clock, XCircle, Share2, Check, Dna, GitBranch, Search, FolderOpen } from "lucide-react";
+import { RefreshCw, CheckCircle2, Clock, XCircle, Share2, Check, Dna, GitBranch, Search, FolderOpen, X, ArrowRightLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { db, auth } from "../lib/firebase";
-import { collection, query, where, onSnapshot, doc, updateDoc, addDoc, getDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, updateDoc, addDoc, getDoc, getDocs, deleteField, serverTimestamp } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useToast } from "../contexts/ToastContext";
 
@@ -16,6 +16,110 @@ const STATUS = {
 
 
 const AUTO_REFRESH_MS = 30_000;
+
+/* ── Modal reasignar job entre proyectos ── */
+function MoveJobModal({ job, userId, onClose }) {
+  const [projects, setProjects] = useState([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [selected, setSelected] = useState(job.projectId ?? "");
+  const [busy,     setBusy]     = useState(false);
+  const [err,      setErr]      = useState(null);
+
+  useEffect(() => {
+    getDocs(query(collection(db, "projects"), where("memberIds", "array-contains", userId)))
+      .then((snap) => {
+        setProjects(snap.docs.map((d) => ({ id: d.id, name: d.data().name })));
+        setLoadingProjects(false);
+      })
+      .catch(() => setLoadingProjects(false));
+  }, [userId]);
+
+  const handleSave = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      if (selected === "") {
+        await updateDoc(doc(db, "jobs", job.id), {
+          projectId:   deleteField(),
+          projectName: deleteField(),
+          updatedAt:   serverTimestamp(),
+        });
+      } else {
+        const proj = projects.find((p) => p.id === selected);
+        await updateDoc(doc(db, "jobs", job.id), {
+          projectId:   selected,
+          projectName: proj?.name ?? "",
+          updatedAt:   serverTimestamp(),
+        });
+      }
+      onClose();
+    } catch (e) {
+      setErr(e.message);
+      setBusy(false);
+    }
+  };
+
+  const currentLabel = job.projectName ?? (job.projectId ? "…" : null);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl w-full max-w-sm">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+          <div>
+            <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Reasignar predicción</h2>
+            <p className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[220px]">{job.proteinName}</p>
+          </div>
+          <button onClick={onClose} className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="p-5 space-y-4">
+          {err && (
+            <p className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-md border border-red-200 dark:border-red-800">{err}</p>
+          )}
+          <div>
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Proyecto destino</label>
+            {loadingProjects ? (
+              <p className="text-xs text-slate-400">Cargando proyectos…</p>
+            ) : (
+              <select
+                value={selected}
+                onChange={(e) => setSelected(e.target.value)}
+                className="w-full px-3 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500"
+              >
+                <option value="">Sin proyecto</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
+          {currentLabel && (
+            <p className="text-[11px] text-slate-400">
+              Proyecto actual: <span className="font-medium text-slate-600 dark:text-slate-300">{currentLabel}</span>
+            </p>
+          )}
+          <div className="flex gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={busy || loadingProjects}
+              className="flex-1 py-2 text-sm font-semibold rounded-md bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white transition-colors"
+            >
+              {busy ? "Guardando…" : "Guardar"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function notify(title, body) {
   if ("Notification" in window && Notification.permission === "granted") {
@@ -33,8 +137,11 @@ export default function JobsList() {
   const [copiedId,   setCopiedId]   = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [search,     setSearch]     = useState("");
+  const [sortKey,    setSortKey]    = useState("date_desc");
+  const [sortOpen,   setSortOpen]   = useState(false);
+  const [moveJob,    setMoveJob]    = useState(null); // job a reasignar
 
-  /* projectId → name cache */
+  /* projectId → name cache (fallback para jobs creados antes del snapshot) */
   const [projectNames, setProjectNames] = useState({});
 
   /* Track previous statuses to detect transitions */
@@ -87,9 +194,9 @@ export default function JobsList() {
       setJobs(data);
       setLoading(false);
 
-      /* Resolve project names for jobs that have a projectId */
+      /* Resolve project names only for jobs that lack the projectName snapshot (legacy data) */
       const unknownIds = [...new Set(
-        data.filter((j) => j.projectId && !projectNames[j.projectId]).map((j) => j.projectId)
+        data.filter((j) => j.projectId && !j.projectName && !projectNames[j.projectId]).map((j) => j.projectId)
       )];
       unknownIds.forEach((pid) => {
         getDoc(doc(db, "projects", pid)).then((snap) => {
@@ -157,7 +264,7 @@ export default function JobsList() {
       list = list.filter((j) =>
         j.proteinName?.toLowerCase().includes(q) ||
         j.cesgaJobId?.toLowerCase().includes(q) ||
-        (j.projectId && projectNames[j.projectId]?.toLowerCase().includes(q))
+        (j.projectId && (j.projectName ?? projectNames[j.projectId])?.toLowerCase().includes(q))
       );
     }
     
@@ -236,7 +343,7 @@ export default function JobsList() {
               const cfg = STATUS[job.status] ?? STATUS.FAILED;
               const { Icon } = cfg;
               const isCompleted = job.status === "COMPLETED";
-              const projName = job.projectId ? projectNames[job.projectId] : null;
+              const projName = job.projectName ?? (job.projectId ? projectNames[job.projectId] : null);
 
               return (
                 <li key={job.id} className="group sm:grid sm:grid-cols-[1fr_120px_140px_96px] items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -284,6 +391,13 @@ export default function JobsList() {
                   </span>
 
                   <div className="hidden sm:flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => setMoveJob(job)}
+                      title="Reasignar proyecto"
+                      className="p-1.5 rounded text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+                    >
+                      <ArrowRightLeft className="w-3.5 h-3.5" />
+                    </button>
                     {isCompleted && (
                       <button
                         onClick={() => handleShare(job.cesgaJobId)}
@@ -313,6 +427,14 @@ export default function JobsList() {
         <p className="text-xs text-slate-400 text-center mt-3">
           {visible.length} de {jobs.length} predicción{jobs.length !== 1 ? "es" : ""} · auto-sync cada 30s
         </p>
+      )}
+
+      {moveJob && userId && (
+        <MoveJobModal
+          job={moveJob}
+          userId={userId}
+          onClose={() => setMoveJob(null)}
+        />
       )}
     </div>
   );

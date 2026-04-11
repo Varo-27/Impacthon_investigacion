@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── projects ──────────────────────────────────────────────────────────────
+    // Cualquier miembro puede leer y actualizar (añadir miembros, renombrar…).
+    // Solo el owner puede borrar.
+    // La creación exige que el uid del creador esté en memberIds.
+    match /projects/{projectId} {
+      allow read:   if request.auth != null
+                    && request.auth.uid in resource.data.memberIds;
+
+      allow create: if request.auth != null
+                    && request.auth.uid == request.resource.data.ownerId
+                    && request.auth.uid in request.resource.data.memberIds;
+
+      allow update: if request.auth != null
+                    && request.auth.uid in resource.data.memberIds;
+
+      allow delete: if request.auth != null
+                    && request.auth.uid == resource.data.ownerId;
+    }
+
+    // ── jobs ──────────────────────────────────────────────────────────────────
+    // El propietario del job siempre puede leer/escribir/borrar.
+    // Los miembros del proyecto asociado pueden leer el job.
+    // Solo el propietario puede crear o modificar.
+    match /jobs/{jobId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.userId
+        || (
+          resource.data.projectId != null
+          && exists(/databases/$(database)/documents/projects/$(resource.data.projectId))
+          && request.auth.uid in get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.memberIds
+        )
+      );
+
+      allow create: if request.auth != null
+                    && request.auth.uid == request.resource.data.userId;
+
+      allow update: if request.auth != null
+                    && request.auth.uid == resource.data.userId;
+
+      allow delete: if request.auth != null
+                    && request.auth.uid == resource.data.userId;
+    }
+
+    // ── invitations ───────────────────────────────────────────────────────────
+    // El remitente y el destinatario pueden leer.
+    // Solo usuarios autenticados pueden crear (y solo con su propio fromUid).
+    // Solo el destinatario puede actualizar el estado (aceptar / rechazar).
+    // No se permite borrar para conservar el historial.
+    match /invitations/{invId} {
+      allow read: if request.auth != null && (
+        request.auth.token.email == resource.data.toEmail
+        || request.auth.uid == resource.data.fromUid
+      );
+
+      allow create: if request.auth != null
+                    && request.auth.uid == request.resource.data.fromUid;
+
+      allow update: if request.auth != null
+                    && request.auth.token.email == resource.data.toEmail;
+
+      allow delete: if false;
+    }
+  }
+}

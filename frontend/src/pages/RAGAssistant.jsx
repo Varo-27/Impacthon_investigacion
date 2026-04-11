@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import {
   Send, Bot, User, BrainCircuit, BookOpen, Dna, FlaskConical,
   Microscope, X, FolderOpen, CheckCircle2, GitBranch, Clock, XCircle, AtSign,
-  Copy, Check, Plus, RotateCcw, Layers,
+  Copy, Check, Plus, RotateCcw, Layers, ChevronRight, ChevronLeft
 } from "lucide-react";
 import { ragApi } from "../api/ragApi";
 import { getJobOutputs } from "../lib/outputsCache";
@@ -12,8 +12,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import ReactMarkdown from "react-markdown";
 
 /* ─── Storage keys ─── */
-const STORAGE_MESSAGES_KEY     = "rag_messages";
-const STORAGE_SESSION_KEY      = "rag_session_id";
+const STORAGE_MESSAGES_KEY = "rag_messages";
+const STORAGE_SESSION_KEY = "rag_session_id";
 /**
  * Bridges the gap between receiving the API reply and the first
  * React + sessionStorage render cycle. Written synchronously as
@@ -30,18 +30,18 @@ let _pendingPromise = null;
 
 /* ─── Suggestions ─── */
 const SUGGESTIONS = [
-  { icon: <Dna className="w-4 h-4" />,         text: "¿Qué es el pLDDT y cómo interpreto su valor?" },
+  { icon: <Dna className="w-4 h-4" />, text: "¿Qué es el pLDDT y cómo interpreto su valor?" },
   { icon: <FlaskConical className="w-4 h-4" />, text: "¿Cómo afecta la solubilidad al uso experimental de una proteína?" },
-  { icon: <BookOpen className="w-4 h-4" />,     text: "Explícame qué es AlphaFold y cómo predice estructuras." },
-  { icon: <Microscope className="w-4 h-4" />,   text: "¿Qué indica un índice de inestabilidad alto en una proteína?" },
+  { icon: <BookOpen className="w-4 h-4" />, text: "Explícame qué es AlphaFold y cómo predice estructuras." },
+  { icon: <Microscope className="w-4 h-4" />, text: "¿Qué indica un índice de inestabilidad alto en una proteína?" },
 ];
 
 /* ─── Status icons ─── */
 const STATUS_ICON = {
   COMPLETED: <CheckCircle2 className="w-3.5 h-3.5 text-purple-500" />,
-  RUNNING:   <GitBranch    className="w-3.5 h-3.5 text-green-500"  />,
-  PENDING:   <Clock        className="w-3.5 h-3.5 text-slate-400"  />,
-  FAILED:    <XCircle      className="w-3.5 h-3.5 text-red-500"    />,
+  RUNNING: <GitBranch className="w-3.5 h-3.5 text-green-500" />,
+  PENDING: <Clock className="w-3.5 h-3.5 text-slate-400" />,
+  FAILED: <XCircle className="w-3.5 h-3.5 text-red-500" />,
 };
 
 /* ─── Helpers ─── */
@@ -89,92 +89,205 @@ function CopyButton({ text }) {
 
 /* ─── Context Panel (+ button) ─── */
 function ContextPanel({ allItems, references, onToggle, onClose }) {
-  const jobs     = allItems.filter((i) => i.kind === "job");
+  const [view, setView] = useState("main"); // "main" | "jobs-folders" | "jobs-list" | "projects-list"
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
+
+  const jobs = allItems.filter((i) => i.kind === "job");
   const projects = allItems.filter((i) => i.kind === "project");
   const isSelected = (id) => references.some((r) => r.id === id);
 
+  const unassignedJobs = jobs.filter((j) => !j.projectId);
+
+  const jobFolders = projects.map((p) => {
+    const projectJobs = jobs.filter((j) => j.projectId === p.id);
+    return { ...p, jobCount: projectJobs.length };
+  });
+
+  const getHeaderTitle = () => {
+    if (view === "jobs-folders") return "Seleccionar origen";
+    if (view === "jobs-list") {
+      if (selectedProjectId === "unassigned") return "Sin proyecto asignado";
+      const p = projects.find((p) => p.id === selectedProjectId);
+      return p ? p.label : "Predicciones";
+    }
+    if (view === "projects-list") return "Seleccionar proyecto completo";
+    return "Añadir contexto al mensaje";
+  };
+
+  const renderContent = () => {
+    switch (view) {
+      case "main":
+        return (
+          <>
+            <button
+              onMouseDown={(e) => { e.preventDefault(); setView("jobs-folders"); }}
+              className="w-full flex items-center justify-between px-3 py-3 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <Dna className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                    Predicciones individuales
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    Añade trabajos específicos como contexto
+                  </span>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-slate-400" />
+            </button>
+            <div className="h-px bg-slate-100 dark:bg-slate-700" />
+            <button
+              onMouseDown={(e) => { e.preventDefault(); setView("projects-list"); }}
+              className="w-full flex items-center justify-between px-3 py-3 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
+                  <FolderOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                    Proyectos completos
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    Añade un proyecto entero y sus trabajos
+                  </span>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-slate-400" />
+            </button>
+          </>
+        );
+
+      case "jobs-folders":
+        return (
+          <>
+            {jobFolders.map((folder) => (
+              <button
+                key={folder.id}
+                onMouseDown={(e) => { e.preventDefault(); setSelectedProjectId(folder.id); setView("jobs-list"); }}
+                className="w-full flex items-center justify-between px-4 py-3 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left border-b last:border-b-0 border-slate-100 dark:border-slate-700"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <FolderOpen className="w-4 h-4 text-primary-400 shrink-0" />
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{folder.label}</span>
+                    <span className="text-[10px] text-slate-400">{folder.jobCount} predicciones</span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+              </button>
+            ))}
+            {jobFolders.length > 0 && <div className="h-px bg-slate-100 dark:bg-slate-700" />}
+            <button
+              onMouseDown={(e) => { e.preventDefault(); setSelectedProjectId("unassigned"); setView("jobs-list"); }}
+              className="w-full flex items-center justify-between px-4 py-3 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <Layers className="w-4 h-4 text-slate-400 shrink-0" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">Sin proyecto asignado</span>
+                  <span className="text-[10px] text-slate-400">{unassignedJobs.length} predicciones</span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+            </button>
+          </>
+        );
+
+      case "jobs-list": {
+        const list = selectedProjectId === "unassigned"
+          ? unassignedJobs
+          : jobs.filter((j) => j.projectId === selectedProjectId);
+
+        if (list.length === 0) {
+          return <p className="px-3 py-5 text-sm text-slate-400 text-center">No hay predicciones en esta carpeta.</p>;
+        }
+
+        return list.map((item) => (
+          <button
+            key={item.id}
+            onMouseDown={(e) => { e.preventDefault(); onToggle(item); }}
+            className="w-full flex items-center gap-3 px-3 py-2 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+          >
+            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected(item.id) ? "bg-primary-600 border-primary-600" : "border-slate-300 dark:border-slate-600"
+              }`}>
+              {isSelected(item.id) && <Check className="w-3 h-3 text-white" />}
+            </div>
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <span className="shrink-0">{STATUS_ICON[item.status] ?? <Dna className="w-3.5 h-3.5 text-slate-400" />}</span>
+              <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{item.label}</span>
+              <span className="text-[10px] text-slate-400 shrink-0">{item.status}</span>
+            </div>
+          </button>
+        ));
+      }
+
+      case "projects-list":
+        if (projects.length === 0) {
+          return <p className="px-3 py-5 text-sm text-slate-400 text-center">No hay proyectos.</p>;
+        }
+        return projects.map((item) => (
+          <button
+            key={item.id}
+            onMouseDown={(e) => { e.preventDefault(); onToggle(item); }}
+            className="w-full flex items-center gap-3 px-3 py-2 outline-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+          >
+            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected(item.id)
+              ? "bg-primary-600 border-primary-600"
+              : "border-slate-300 dark:border-slate-600"
+              }`}>
+              {isSelected(item.id) && <Check className="w-3 h-3 text-white" />}
+            </div>
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <FolderOpen className="w-3.5 h-3.5 text-primary-400 shrink-0" />
+              <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{item.label}</span>
+              <span className="text-[10px] text-slate-400 shrink-0">proyecto</span>
+            </div>
+          </button>
+        ));
+
+      default: return null;
+    }
+  };
+
   return (
-    <div className="absolute bottom-full mb-2 left-0 right-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-30 overflow-hidden max-h-72 flex flex-col">
+    <div className="absolute bottom-full mb-2 left-0 right-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-30 overflow-hidden max-h-[320px] flex flex-col">
 
       {/* Header */}
-      <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-1.5">
-          <Layers className="w-3.5 h-3.5 text-primary-500" />
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            Añadir contexto al mensaje
+      <div className="px-3 py-2.5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between shrink-0 bg-slate-50/80 dark:bg-slate-800/80">
+        <div className="flex items-center gap-2">
+          {view !== "main" ? (
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault();
+                if (view === "jobs-list") setView("jobs-folders");
+                else setView("main");
+              }}
+              className="p-1 -ml-1 rounded text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          ) : (
+            <Layers className="w-4 h-4 ml-1 text-primary-500" />
+          )}
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+            {getHeaderTitle()}
           </span>
         </div>
         <button
           onMouseDown={(e) => { e.preventDefault(); onClose(); }}
-          className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shrink-0"
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-4 h-4" />
         </button>
       </div>
 
       {/* List */}
       <div className="overflow-y-auto flex-1">
-        {jobs.length > 0 && (
-          <>
-            <p className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              <Dna className="w-3 h-3" /> Mis predicciones
-            </p>
-            {jobs.map((item) => (
-              <button
-                key={item.id}
-                onMouseDown={(e) => { e.preventDefault(); onToggle(item); }}
-                className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
-              >
-                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                  isSelected(item.id)
-                    ? "bg-primary-600 border-primary-600"
-                    : "border-slate-300 dark:border-slate-600"
-                }`}>
-                  {isSelected(item.id) && <Check className="w-3 h-3 text-white" />}
-                </div>
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <span className="shrink-0">{STATUS_ICON[item.status] ?? <Dna className="w-3.5 h-3.5 text-slate-400" />}</span>
-                  <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{item.label}</span>
-                  <span className="text-[10px] text-slate-400 shrink-0">{item.status}</span>
-                </div>
-              </button>
-            ))}
-          </>
-        )}
-
-        {projects.length > 0 && (
-          <>
-            <p className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              <FolderOpen className="w-3 h-3" /> Mis proyectos
-            </p>
-            {projects.map((item) => (
-              <button
-                key={item.id}
-                onMouseDown={(e) => { e.preventDefault(); onToggle(item); }}
-                className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
-              >
-                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                  isSelected(item.id)
-                    ? "bg-primary-600 border-primary-600"
-                    : "border-slate-300 dark:border-slate-600"
-                }`}>
-                  {isSelected(item.id) && <Check className="w-3 h-3 text-white" />}
-                </div>
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <FolderOpen className="w-3.5 h-3.5 text-primary-400 shrink-0" />
-                  <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{item.label}</span>
-                  <span className="text-[10px] text-slate-400 shrink-0">proyecto</span>
-                </div>
-              </button>
-            ))}
-          </>
-        )}
-
-        {allItems.length === 0 && (
-          <p className="px-3 py-5 text-sm text-slate-400 text-center">
-            No hay predicciones ni proyectos disponibles.
-          </p>
-        )}
+        {renderContent()}
       </div>
     </div>
   );
@@ -190,26 +303,26 @@ export default function RAGAssistant() {
     } catch { return []; }
   });
 
-  const [input,           setInput]           = useState("");
-  const [isWaiting,       setIsWaiting]       = useState(false);
-  const [isStreaming,     setIsStreaming]      = useState(false);
+  const [input, setInput] = useState("");
+  const [isWaiting, setIsWaiting] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
 
   /* @ mention */
-  const [atQuery,         setAtQuery]         = useState(null);
-  const [activeIndex,     setActiveIndex]     = useState(-1);
+  const [atQuery, setAtQuery] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   /* References / context */
-  const [references,      setReferences]      = useState([]);
-  const [allItems,        setAllItems]        = useState([]);
+  const [references, setReferences] = useState([]);
+  const [allItems, setAllItems] = useState([]);
 
   /* Context panel (+ button) */
   const [showContextPanel, setShowContextPanel] = useState(false);
 
-  const dropdownRef  = useRef(null);
-  const scrollRef    = useRef(null);
+  const dropdownRef = useRef(null);
+  const scrollRef = useRef(null);
   const cancelStream = useRef(null);
-  const inputRef     = useRef(null);
-  const sessionId    = useRef(getOrCreateSessionId());
+  const inputRef = useRef(null);
+  const sessionId = useRef(getOrCreateSessionId());
 
   /* ── Sync messages → sessionStorage ── */
   useEffect(() => {
@@ -226,7 +339,7 @@ export default function RAGAssistant() {
 
   /* ── Load user's jobs + projects (real-time) ── */
   useEffect(() => {
-    let unsubJobs = () => {}, unsubProjects = () => {};
+    let unsubJobs = () => { }, unsubProjects = () => { };
     const unsubAuth = onAuthStateChanged(auth, (user) => {
       if (!user) return;
       unsubJobs = onSnapshot(
@@ -237,6 +350,7 @@ export default function RAGAssistant() {
             kind: "job",
             label: d.data().proteinName || d.data().cesgaJobId,
             status: d.data().status,
+            projectId: d.data().projectId || null,
             data: {
               type: "job",
               jobId: d.data().cesgaJobId,
@@ -316,26 +430,31 @@ export default function RAGAssistant() {
   /* ── Enrich a reference item with external data, then add it ── */
   const selectReference = async (item) => {
     setAtQuery(null);
-    setShowContextPanel(false);
 
     if (references.find((r) => r.id === item.id)) {
       inputRef.current?.focus();
       return;
     }
 
+    // Optimistic update: instantly add to UI
+    setReferences((prev) => [...prev, item]);
+    inputRef.current?.focus();
+
+    let enrichedItem = { ...item };
+
     // Jobs: enrich with CESGA outputs (shared cache with Viewer)
     if (item.kind === "job" && item.data.jobId) {
       try {
         const outputs = await getJobOutputs(item.data.jobId);
-        item = {
+        enrichedItem = {
           ...item,
           data: {
             ...item.data,
-            plddt:          outputs.plddt          ?? item.data.plddt,
-            organism:       outputs.organism        ?? item.data.organism,
-            biological:     outputs.biological      ?? item.data.biological,
-            uniprot:        outputs.uniprot         ?? null,
-            plddtHistogram: outputs.plddtHistogram  ?? null,
+            plddt: outputs.plddt ?? item.data.plddt,
+            organism: outputs.organism ?? item.data.organism,
+            biological: outputs.biological ?? item.data.biological,
+            uniprot: outputs.uniprot ?? null,
+            plddtHistogram: outputs.plddtHistogram ?? null,
           },
         };
       } catch { /* use Firestore data */ }
@@ -348,18 +467,18 @@ export default function RAGAssistant() {
           query(collection(db, "jobs"), where("projectId", "==", item.id))
         );
         const projectJobs = jobsSnap.docs.map((d) => ({
-          jobId:       d.data().cesgaJobId,
+          jobId: d.data().cesgaJobId,
           proteinName: d.data().proteinName,
-          status:      d.data().status,
-          plddt:       d.data().plddt    ?? null,
-          organism:    d.data().organism ?? null,
+          status: d.data().status,
+          plddt: d.data().plddt ?? null,
+          organism: d.data().organism ?? null,
         }));
-        item = { ...item, data: { ...item.data, jobs: projectJobs } };
+        enrichedItem = { ...item, data: { ...item.data, jobs: projectJobs } };
       } catch { /* project with no jobs is fine */ }
     }
 
-    setReferences((prev) => [...prev, item]);
-    inputRef.current?.focus();
+    // Update in background
+    setReferences((prev) => prev.map((r) => (r.id === item.id ? enrichedItem : r)));
   };
 
   /* Toggle for the + panel (add if absent, remove if present) */
@@ -514,7 +633,7 @@ export default function RAGAssistant() {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
-  const busy    = isWaiting || isStreaming;
+  const busy = isWaiting || isStreaming;
   const isEmpty = messages.length === 0;
 
   return (
@@ -586,19 +705,17 @@ export default function RAGAssistant() {
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`flex gap-3 max-w-[80%] ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-              <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center border ${
-                msg.role === "ai"
-                  ? "bg-primary-50 border-primary-100 text-primary-600 dark:bg-primary-900/30 dark:border-primary-800"
-                  : "bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700"
-              }`}>
+              <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center border ${msg.role === "ai"
+                ? "bg-primary-50 border-primary-100 text-primary-600 dark:bg-primary-900/30 dark:border-primary-800"
+                : "bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700"
+                }`}>
                 {msg.role === "ai" ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
               </div>
               <div className="group/msg flex flex-col gap-1">
-                <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                  msg.role === "ai"
-                    ? "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm dark:text-slate-200"
-                    : "bg-primary-600 text-white shadow-md shadow-primary-500/10"
-                }`}>
+                <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === "ai"
+                  ? "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm dark:text-slate-200"
+                  : "bg-primary-600 text-white shadow-md shadow-primary-500/10"
+                  }`}>
                   {/* Context chips on user messages */}
                   {msg.refs?.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-2">
@@ -666,11 +783,10 @@ export default function RAGAssistant() {
                     selectReference(item);
                     setInput((prev) => prev.replace(/@\w*$/, ""));
                   }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 transition-colors text-left ${
-                    idx === activeIndex
-                      ? "bg-primary-50 dark:bg-primary-900/20"
-                      : "hover:bg-slate-50 dark:hover:bg-slate-700"
-                  }`}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 transition-colors text-left ${idx === activeIndex
+                    ? "bg-primary-50 dark:bg-primary-900/20"
+                    : "hover:bg-slate-50 dark:hover:bg-slate-700"
+                    }`}
                 >
                   <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 bg-slate-100 dark:bg-slate-700">
                     {item.kind === "job"
@@ -729,11 +845,10 @@ export default function RAGAssistant() {
               type="button"
               onClick={() => { setShowContextPanel((v) => !v); setAtQuery(null); }}
               title="Añadir contexto"
-              className={`shrink-0 mb-1 w-7 h-7 flex items-center justify-center rounded-lg transition-colors relative ${
-                showContextPanel || references.length > 0
-                  ? "bg-primary-600 text-white shadow-sm"
-                  : "bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 border border-slate-200 dark:border-slate-600"
-              }`}
+              className={`shrink-0 mb-1 w-7 h-7 flex items-center justify-center rounded-lg transition-colors relative ${showContextPanel || references.length > 0
+                ? "bg-primary-600 text-white shadow-sm"
+                : "bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 border border-slate-200 dark:border-slate-600"
+                }`}
             >
               <Plus className="w-4 h-4" />
               {references.length > 0 && (
