@@ -25,7 +25,6 @@ export default function Viewer() {
   const [retryKey, setRetryKey] = useState(0);
   const isDragging = useRef(false);
 
-  const [quickStyle, setQuickStyle] = useState("default");
   const [visualMode, setVisualMode] = useState("cartoon");
   const [activeComponents, setActiveComponents] = useState([]);
 
@@ -59,58 +58,25 @@ export default function Viewer() {
         || (viewer.structureRefMap && viewer.structureRefMap.get('model'));
 
       // Intentamos usar el método interno de clase nativo que aplica estilos al momento sin recargar
+      const smartMode = {
+        polymer: mode,
+        het: 'ball-and-stick',
+        water: 'ball-and-stick',
+        carbs: 'ball-and-stick',
+        nonStandard: 'ball-and-stick'
+      };
+
       if (structRef && typeof viewer.applyVisualStyles === 'function') {
-        await viewer.applyVisualStyles(structRef, mode);
+        await viewer.applyVisualStyles(structRef, smartMode);
       } else {
         // Opción de retroceso (fallback) si falta el contexto, recargando suavemente los parámetros
         viewer.visual.update({
           ...viewer.initParams,
-          visualStyle: mode
+          visualStyle: smartMode
         }, true);
       }
     } catch (e) {
       console.warn("No se pudo aplicar el modo visual", e);
-    }
-  };
-
-  const applyQuickStyle = (style) => {
-    if (!viewerInstanceRef.current || !viewerInstanceRef.current.plugin) return;
-    const plugin = viewerInstanceRef.current.plugin;
-    setQuickStyle(style);
-
-    try {
-      if (style === "illustrative") {
-        plugin.canvas3d.setProps({
-          postprocessing: {
-            ...plugin.canvas3d.props.postprocessing,
-            outline: {
-              name: "on",
-              params: { scale: 1, threshold: 0.33, color: 0x000000, includeTransparent: true }
-            },
-            occlusion: { name: "off", params: {} },
-            shadow: { name: "off", params: {} }
-          }
-        });
-      } else {
-        // "default"
-        plugin.canvas3d.setProps({
-          postprocessing: {
-            ...plugin.canvas3d.props.postprocessing,
-            outline: { name: "off", params: {} },
-            occlusion: {
-              name: "on",
-              params: {
-                samples: 32, radius: 5, bias: 0.8, blurKernelSize: 15, resolutionScale: 1,
-                colorTheme: { name: 'black' },
-                multiScale: { name: 'off', params: {} } // <- Force multiScale value to avoid undefined crash
-              }
-            },
-            shadow: { name: "off", params: {} }
-          }
-        });
-      }
-    } catch (e) {
-      console.warn("No se pudo aplicar el quick style", e);
     }
   };
 
@@ -520,7 +486,14 @@ ${bioHtml}
             hideControls: true,
             bgColor: { r: 255, g: 255, b: 255 },
             hideCanvasControls: ["expand", "selection", "animation", "controlToggle", "controlInfo"],
-            visualStyle: "cartoon",
+            hideStructure: [],
+            visualStyle: {
+              polymer: "cartoon",
+              het: "ball-and-stick",
+              water: "ball-and-stick",
+              carbs: "ball-and-stick",
+              nonStandard: "ball-and-stick"
+            },
             // Keep AF specific parsing for the Blue->Red B-factor scale
             alphafoldView: true,
           };
@@ -547,14 +520,16 @@ ${bioHtml}
 
                   if (rawKey.includes('water')) resolvedKey = 'water';
                   else if (rawKey.includes('polymer')) resolvedKey = 'polymer';
-                  else if (rawKey.includes('het')) resolvedKey = 'het';
-                  else if (rawKey.includes('carbs')) resolvedKey = 'carbs';
+                  else if (rawKey.includes('het') || rawKey.includes('ligand') || rawKey.includes('ion')) resolvedKey = 'het';
+                  else if (rawKey.includes('carbs') || rawKey.includes('branched')) resolvedKey = 'carbs';
+                  else if (rawKey.includes('non-standard')) resolvedKey = 'nonStandard';
 
                   const niceName = resolvedKey === 'polymer' ? 'Estructura Principal'
                     : resolvedKey === 'water' ? 'Agua (Solvente)'
-                      : resolvedKey === 'het' ? 'Ligando / HETATM'
+                      : resolvedKey === 'het' ? 'Ligando / HETATM / Iones'
                         : resolvedKey === 'carbs' ? 'Carbohidratos'
-                          : resolvedKey;
+                          : resolvedKey === 'nonStandard' ? 'Residuos No Estándar'
+                            : resolvedKey;
 
                   if (!acc.some(c => c.key === resolvedKey) && resolvedKey) {
                     acc.push({
@@ -889,6 +864,59 @@ ${bioHtml}
               />
             </div>
           )}
+
+          {activeTab === "vista" && (
+            <div className="p-4 space-y-6">
+
+              {/* Componentes de Estructura */}
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Componentes de Estructura</h3>
+                <div className="space-y-2 mb-6">
+                  {activeComponents.length > 0 ? (
+                    activeComponents.map((comp, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/80 rounded-md border border-slate-200 dark:border-slate-700/70">
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300 capitalize">
+                          {comp.name}
+                        </span>
+                        <button
+                          onClick={() => toggleComponent(comp.key, comp.visible)}
+                          className={`px-3 py-1 text-xs rounded-md font-semibold transition-all ${comp.visible ? "bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-400" : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"}`}
+                        >
+                          {comp.visible ? "Ocultar" : "Mostrar"}
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-400 italic">No hay componentes detectados</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Representación Visual */}
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Representación del Polímero</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: "cartoon", label: "Cartoon" },
+                    { id: "ball-and-stick", label: "Ball & Stick" },
+                    { id: "carbohydrate", label: "Carbohidratos" },
+                    { id: "surface", label: "Superficie" },
+                    { id: "putty", label: "Putty" },
+                    { id: "spacefill", label: "Spacefill" },
+                  ].map(style => (
+                    <button
+                      key={style.id}
+                      onClick={() => applyVisualMode(style.id)}
+                      className={`py-2 px-3 text-xs font-medium rounded-md border transition-all ${visualMode === style.id ? "bg-primary-50 text-primary-700 border-primary-200 dark:bg-primary-900/30 dark:text-primary-400 dark:border-primary-800/50" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-700/70"}`}
+                    >
+                      {style.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          )}
         </div>}
 
       </div>{/* end right panel */}
@@ -942,4 +970,5 @@ ${bioHtml}
     </div>
   );
 }
+
 
