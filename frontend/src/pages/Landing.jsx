@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../lib/firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
@@ -10,6 +11,13 @@ import logoUrl from "../assets/logo.png";
 
 export default function Landing() {
   const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleLogin = async () => {
     try {
@@ -25,7 +33,7 @@ export default function Landing() {
     <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col font-sans selection:bg-primary-500/30">
 
       {/* Navbar */}
-      <nav className="flex justify-between items-center p-6 lg:px-12 border-b border-white/5 sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
+      <nav className={`flex justify-between items-center p-6 lg:px-12 fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "bg-slate-950/80 backdrop-blur-md border-b border-white/5" : "bg-transparent"}`}>
         <div className="flex items-center gap-2">
           <img src={logoUrl} className="w-8 h-8 object-contain" alt="LocalFold" />
           <span className="text-xl font-bold tracking-tight text-white">Local<span className="text-primary-500">Fold</span></span>
@@ -39,7 +47,7 @@ export default function Landing() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="flex flex-col items-center justify-center text-center px-4 sm:px-6 pt-24 pb-16 relative overflow-hidden">
+      <section className="flex flex-col items-center justify-center text-center px-4 sm:px-6 pt-40 pb-16 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-primary-600/10 blur-[140px] rounded-full pointer-events-none" />
 
         <div className="z-10 max-w-4xl space-y-8">

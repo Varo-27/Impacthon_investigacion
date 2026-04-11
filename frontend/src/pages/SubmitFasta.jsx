@@ -221,16 +221,10 @@ export default function SubmitFasta() {
   }, [jobStatus]);
 
   useEffect(() => {
-    if (jobStatus?.status === "COMPLETED" && !jobOutputs) {
-      Promise.all([
-        fetch(`https://api-mock-cesga.onrender.com/jobs/${jobStatus.id}/outputs`).then(r => r.json()),
-        fetch(`https://api-mock-cesga.onrender.com/jobs/${jobStatus.id}/accounting`).then(r => r.json())
-      ]).then(([outputs, accounting]) => {
-        setJobOutputs(outputs);
-        setJobAccounting(accounting);
-      }).catch(e => console.error(e));
+    if (jobStatus?.status === "COMPLETED") {
+      navigate(`/app?job=${jobStatus.id}`);
     }
-  }, [jobStatus, jobOutputs]);
+  }, [jobStatus]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -580,31 +574,44 @@ export default function SubmitFasta() {
                     <div>
                       <h4 className="text-[11px] font-semibold text-[#64748b] tracking-[0.08em] uppercase mb-3">Estructura</h4>
                       <div className="flex flex-col gap-2.5">
-                         <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
-                           <span className="text-xs text-slate-800 dark:text-slate-200">pLDDT medio</span>
-                           <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
-                              jobOutputs.metrics.plddt_mean > 90 ? 'bg-[#2dd4bf]/20 text-[#2dd4bf]' :
-                              jobOutputs.metrics.plddt_mean >= 70 ? 'bg-blue-500/20 text-blue-400' :
-                              jobOutputs.metrics.plddt_mean >= 50 ? 'bg-amber-500/20 text-amber-500' :
-                              'bg-red-500/20 text-red-500'
-                           }`}>
-                             {jobOutputs.metrics.plddt_mean.toFixed(1)}
-                           </span>
-                         </div>
-                         <div className="bg-slate-50 dark:bg-slate-900/40 px-3 py-2.5 border border-slate-200 dark:border-slate-700/50 rounded-[6px] flex flex-col gap-2">
-                           <span className="text-xs text-slate-800 dark:text-slate-200">Fracción de residuos</span>
-                           <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] uppercase font-medium tracking-wider">
-                             <span className="text-[#2dd4bf]">Muy Alta: {(jobOutputs.metrics.fraction_plddt_above_90 * 100).toFixed(0)}%</span>
-                             <span className="text-blue-400">Alta: {(jobOutputs.metrics.fraction_plddt_70_to_90 * 100).toFixed(0)}%</span>
-                             <span className="text-amber-500">Media: {(jobOutputs.metrics.fraction_plddt_50_to_70 * 100).toFixed(0)}%</span>
-                             <span className="text-red-500">Baja: {(jobOutputs.metrics.fraction_plddt_below_50 * 100).toFixed(0)}%</span>
-                           </div>
-                         </div>
+                         {(() => {
+                           const plddt = jobOutputs.structural_data?.confidence?.plddt_mean
+                             ?? jobOutputs.structural_data?.confidence?.plddt_average
+                             ?? jobOutputs.metrics?.plddt_mean
+                             ?? null;
+                           const fractions = jobOutputs.structural_data?.confidence ?? jobOutputs.metrics ?? null;
+                           return plddt != null ? (
+                             <>
+                               <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
+                                 <span className="text-xs text-slate-800 dark:text-slate-200">pLDDT medio</span>
+                                 <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
+                                    plddt > 90 ? 'bg-[#2dd4bf]/20 text-[#2dd4bf]' :
+                                    plddt >= 70 ? 'bg-blue-500/20 text-blue-400' :
+                                    plddt >= 50 ? 'bg-amber-500/20 text-amber-500' :
+                                    'bg-red-500/20 text-red-500'
+                                 }`}>
+                                   {plddt.toFixed(1)}
+                                 </span>
+                               </div>
+                               {fractions && (fractions.fraction_plddt_above_90 != null || fractions.fraction_plddt_70_to_90 != null) && (
+                                 <div className="bg-slate-50 dark:bg-slate-900/40 px-3 py-2.5 border border-slate-200 dark:border-slate-700/50 rounded-[6px] flex flex-col gap-2">
+                                   <span className="text-xs text-slate-800 dark:text-slate-200">Fracción de residuos</span>
+                                   <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] uppercase font-medium tracking-wider">
+                                     <span className="text-[#2dd4bf]">Muy Alta: {((fractions.fraction_plddt_above_90 ?? 0) * 100).toFixed(0)}%</span>
+                                     <span className="text-blue-400">Alta: {((fractions.fraction_plddt_70_to_90 ?? 0) * 100).toFixed(0)}%</span>
+                                     <span className="text-amber-500">Media: {((fractions.fraction_plddt_50_to_70 ?? 0) * 100).toFixed(0)}%</span>
+                                     <span className="text-red-500">Baja: {((fractions.fraction_plddt_below_50 ?? 0) * 100).toFixed(0)}%</span>
+                                   </div>
+                                 </div>
+                               )}
+                             </>
+                           ) : null;
+                         })()}
                          {jobOutputs.derived_insights && (
                            <>
                              <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
                                <span className="text-xs text-slate-800 dark:text-slate-200">Solubilidad score</span>
-                               <span className="text-xs text-slate-600 dark:text-slate-300">{jobOutputs.derived_insights.solubility_score.toFixed(2)}</span>
+                               <span className="text-xs text-slate-600 dark:text-slate-300">{jobOutputs.derived_insights.solubility_score?.toFixed(2)}</span>
                              </div>
                              <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
                                <span className="text-xs text-slate-800 dark:text-slate-200">Estado estabilidad</span>
@@ -621,11 +628,11 @@ export default function SubmitFasta() {
                       <div className="flex flex-col gap-2.5">
                          <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
                            <span className="text-xs text-slate-800 dark:text-slate-200">CPU Hours</span>
-                           <span className="text-xs text-slate-600 dark:text-slate-300">{jobAccounting.cpu_hours.toFixed(2)} h</span>
+                           <span className="text-xs text-slate-600 dark:text-slate-300">{jobAccounting.cpu_hours?.toFixed(2)} h</span>
                          </div>
                          <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
                            <span className="text-xs text-slate-800 dark:text-slate-200">GPU Hours</span>
-                           <span className="text-xs text-slate-600 dark:text-slate-300">{jobAccounting.gpu_hours.toFixed(2)} h</span>
+                           <span className="text-xs text-slate-600 dark:text-slate-300">{jobAccounting.gpu_hours?.toFixed(2)} h</span>
                          </div>
                          <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 px-3 py-2 border border-slate-200 dark:border-slate-700/50 rounded-[6px]">
                            <span className="text-xs text-slate-800 dark:text-slate-200">Wall Time</span>
