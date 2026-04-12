@@ -32,7 +32,7 @@ let _pendingPromise = null;
 const SUGGESTIONS = [
   { icon: <Dna className="w-4 h-4" />, text: "¿Qué es el pLDDT y cómo interpreto su valor?" },
   { icon: <FlaskConical className="w-4 h-4" />, text: "¿Cómo afecta la solubilidad al uso experimental de una proteína?" },
-  { icon: <BookOpen className="w-4 h-4" />, text: "Explícame qué es AlphaFold y cómo predice estructuras." },
+  { icon: <BookOpen className="w-4 h-4" />, text: "Explícame qué es nuestro sistema y cómo predice estructuras." },
   { icon: <Microscope className="w-4 h-4" />, text: "¿Qué indica un índice de inestabilidad alto en una proteína?" },
 ];
 

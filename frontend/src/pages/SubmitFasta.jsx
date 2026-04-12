@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { UploadCloud, CheckCircle2, AlertTriangle, FlaskConical, Dna, ArrowRight, FolderOpen, X, ChevronDown } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { db, auth } from "../lib/firebase";
-import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc, onSnapshot, query, where, or } from "firebase/firestore";
 import { getJobOutputs } from "../lib/outputsCache";
 import { searchProteins, getProteinDetails, findBestProteinMatch, extractProteinMetadata } from "../api/proteinsApi";
 
@@ -158,23 +158,35 @@ function enrichJobWhenCompleted(jobId, cesgaJobId, proteinName) {
 export default function SubmitFasta() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const projectId = searchParams.get("project") || null;
-  const [projectName, setProjectName] = useState(null);
+  const [projectId, setProjectId] = useState(searchParams.get("project") || "");
+  const [userProjects, setUserProjects] = useState([]);
   const [fastaContent, setFastaContent] = useState("");
   const [customName, setCustomName] = useState("");
   const [sequenceWarnings, setSequenceWarnings] = useState([]);
   const [parsedSequences, setParsedSequences] = useState([]);
   const [multiSubmitSuccess, setMultiSubmitSuccess] = useState(0);
 
-  /* Nuevos campos para filtrado */
-
-  /* Load project name if coming from a project */
+  /* Load user's projects for select dropdown */
   useEffect(() => {
-    if (!projectId) return;
-    getDoc(doc(db, "projects", projectId)).then((snap) => {
-      if (snap.exists()) setProjectName(snap.data().name);
+    if (!auth.currentUser) return;
+    const q = query(
+      collection(db, "projects"),
+      or(
+        where("memberIds", "array-contains", auth.currentUser.uid),
+        where("ownerId", "==", auth.currentUser.uid),
+        where("userId", "==", auth.currentUser.uid) // For legacy records
+      )
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setUserProjects(all);
     });
-  }, [projectId]);
+    return () => unsub();
+  }, []);
+
+  const activeProject = userProjects.find(p => p.id === projectId);
+  const projectName = activeProject ? activeProject.name : null;
+
   const [activeChip, setActiveChip] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -455,12 +467,20 @@ export default function SubmitFasta() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Nueva predicción</h1>
-          {projectName && (
-            <div className="flex items-center gap-1.5 mt-1">
-              <FolderOpen className="w-3.5 h-3.5 text-primary-500" />
-              <span className="text-xs text-primary-600 dark:text-primary-400 font-medium">{projectName}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5 mt-2">
+            <FolderOpen className="w-4 h-4 text-emerald-500" />
+            <select
+              id="target-project-select"
+              value={projectId || ""}
+              onChange={(e) => setProjectId(e.target.value || null)}
+              className="text-sm bg-transparent border-b border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 font-medium focus:ring-0 focus:border-emerald-500 py-0.5 pl-0 pr-4 outline-none"
+            >
+              <option value="">Sin proyecto (Mis trabajos)</option>
+              {userProjects.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
         <button
           onClick={() => navigate(projectId ? `/app/projects/${projectId}` : "/app/jobs")}

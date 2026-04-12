@@ -71,12 +71,12 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
             paeMatrix: cesga.structural_data?.confidence?.pae_matrix || statusData?.paeMatrix,
             plddtHistogram: cesga.structural_data?.confidence?.plddt_histogram || statusData?.plddtHistogram,
           };
-          console.log("✅ ProteinCopilot: datos COMPLETOS cargados", full);
+          console.log(" ProteinCopilot: datos COMPLETOS cargados", full);
           setEnrichedData(full);
         }
       } catch (err) {
-        console.error("❌ ProteinCopilot: error cargando datos:", err);
-        console.log("⚠️  usando statusData de fallback:", statusData);
+        console.error(" ProteinCopilot: error cargando datos:", err);
+        console.log("️  usando statusData de fallback:", statusData);
         setEnrichedData(statusData);
       }
     })();
@@ -150,7 +150,7 @@ export default function ProteinCopilot({ jobId, proteinName, statusData, onSumma
     setMessages(prev => [...prev, { role: "user", text: userMsg }]);
 
     setIsWaiting(true);
-    console.log("📤 ProteinCopilot enviando mensaje con enrichedData:", enrichedData);
+    console.log(" ProteinCopilot enviando mensaje con enrichedData:", enrichedData);
     const aiResponse = await proteiaApi.sendChatMessage(jobId, userMsg, messages, enrichedData || statusData);
     setIsWaiting(false);
     startStream(aiResponse);

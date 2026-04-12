@@ -2,7 +2,7 @@ import { useRef, useEffect, forwardRef } from 'react';
 
 /**
  * Renders an N x N matrix as an HTML Canvas Heatmap.
- * For AlphaFold PAE: lower error -> dark blue/green. higher error -> white/red/yellow.
+ * For nuestro sistema PAE: lower error -> dark blue/green. higher error -> white/red/yellow.
  */
 const PAEHeatmap = forwardRef(function PAEHeatmap({ matrix, className = "" }, forwardedRef) {
   const canvasRef = useRef(null);
@@ -27,7 +27,7 @@ const PAEHeatmap = forwardRef(function PAEHeatmap({ matrix, className = "" }, fo
     canvas.width = n;
     canvas.height = n;
     
-    // AlphaFold style PAE mapping: 0 -> Dark blue/green, 30 -> White
+    // nuestro sistema style PAE mapping: 0 -> Dark blue/green, 30 -> White
     // A strict and fast implementation using ImageData
     const imgData = ctx.createImageData(n, n);
     const data = imgData.data;
@@ -45,7 +45,7 @@ const PAEHeatmap = forwardRef(function PAEHeatmap({ matrix, className = "" }, fo
         // Simple distinct gradient from deep emerald to soft white
         let r, g, b;
         
-        // AlphaFold color scheme logic:
+        // nuestro sistema color scheme logic:
         // Dark blue: 0, 83, 214 (Very Low Error)
         // Light blue: 101, 203, 243
         // Yellow: 255, 219, 19

@@ -187,7 +187,7 @@ export default function Viewer() {
     }
 
     const plddt = jobData?.plddt ?? 0;
-    const plddtConf = plddt >= 90 ? "MUY ALTA ✦" : plddt >= 70 ? "ALTA" : plddt >= 50 ? "BAJA" : "MUY BAJA";
+    const plddtConf = plddt >= 90 ? "MUY ALTA " : plddt >= 70 ? "ALTA" : plddt >= 50 ? "BAJA" : "MUY BAJA";
     const plddtColor = plddt >= 90 ? "#059669" : plddt >= 70 ? "#0284c7" : plddt >= 50 ? "#d97706" : "#dc2626";
     const plddtDesc = plddt >= 90
       ? "La forma global es muy fiable. Adecuada para estudios de docking y diseño racional."
@@ -378,7 +378,7 @@ export default function Viewer() {
 </div>
 
 <div class="header">
-  <div class="header-brand">🧬 OmicaFold<span>Informe de Predicción Estructural</span></div>
+  <div class="header-brand"> OmicaFold<span>Informe de Predicción Estructural</span></div>
   <div class="header-date">Impacthon 2026 · CESGA FinisTerrae III<br>${new Date().toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })}</div>
 </div>
 
@@ -410,8 +410,8 @@ ${bioHtml}
 </section>
 
 <div class="footer">
-  <div class="footer-brand">🧬 OmicaFold</div>
-  <div class="footer-note">Los resultados son predicciones computacionales generadas por AlphaFold 2. No constituyen diagnóstico clínico ni asesoramiento médico.</div>
+  <div class="footer-brand"> OmicaFold</div>
+  <div class="footer-note">Los resultados son predicciones computacionales generadas por nuestro sistema 2. No constituyen diagnóstico clínico ni asesoramiento médico.</div>
 </div>
 
 </body>
@@ -551,7 +551,7 @@ ${bioHtml}
           } else if (data.uniprot) {
             options.customData = { url: `https://alphafold.ebi.ac.uk/files/AF-${data.uniprot}-F1-model_v4.cif`, format: 'cif' };
           } else {
-            // Fallback to a real AlphaFold model (p53) instead of an experimental PDB like 1cbs,
+            // Fallback to a real nuestro sistema model (p53) instead of an experimental PDB like 1cbs,
             // so that the B-factors mapped to pLDDT color properly (blue/yellow/orange).
             options.customData = { url: "https://alphafold.ebi.ac.uk/files/AF-P04637-F1-model_v4.cif", format: "cif" };
           }
@@ -932,7 +932,7 @@ ${bioHtml}
                 >
                   {waitingForAi
                     ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Esperando análisis IA…</>
-                    : <><FileText className="w-3.5 h-3.5" /> {aiSummary ? "Generar informe PDF ✓" : "Generar informe PDF"}</>}
+                    : <><FileText className="w-3.5 h-3.5" /> {aiSummary ? "Generar informe PDF " : "Generar informe PDF"}</>}
                 </button>
 
                 <div className="flex gap-1.5">

@@ -252,7 +252,7 @@ export default function JobsList() {
         const prev = prevStatuses.current[job.id];
         if (prev && prev !== job.status) {
           if (job.status === "COMPLETED") {
-            addToast(`✓ "${job.proteinName}" ha completado la predicción.`, "success");
+            addToast(` "${job.proteinName}" ha completado la predicción.`, "success");
             notify("Predicción completada", `"${job.proteinName}" ya está lista en OmicaFold.`);
           } else if (job.status === "FAILED") {
             addToast(`"${job.proteinName}" falló en el clúster.`, "error");
@@ -355,7 +355,7 @@ export default function JobsList() {
 
       await deleteDoc(doc(db, "jobs", jobId));
 
-      addToast(`✗ "${jobName}" ha sido eliminada.`, "success");
+      addToast(` "${jobName}" ha sido eliminada.`, "success");
     } catch (e) {
       console.error("Error deleting job:", e);
       addToast("Error al eliminar la predicción", "error");
@@ -528,28 +528,28 @@ export default function JobsList() {
                         {/* Category badge */}
                         {job.functionalCategory && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                            🏷️ {job.functionalCategory}
+                            ️ {job.functionalCategory}
                           </span>
                         )}
 
                         {/* Organism badge */}
                         {job.organism && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                            🧬 {job.organism.split(" ").slice(0, 2).join(" ")}
+                             {job.organism.split(" ").slice(0, 2).join(" ")}
                           </span>
                         )}
 
                         {/* AA Length info */}
                         {job.aaLength && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800">
-                            ⚖️ {job.aaLength} aa
+                            ️ {job.aaLength} aa
                           </span>
                         )}
 
                         {/* PDB ID if available */}
                         {job.pdbId && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                            🔗 {job.pdbId}
+                             {job.pdbId}
                           </span>
                         )}
 
@@ -563,7 +563,7 @@ export default function JobsList() {
                         {/* Molecular Weight if available */}
                         {job.molecularWeight != null && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800">
-                            ⚛️ {job.molecularWeight} kDa
+                            ️ {job.molecularWeight} kDa
                           </span>
                         )}
 
@@ -573,7 +573,7 @@ export default function JobsList() {
                             job.plddt >= 70 ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800" :
                               "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800"
                             }`}>
-                            📊 pLDDT {job.plddt.toFixed(1)}
+                             pLDDT {job.plddt.toFixed(1)}
                           </span>
                         )}
                       </div>
