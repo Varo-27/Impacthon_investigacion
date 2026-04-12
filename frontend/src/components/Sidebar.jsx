@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import logoUrl from "../assets/logo.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Activity, Dna, LayoutDashboard, Sun, Moon, FolderOpen, Mail, LogOut, ChevronLeft, ChevronRight, BrainCircuit } from "lucide-react";
+import { Activity, Dna, LayoutDashboard, Sun, Moon, FolderOpen, Mail, LogOut, ChevronLeft, ChevronRight, BrainCircuit, HelpCircle } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { db, auth } from "../lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import { autoStartTour, startDashboardTour, startSubmitTour, startViewerTour, startChatTour } from "../lib/tutorials";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
@@ -38,19 +39,35 @@ export default function Sidebar() {
   };
 
   const links = [
-    { name: "Visor 3D", path: "/app", icon: <Activity className="w-5 h-5" /> },
-    { name: "Nuevo Trabajo", path: "/app/submit", icon: <Dna className="w-5 h-5" /> },
-    { name: "Mis Trabajos", path: "/app/jobs", icon: <LayoutDashboard className="w-5 h-5" /> },
-    { name: "Proyectos", path: "/app/projects", icon: <FolderOpen className="w-5 h-5" />, badge: pendingInvites },
-    { name: "MicaFold", path: "/app/assistant", icon: <BrainCircuit className="w-5 h-5" /> },
+    { name: "Visor 3D", path: "/app", icon: <Activity className="w-5 h-5" />, id: "viewer-link" },
+    { name: "Nuevo Trabajo", path: "/app/submit", icon: <Dna className="w-5 h-5" />, id: "btn-new-job" },
+    { name: "Mis Trabajos", path: "/app/jobs", icon: <LayoutDashboard className="w-5 h-5" />, id: "jobs-link" },
+    { name: "Proyectos", path: "/app/projects", icon: <FolderOpen className="w-5 h-5" />, badge: pendingInvites, id: "projects-list" },
+    { name: "MicaFold", path: "/app/assistant", icon: <BrainCircuit className="w-5 h-5" />, id: "assistant-link" },
   ];
 
   const initials = user?.displayName
     ? user.displayName.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
     : user?.email?.[0]?.toUpperCase() ?? "?";
 
+  // Determinar qué tutorial lanzar
+  const handleStartTutorial = () => {
+    if (location.pathname.includes('/submit')) {
+      startSubmitTour();
+    } else if (location.pathname.includes('/assistant')) {
+      startChatTour();
+    } else if (location.pathname.includes('/jobs') || location.pathname.includes('/projects')) {
+      startDashboardTour();
+    } else if (location.pathname.match(/\/app\/job_/)) {
+      startViewerTour();
+    } else {
+      startDashboardTour();
+    }
+  };
+
   return (
     <aside
+      id="sidebar-nav"
       className={`relative h-full flex flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 shrink-0 ${isOpen ? "w-56" : "w-14"
         }`}
     >
@@ -82,11 +99,12 @@ export default function Sidebar() {
           return (
             <Link
               key={link.path}
+              id={link.id}
               to={link.path}
               title={!isOpen ? link.name : undefined}
               className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md transition-colors ${isActive
-                  ? "bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300 pointer-events-none"
-                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-100"
+                ? "bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300 pointer-events-none"
+                : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
             >
               <div className={`relative shrink-0 ${isActive ? "text-primary-600 dark:text-primary-400" : ""}`}>
@@ -116,6 +134,16 @@ export default function Sidebar() {
 
       {/* Bottom section */}
       <div className="px-2 py-2 border-t border-slate-200 dark:border-slate-700 space-y-1">
+
+        {/* Tutorial wizard toggle */}
+        <button
+          onClick={handleStartTutorial}
+          title={isOpen ? undefined : "Tutorial de esta pantalla"}
+          className={`w-full flex items-center justify-start gap-2.5 px-2.5 py-2 rounded-md text-amber-500 hover:bg-amber-50 hover:text-amber-600 dark:text-amber-400 dark:hover:bg-amber-900/30 transition-colors mb-1 ${!isOpen ? "justify-center" : ""}`}
+        >
+          <HelpCircle className="w-[18px] h-[18px] shrink-0" />
+          {isOpen && <span className="text-sm font-medium">Tutorial guiado</span>}
+        </button>
 
         {/* Theme toggle */}
         <button
