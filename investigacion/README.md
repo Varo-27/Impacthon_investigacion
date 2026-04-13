@@ -1,7 +1,5 @@
 # Micafold — Base de Conocimiento del Proyecto
 
-> [!CAUTION]
-> **Aviso Importante:** La infraestructura técnica de este proyecto (API Mock del CESGA) ha sido desactivada tras el Impacthon 2026. Los documentos y el código se mantienen como referencia histórica.
 
 Todo lo que el equipo necesita saber antes de escribir código.
 

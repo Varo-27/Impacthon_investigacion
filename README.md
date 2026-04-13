@@ -4,8 +4,6 @@
 [![Target](https://img.shields.io/badge/Platform-CESGA%20HPC-brightgreen?style=for-the-badge)](https://www.cesga.es/)
 [![AI-Powered](https://img.shields.io/badge/Powered%20by-ProteIA-orange?style=for-the-badge)](https://github.com/JoseEstevez520/Impacthon_investigacion)
 
-> [!CAUTION]
-> **Project Status:** This application is **no longer functional**. The system relied on a **CESGA Mock API** that was retired after the event concluded. The code is maintained for documentation and portfolio purposes only.
 
 > **Micafold** bridges the gap between high-performance computing and biological intuition. An AI-augmented platform designed for researchers to fold, visualize, and interpret protein structures with the power of CESGA infrastructure.
 
