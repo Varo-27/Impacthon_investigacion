@@ -1,6 +1,6 @@
-# Documento de Investigación: Problema y Usuarios - LocalFold
+# Documento de Investigación: Problema y Usuarios - Micafold
 
-Este documento sirve como base estratégica para entender el propósito del producto. Se enfoca en delimitar el problema real de mercado, el público objetivo y la brecha tecnológica que LocalFold viene a solucionar.
+Este documento sirve como base estratégica para entender el propósito del producto. Se enfoca en delimitar el problema real de mercado, el público objetivo y la brecha tecnológica que Micafold viene a solucionar.
 
 ## 1. ¿Para quién lo hacemos? (Arquetipo de Usuario)
 
@@ -45,4 +45,4 @@ A fecha de hoy, un investigador que requiere modelar una secuencia tiene opcione
 ---
 
 ## Conclusión Ejecutiva
-Existe un vacío entre la "capacidad técnica" y la "accesibilidad científica". La necesidad no es hacer *mejor* el plegamiento de proteínas, sino **hacerlo utilizable**. **LocalFold** resuelve esto siendo la "última milla" que provee de una Experiencia de Usuario excelente, con una curva de aprendizaje cero y visuales interpretables, manteniendo al mismo tiempo toda la potencia del Supercomputador CESGA protegido por detrás.
+Existe un vacío entre la "capacidad técnica" y la "accesibilidad científica". La necesidad no es hacer *mejor* el plegamiento de proteínas, sino **hacerlo utilizable**. **Micafold** resuelve esto siendo la "última milla" que provee de una Experiencia de Usuario excelente, con una curva de aprendizaje cero y visuales interpretables, manteniendo al mismo tiempo toda la potencia del Supercomputador CESGA protegido por detrás.

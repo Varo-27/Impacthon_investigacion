@@ -854,12 +854,12 @@ export default function SubmitFasta() {
       </p>
 
       {/* Flotante de Pruebas */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-1.5 p-3 bg-amber-50 dark:bg-slate-800 border-2 border-amber-400 dark:border-amber-600 rounded-lg shadow-xl max-w-[200px] text-xs opacity-70 hover:opacity-100 transition-opacity">
-        <div className="text-amber-600 dark:text-amber-500 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5">
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-1.5 p-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-emerald-500/30 dark:border-emerald-500/20 rounded-lg shadow-xl max-w-[200px] text-xs transition-opacity">
+        <div className="text-emerald-600 dark:text-emerald-500 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5">
           <FlaskConical className="w-3 h-3" />
-          Debug: Ejemplos
+          Muestras Rápidas
         </div>
-        <p className="text-[9px] text-slate-500 leading-tight mb-1">Uso exclusivo pruebas locales. Ignorar en PROD.</p>
+        <p className="text-[9px] text-slate-500 dark:text-slate-400 leading-tight mb-1">Ejemplos de acceso rápido para demostración pública.</p>
         {PROTEIN_SAMPLES.map((protein) => (
           <button
             key={protein.tag}

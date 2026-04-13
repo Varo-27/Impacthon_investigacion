@@ -1,4 +1,4 @@
-# Stack Tecnológico y Apuntes de Desarrollo — LocalFold
+# Stack Tecnológico y Apuntes de Desarrollo — Micafold
 
 Este documento define el stack técnico recomendado para el proyecto, basado
 íntegramente en lo que los documentos del reto mencionan de forma explícita
@@ -108,7 +108,7 @@ await supabase.auth.signInWithOAuth({ provider: 'google' })
 
 ### IA / LLMs (diferenciación)
 ```
-Gemini Flash 2.0 → Protein Copilot (explicación en lenguaje natural)
+n8n Webhooks     → ProteIA (explicación en lenguaje natural)
                  → Chat contextual con datos del job actual
 ```
 

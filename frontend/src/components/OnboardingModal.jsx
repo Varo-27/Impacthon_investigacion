@@ -15,10 +15,10 @@ const GOALS = [
 ];
 
 const WELCOME = {
-  researcher: "OmicaFold está listo para investigadores.",
-  clinical:   "OmicaFold está listo para clínicos.",
-  drug:       "OmicaFold está listo para drug discovery.",
-  student:    "OmicaFold está listo para aprender.",
+  researcher: "Micafold está listo para investigadores.",
+  clinical:   "Micafold está listo para clínicos.",
+  drug:       "Micafold está listo para drug discovery.",
+  student:    "Micafold está listo para aprender.",
 };
 
 // phase: "steps" → "tutorial-prompt" → "closing"
@@ -89,7 +89,7 @@ export default function OnboardingModal({ onComplete }) {
                 {step === 1 ? "¿Cuál es tu perfil?" : "¿Qué buscas principalmente?"}
               </h2>
               <p className="text-xs text-slate-400 mt-1">
-                {step === 1 ? "Para que OmicaFold hable tu idioma." : "MicaFold adaptará sus respuestas a tu objetivo."}
+                {step === 1 ? "Para que Micafold hable tu idioma." : "Micafold adaptará sus respuestas a tu objetivo."}
               </p>
             </div>
 
@@ -158,7 +158,7 @@ export default function OnboardingModal({ onComplete }) {
                         </button>
                         {showInfo && (
                           <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-56 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-300 leading-relaxed shadow-xl z-10">
-                            MicaFold tendrá en cuenta lo que escribas aquí para personalizar cada respuesta según tu contexto de investigación.
+                            Micafold tendrá en cuenta lo que escribas aquí para personalizar cada respuesta según tu contexto de investigación.
                             <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 border-r border-b border-slate-700 rotate-45 -mt-1" />
                           </div>
                         )}

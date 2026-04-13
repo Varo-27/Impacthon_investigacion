@@ -15,7 +15,7 @@ Tienes toda la razón. Para un hackathon es mucho más limpio, fácil de debugea
 2. **Nodo 2: Basic LLM Chain**
    - *Prompt:* `{{ $json.body.context }}`
    - *System Message:* "Eres un experto bioquímico. Devuelve un JSON con: {'text': 'resumen en lenguaje natural'}."
-   - **Nodo Auxiliar conectado (Language Model):** Google Gemini Chat Model (Gemini 1.5 Flash).
+   - **Nodo Auxiliar conectado (Language Model):** LLM Chat Model (configurado en n8n).
 
 3. **Nodo 3: Respond to Webhook**
    - *Respond With:* `JSON`
@@ -33,7 +33,7 @@ Tienes toda la razón. Para un hackathon es mucho más limpio, fácil de debugea
 
 2. **Nodo 2: AI Agent**
    - *Prompt:* `{{ $json.body.question }}`
-   - **Nodo Auxiliar conectado (Language Model):** Google Gemini Chat Model.
+   - **Nodo Auxiliar conectado (Language Model):** LLM Chat Model (configurado en n8n).
    - **Nodo Auxiliar conectado (Memory):** Window Buffer Memory.
      - *Session ID:* `={{ $json.body.session_id }}` *(Super importante para que no mezcle pacientes)*.
    - **Nodos Auxiliares conectados (Tools):** Si quieres, métele un Calculator o un HTTP Request a la Wikipedia.

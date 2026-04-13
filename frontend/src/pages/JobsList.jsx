@@ -253,7 +253,7 @@ export default function JobsList() {
         if (prev && prev !== job.status) {
           if (job.status === "COMPLETED") {
             addToast(` "${job.proteinName}" ha completado la predicción.`, "success");
-            notify("Predicción completada", `"${job.proteinName}" ya está lista en MicaFold.`);
+            notify("Predicción completada", `"${job.proteinName}" ya está lista en Micafold.`);
           } else if (job.status === "FAILED") {
             addToast(`"${job.proteinName}" falló en el clúster.`, "error");
             notify("Error en la predicción", `"${job.proteinName}" falló en CESGA.`);

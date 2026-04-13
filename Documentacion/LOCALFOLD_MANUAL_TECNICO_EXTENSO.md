@@ -1,12 +1,12 @@
-# 🧬 LOCALFOLD - MANUAL ENCICLOPÉDICO, ARQUITECTURA, ALTERNATIVAS E IA
+# 🧬 MICAFOLD - MANUAL ENCICLOPÉDICO, ARQUITECTURA, ALTERNATIVAS E IA
 
-El presente documento constituye un "Deep-Dive" arquitectónico y la tesis de ingeniería definitiva detrás de **LocalFold**. Cubriremos el estado del arte actual del plegamiento biomolecular, por qué de descartaron las alternativas principales del mercado, y cómo se diseñó una solución end-to-end de Soberanía Computacional conectada a Inteligencia Artificial RAG.
+El presente documento constituye un "Deep-Dive" arquitectónico y la tesis de ingeniería definitiva detrás de **Micafold**. Cubriremos el estado del arte actual del plegamiento biomolecular, por qué de descartaron las alternativas principales del mercado, y cómo se diseñó una solución end-to-end de Soberanía Computacional conectada a Inteligencia Artificial RAG.
 
 ---
 
 ## 1. ESTADO DEL ARTE Y ANÁLISIS DE ALTERNATIVAS
 
-Predecir la estructura de una proteína con **AlphaFold 2/3** es un cuello de botella logístico en la biología moderna. AlphaFold requiere decenas de Gigabytes de RAM, GPUs de alto rendimiento (A100 / H100) y bases de datos genómicas masivas (hasta 3TB para la busqueda BFD/Uniref). Ante esta problemática, un investigador del CSIC o la Universidad tradicionalmente tiene tres alternativas principales en el mercado. **LocalFold surge precisamente tras auditar las ineficiencias críticas de estas opciones:**
+Predecir la estructura de una proteína con **AlphaFold 2/3** es un cuello de botella logístico en la biología moderna. AlphaFold requiere decenas de Gigabytes de RAM, GPUs de alto rendimiento (A100 / H100) y bases de datos genómicas masivas (hasta 3TB para la busqueda BFD/Uniref). Ante esta problemática, un investigador del CSIC o la Universidad tradicionalmente tiene tres alternativas principales en el mercado. **Micafold surge precisamente tras auditar las ineficiencias críticas de estas opciones:**
 
 ### Alternativa A: Acceso Bare-Metal (SSH + SLURM en Entorno Nativo HPC)
 *   **El proceso:** El biólogo recibe credenciales del CESGA u otro superordenador. Debe utilizar una terminal negra (`PuTTY` / `bash`), navegar directorios UNIX (`cd /mnt/scratch`), aprender a paralelizar en colas escribiendo scripts de Bash con *directives* `#SBATCH` y finalmente extraer los resultados a ciegas.
@@ -24,15 +24,15 @@ Predecir la estructura de una proteína con **AlphaFold 2/3** es un cuello de bo
 
 ---
 
-## 2. LA PROPUESTA ARQUITECTÓNICA DE "LOCALFOLD" (SOBERANÍA Y UX)
+## 2. LA PROPUESTA ARQUITECTÓNICA DE "MICAFOLD" (SOBERANÍA Y UX)
 
-A diferencia de las opciones anteriores, **LocalFold** diseña un puente perfecto que casa la inigualable Potencia Soberana del HPC local (Ej. CESGA) con los estándares de *User Experience* de los productos de Silicon Valley.
+A diferencia de las opciones anteriores, **Micafold** diseña un puente perfecto que casa la inigualable Potencia Soberana del HPC local (Ej. CESGA) con los estándares de *User Experience* de los productos de Silicon Valley.
 
 ### 2.1 La Topología del Sistema (Híbrido)
 *   **Frontend (Capa de Fricción Cero):** Desarrollado en React/Vite web. La mentalidad es entregar una experiencia WYSIWYG (Lo que ves es lo que hay). Sin comandos, cajas de texto que sanitizan fallos automáticamente antes de emitirlos a red.
 *   **Backend Proxy (Capa de Soberanía):** Las APIs (`api-mock-cesga` en nuestro hackathon) operan sobre un proxy Python/FastAPI. Este microservicio es el único que dialogaría con la capa profunda y sensible del Clúster Físico del CESGA. Recibe el JSON inofensivo del frontend, y él sí genera, tras bambalinas, las configuraciones bash complejas para invocar a AlphaFold, manteniendo al biólogo abstraído y aislando la infraestructura principal de inyecciones erróneas.
-*   **Base de Datos en Paralelo (Capa de Orquestación de Estados):** En la computación en nube del mundo real, los nodos limpian sus históricos periódicamente. Y si el proxy HTTP estuviera todo el rato preguntando al Nodo del CESGA por cada trabajo de cada usuario, generaría ataques de denegación de servicio (DDoS locales). LocalFold integra **Firebase Firestore** para clonar asíncronamente los logs e identificaciones en una base No-SQL propia; es aquí donde la App del usuario consulta su listado histórico mediante WebSockets ultra-reactivos.
-*   **Hub de Inteligencia (Capa N8n + LLMs):** Aislando por completo la red de renderización y bases de datos, un servidor *serverless* auto-alojado rutea preguntas de lenguaje natural hacia APIs Cognitivas externas (Google Gemini o DeepSeek), retornándolas empaquetadas al frontend en milisegundos.
+*   **Base de Datos en Paralelo (Capa de Orquestación de Estados):** En la computación en nube del mundo real, los nodos limpian sus históricos periódicamente. Y si el proxy HTTP estuviera todo el rato preguntando al Nodo del CESGA por cada trabajo de cada usuario, generaría ataques de denegación de servicio (DDoS locales). Micafold integra **Firebase Firestore** para clonar asíncronamente los logs e identificaciones en una base No-SQL propia; es aquí donde la App del usuario consulta su listado histórico mediante WebSockets ultra-reactivos.
+        *   **Hub de Inteligencia (Capa n8n + LLMs):** Aislando por completo la red de renderización y bases de datos, un servidor *serverless* auto-alojado rutea preguntas de lenguaje natural hacia APIs Cognitivas externas (orquestadas por n8n), retornándolas empaquetadas al frontend en milisegundos.
 
 ---
 
@@ -45,7 +45,7 @@ LocalFold incrusta **`pdbe-molstar`**, una envoltura de código abierto promovid
 
 ### 3.2 La Estrategia del Payload Crudo (In-Memory Blobs)
 La API devuelve el resultado final en un macro-fichero de texto denso milimétrico (El estándar PDB o mmCIF). 
-Intentar que un cliente web cargue estos vectores a través del DOM provocaría latencia y propensión a bloqueos CORS. Por tanto, LocalFold intercepta un `String` y fabrica un archivo fantasma local dentro de la RAM del navegador:
+Intentar que un cliente web cargue estos vectores a través del DOM provocaría latencia y propensión a bloqueos CORS. Por tanto, Micafold intercepta un `String` y fabrica un archivo fantasma local dentro de la RAM del navegador:
 ```javascript
 const blob = new Blob([data.pdbFileUrl], { type: 'text/plain' });
 const customUrl = URL.createObjectURL(blob);
@@ -55,7 +55,7 @@ const customUrl = URL.createObjectURL(blob);
 ### 3.3 Mapeo Termodinámico (Coloración por pLDDT - DeepMind Hack)
 Las predicciones de Inteligencia Artificial como AlphaFold no son estatuas fijas; algunas áreas son sólidas y otras son flexibles (baja certidumbre). Su fiabilidad la calculan mediante un espectro del 0 al 100 etiquetado como **pLDDT**.
 El formato internacional `.PDB` fue diseñado en los años 70 y no tenía espacio para la "Certeza IA". La comunidad científica acordó trampearlo sobre-escribiendo la columna conocida históricamente como *B-factor* (Factor de Temperatura de difracción).
-**LocalFold** fuerza e instruye al motor Molstar a leer esta columna falsa a través del flag Booleano estricto `alphafoldView: true`, pintando el modelo:
+**Micafold** fuerza e instruye al motor Molstar a leer esta columna falsa a través del flag Booleano estricto `alphafoldView: true`, pintando el modelo:
 *   💙 **Azul Oscuro (pLDDT > 90):** Certeza Atómica de Acero. La Inteligencia Artificial jura que ese loop es idéntico a la realidad.
 *   💛 **Amarillo / Naranja (pLDDT < 50):** Certidumbre "Pasta Espagueti". Son loops flexibles intrínsecamente desordenados flotando en el medio acuoso biológico.
 
@@ -74,18 +74,18 @@ return () => {
 
 ## 4. SISTEMAS DE INTELIGENCIA ARTIFICIAL: COMPRESIÓN, LLM Y RAG 
 
-LocalFold abandona la era estática y muta a un oráculo proactivo: no te entrega un render numérico y asume que sabes entenderlo. Dispone de Capas de Red NeuroLinguística conectadas bidirecionalmente a la proteína en observancia (Tu proteína actual dicta el "Contexto" de la memoria de la IA).
+Micafold abandona la era estática y muta a un oráculo proactivo: no te entrega un render numérico y asume que sabes entenderlo. Dispone de Capas de Red NeuroLinguística conectadas bidirecionalmente a la proteína en observancia (Tu proteína actual dicta el "Contexto" de la memoria de la IA).
 
 ### 4.1 Orchestrator Backend Serverless (N8N)
 La lógica fundacional no se empaqueta en librerías masivas de JavaScript (las llaves API de OpenAI / GCP nunca deben ser emitidas hacia Vite.js en local o acabarían pirateadas en dev-tools GitHub).
-En su lugar el Frontend se comunica con disparadores asimétricos hacia Webhooks blindados en `https://n8n-n8n.yaqvsc.../webhook/protein-chat`. N8N procesa, encadena el Promting, le imprime una Identidad Sistémica ("Actúa como un Biólogo Catedrático, No menciones programación, háblale al usuario del laboratorio") y dispara a endpoints de Deepseek o Gemini 1.5.
+Al terminar, el n8n procesa, encadena el Promting, le imprime una Identidad Sistémica ("Actúa como un Biólogo Catedrático, No menciones programación, háblale al usuario del laboratorio") y dispara a endpoints de modelos de lenguaje de gran tamaño (LLMs).
 
 ### 4.2 Arquitectura "BuildMetricsPayload" contra el Crash 422 de Tokens
 Un Hito Crítico de la ingeniería temprana fue comprender los límites abstractos del vector atómico LLM frente a la geometría.
 Mandar por la red todo lo devuelto por el HPC (Coordenadas Atómicas, Matrices Geométricas Bidimensionales de Predicción Alignada PAE) resultaba en hasta **150,000 Tokens (Palabras)** introducidas dentro de un LLM. El Webhook reventaba vomitando el fatídico *HTTP Error 422 Unprocessable Context Size Boundary*.
 Y lo que es peor: aunque funcionase, el LLM *alucinaría*, ya que carece de Graph-Attention Neuronal para "imaginar" ejes tridimensionales PDB.
 
-**El Arreglo LocalFold (Serializador Semántico):**
+**El Arreglo Micafold (Serializador Semántico):**
 La función interceptora destruye intencionalmente todos los arreglos matriciales brutos y empaqueta metadatos condensados en crudo. Construye un JSON esquelético de menos de **300 tokens** con pura estadística (Inestabilidad: 41, Media Global 92.4%, y flags true/false biológicos). El LLM devora esta serialización diminuta a 1000 iteraciones/segundo por fracciones de penique comercial, retornando insights bioquímicos exactos, a coste nulo en infraestructura.
 
 ### 4.3 El Nuevo Entorno RAG Assistant (Rama Innovación)
@@ -95,15 +95,13 @@ La IA lee y asimila en vivo este documento extraído, se empalma en su Context P
 
 ---
 
-## 5. EXPERIENCIA Y BLINDAJE PARA DEFENSA ANTE JURADO (THE PITCH)
-
-Cualquier producto compitiendo por galardones académicos necesita un *BulletProofing* anti-cuelgues frente al Efecto Demo. Para defenderse y destacar en Hackathones o Ferias.
+Cualquier producto compitiendo por galardones académicos necesita un *BulletProofing* anti-cuelgues frente al Efecto Demo. Micafold implementa varias capas de redundancia estratégica:
 
 ### 5.1 El Fallback Inyectivo: "Demo Segura" Oculta
 Al realizar un pitch en directo, depender de redes WiFi públicas o Cold-Starts del renderizado online y colas remotas puede matar la fluidez de un evento de 5 minutos máximos.
 *   **Mecánica Táctica (`JobsList`):** Se mapeó una intercepción global en JavaScript apuntando a los identificadores del Input con *Shortcuts* (ejemplo, `SHIFT + Click` en el "Refrescar"). 
 *   **Inyección Mockup:** En lugar de lanzar GETS perversos a la Red, clona forzosamente una id maestra `job_demo_segura` validando la firma del objeto y depositándola en Firebase al milisegundo mediante el timestamp cliente actual.
-*   **Render Cero-Coste (`Viewer`):** Este detecta y desvía la petición fetch si lee esta ID Mágica, no cargando la red. Instancia al milisengundo una métrica excelente y el pre-pack `1cbs` embebido que compila instantáneo el visualizador atómico. Magia presencial garantizada.
+*   **Render Cero-Coste (`Viewer`):** Este detecta y desvía la petición fetch si lee esta ID Mágica, no cargando la red. Instancia al milisegundo una métrica excelente y el pre-pack `1cbs` embebido que compila instantáneo el visualizador atómico. Magia presencial garantizada.
 
 ### 5.2 Emisor Endémico de Reportes Client-Side Automático a DINA4 (PDF)
 Un SaaS Bio-B2B en el 2026 requiere reportabilidad de auditoría. Para evitar montar el servidor con cabezas Chromium invisibles y quemar ancho de banda de Render Cloud, invertimos el paradigma a la Tarjeta Local (*Client-Side Exporting*).

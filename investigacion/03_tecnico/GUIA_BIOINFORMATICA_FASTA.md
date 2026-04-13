@@ -117,7 +117,7 @@ En un superordenador científico, el FASTA no pasa solo por AlphaFold, pasa por 
 3. **Paso 3 (Farmacología):** El modelo se cruza con bases de datos toxicológicas (como *ToxinPred*) para generar las **Alertas de Toxicidad**.
 
 **Por qué esto es importante para LocalFold:**
-Nuestra API (Mock) unifica todo este pipeline complejo en un solo JSON. Por eso el Protein Copilot (n8n + Gemini) es tan "listo": porque recibe métricas geométricas (AlphaFold) combinadas con física predictiva (Pipeline CESGA), permitiéndole razonar no solo sobre la "forma" de la proteína, sino sobre cómo se comportará en un tubo de ensayo real.
+Nuestra API (Mock) unifica todo este pipeline complejo en un solo JSON. Por eso el Protein Copilot (orquestado vía n8n) es tan "listo": porque recibe métricas geométricas (AlphaFold) combinadas con física predictiva (Pipeline CESGA), permitiéndole razonar no solo sobre la "forma" de la proteína, sino sobre cómo se comportará en un tubo de ensayo real.
 
 ---
 

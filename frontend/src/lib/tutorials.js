@@ -4,14 +4,14 @@
 export const DASHBOARD_STEPS = [
   {
     target: null,
-    title: "Bienvenido a OmicaFold",
+    title: "Bienvenido a Micafold",
     description: "Te mostramos las funciones principales en menos de un minuto. Usa las flechas del teclado o los botones para navegar.",
     icon: "👋",
   },
   {
     target: "#btn-new-job",
     title: "Enviar una predicción",
-    description: "Pega tu secuencia FASTA y OmicaFold la envía al CESGA. Sin terminales, sin scripts, sin configuración.",
+    description: "Pega tu secuencia FASTA y Micafold la envía al CESGA. Sin terminales, sin scripts, sin configuración.",
     side: "right",
   },
   {
@@ -28,7 +28,7 @@ export const DASHBOARD_STEPS = [
   },
   {
     target: "#assistant-link",
-    title: "MicaFold — tu asistente IA",
+    title: "ProteIA — tu asistente IA",
     description: "Analiza resultados con contexto real de tu proteína. Las respuestas se adaptan a tu perfil, no son genéricas.",
     side: "right",
   },
@@ -50,7 +50,7 @@ export const SUBMIT_STEPS = [
   {
     target: "#submit-job-btn",
     title: "Lanzar al CESGA",
-    description: "Al confirmar, OmicaFold reserva nodos GPU en el FinisTerrae III y ejecuta AlphaFold2 de forma transparente.",
+    description: "Al confirmar, Micafold reserva nodos GPU en el FinisTerrae III y ejecuta AlphaFold2 de forma transparente.",
     side: "top",
   },
 ];
@@ -80,13 +80,13 @@ export const CHAT_STEPS = [
   {
     target: "#chat-context-area",
     title: "Contexto de tu proteína",
-    description: "MicaFold ya ha leído todos los datos de tu predicción antes de que preguntes. Cada respuesta parte de tus resultados reales.",
+    description: "ProteIA ya ha leído todos los datos de tu predicción antes de que preguntes. Cada respuesta parte de tus resultados reales.",
     side: "bottom",
   },
   {
     target: "#chat-input-area",
     title: "Pregunta en lenguaje natural",
-    description: "Escribe como hablarías con un colega. MicaFold adapta la profundidad de la respuesta a tu perfil de usuario.",
+    description: "Escribe como hablarías con un colega. ProteIA adapta la profundidad de la respuesta a tu perfil de usuario.",
     side: "top",
   },
 ];

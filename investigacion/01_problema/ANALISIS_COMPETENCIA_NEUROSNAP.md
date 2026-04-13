@@ -2,7 +2,7 @@
 
 **URL analizada:** https://neurosnap.ai/service/AlphaFold2  
 **Fecha de análisis:** Abril 2026  
-**Propósito:** Entender cómo el mercado actual resuelve el problema que aborda LocalFold.
+**Propósito:** Entender cómo el mercado actual resuelve el problema que aborda Micafold.
 
 ---
 
@@ -104,16 +104,16 @@ Los créditos **no caducan** al final del ciclo de facturación.
 
 ---
 
-## 6. Puntos Débiles de Neurosnap (Oportunidades para LocalFold)
+## 6. Puntos Débiles de Neurosnap (Oportunidades para Micafold)
 
-| Debilidad Neurosnap | Oportunidad LocalFold |
+| Debilidad Neurosnap | Oportunidad Micafold |
 |---|---|
-| **Requiere registro y pago** — ni siquiera la prueba gratuita es completamente libre (1 solo crédito) | LocalFold es de acceso **directo y gratuito** para la comunidad investigadora del CESGA/USC |
-| **Servidor externo en Delaware, USA** — datos salen del país e institución | LocalFold ejecuta **dentro del CESGA** (infraestructura gallega/española). Cumple GDPR y normativa hospitalaria |
-| **Interfaz orientada a técnicos** — muchas opciones avanzadas (MSA mode, pairing, recycling) confunden a biólogos sin perfil computacional | LocalFold apuesta por **UX radical para el biólogo**: presets simples, tooltips educativos, cero jerga técnica |
-| **Sin contexto educativo** — no explica qué significa el pLDDT al usuario no experto | LocalFold puede incluir **resumen en lenguaje natural con LLM** que traduzca el resultado a biología |
-| **Orientado al mercado global/comercial** | LocalFold está **integrado con el ecosistema institucional** (USC, CiTIUS, CAMELIA) |
-| **Opciones complejas exportadas al usuario** | LocalFold simplifica la experiencia: 1 input, 1 botón, resultados claros |
+| **Requiere registro y pago** — ni siquiera la prueba gratuita es completamente libre (1 solo crédito) | Micafold es de acceso **directo y gratuito** para la comunidad investigadora del CESGA/USC |
+| **Servidor externo en Delaware, USA** — datos salen del país e institución | Micafold ejecuta **dentro del CESGA** (infraestructura gallega/española). Cumple GDPR y normativa hospitalaria |
+| **Interfaz orientada a técnicos** — muchas opciones avanzadas (MSA mode, pairing, recycling) confunden a biólogos sin perfil computacional | Micafold apuesta por **UX radical para el biólogo**: presets simples, tooltips educativos, cero jerga técnica |
+| **Sin contexto educativo** — no explica qué significa el pLDDT al usuario no experto | Micafold puede incluir **resumen en lenguaje natural con LLM** que traduzca el resultado a biología |
+| **Orientado al mercado global/comercial** | Micafold está **integrado con el ecosistema institucional** (USC, CiTIUS, CAMELIA) |
+| **Opciones complejas exportadas al usuario** | Micafold simplifica la experiencia: 1 input, 1 botón, resultados claros |
 
 ---
 
@@ -131,21 +131,21 @@ flujos de trabajo son populares entre los investigadores:
 
 > **Insight:** Los investigadores no solo predicen estructuras —
 > también quieren saber si la proteína es soluble, tóxica, si hace
-> docking con fármacos, y si una mutación la destabiliza. LocalFold
+> docking con fármacos, y si una mutación la destabiliza. Micafold
 > puede integrar algunas de estas métricas directamente desde la API del
 > CESGA (la API Mock ya devuelve solubilidad, toxicidad y estructura secundaria).
 
 ---
 
-## 8. Conclusión: Posicionamiento de LocalFold vs. Neurosnap
+## 8. Conclusión: Posicionamiento de Micafold vs. Neurosnap
 
-Neurosnap es la **solución comercial global**. LocalFold no compite con
+Neurosnap es la **solución comercial global**. Micafold no compite con
 ellos en escala ni en número de herramientas.
 
-LocalFold compite en **3 dimensiones clave**:
+Micafold compite en **3 dimensiones clave**:
 
 ```
-Neurosnap                      LocalFold
+Neurosnap                      Micafold
 ─────────────────────────────────────────────────
 Global / comercial      →      Institucional / CESGA
 Requiere pago           →      Gratuito (clúster propio)
