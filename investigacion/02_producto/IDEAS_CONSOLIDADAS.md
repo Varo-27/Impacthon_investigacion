@@ -107,7 +107,7 @@ Priorización basada en los **5 criterios oficiales del jurado**, en orden de pe
 **4. Generador de Reportes Automático (Exportación a Paper)**
 - Un botón para descargar un documento PDF que consolide la imagen 3D, las gráficas de PAE/pLDDT y una leyenda técnica escrita por IA, un 'abstract' listo para adjuntar a una publicación, tesis o reporte de laboratorio.
 
-**API:** Gemini 1.5 Pro vía n8n Webhooks (Integración viva)
+**API:** n8n Webhooks (Orquestación LLM en vivo)
 **Criterio:** 🥇 UX + IA (criterio 1 explícito del reto)
 
 ### B2. Historial de jobs — "Mis predicciones"

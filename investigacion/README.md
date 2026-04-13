@@ -70,7 +70,7 @@ JUEVES NOCHE    → Setup + Pantalla 1 (input FASTA + submit)
 VIERNES MAÑANA  → Pantalla 2 (polling + job lifecycle)
 VIERNES TARDE   → Pantalla 3 (visor 3D + métricas)
 VIERNES NOCHE   → PAE heatmap + descargas + MVP 100%
-SÁBADO MAÑANA   → ProteIA LLM + upload PDB + pitch
+SÁBADO MAÑANA   → ProteIA (n8n Webhooks) + upload PDB + pitch
 ```
 
 ---
@@ -85,4 +85,4 @@ SÁBADO MAÑANA   → ProteIA LLM + upload PDB + pitch
 | Neurosnap (competidor) | https://neurosnap.ai/service/AlphaFold2 |
 | Mol* viewer | https://molstar.org/viewer/ |
 | 3Dmol.js docs | https://3dmol.csb.pitt.edu |
-| Gemini API (LLM) | https://ai.google.dev |
+| AI Orchestration | n8n Webhooks |

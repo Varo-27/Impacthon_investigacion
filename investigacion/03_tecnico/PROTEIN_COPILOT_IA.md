@@ -171,17 +171,11 @@ Para drug discovery:
 
 ---
 
-## 5. APIs de LLM candidatas
+## 5. Orquestación del backend (n8n Webhook)
 
-| API | Ventajas | Inconvenientes | Recomendación hackathon |
-|---|---|---|---|
-| **Google Gemini Flash** | Gratis (tier gratuito generoso), muy rápido | Requiere Google account | ⭐ Primera opción |
-| **OpenAI GPT-4o-mini** | Calidad muy alta, barato | Requiere tarjeta de crédito | Segunda opción |
-| **Anthropic Claude Haiku** | Muy bueno en científico | Requiere tarjeta | Tercera opción |
-| **Ollama (local)** | Sin coste, sin API key | Requiere modelo descargado, lento | Solo si todo falla |
+Para evitar exponer API keys en el frontend y ganar puntos por usar una "arquitectura de orquestación", usaremos **n8n**. n8n actúa como un hub que recibe los datos de la proteína, los procesa y consulta al modelo de lenguaje configurado de forma segura.
 
-**Recomendación:** Gemini Flash 2.0 — tier gratuito suficiente para el
-hackathon, sin tarjeta de crédito, latencia baja (~1-2s).
+**Recomendación:** Usar n8n como capa intermedia para añadir asincronía y memoria sin complicar el código del frontend.
 
 ---
 
@@ -219,7 +213,7 @@ export async function generateProteinSummary(proteinContext) {
 }
 ```
 
-> **Ventaja de Seguridad:** La `VITE_GEMINI_API_KEY` vive segura dentro de la nube de n8n. React solo conoce la URL del Webhook.
+> **Ventaja de Seguridad:** Todas las credenciales críticas viven seguras dentro de la nube de n8n. React solo conoce la URL del Webhook.
 
 ---
 

@@ -1,4 +1,4 @@
-# OmicaFold — Guión Impacthon 2026
+# Micafold — Guión Impacthon 2026
 
 > **P1** = storyteller/narrador | **P2** = demo driver | **5 minutos** | Solux
 
@@ -53,7 +53,7 @@
 
 *(giro hacia la pantalla — P2 da un paso al frente)*
 
-> *"Les presentamos OmicaFold."*
+> *"Les presentamos Micafold."*
 
 ---
 
@@ -61,7 +61,7 @@
 
 > *"OmicaFold no es una interfaz para AlphaFold. Es la puerta de entrada a toda la computación científica del CESGA — para cualquier investigador, sin importar su perfil técnico.*
 >
-> *Y dentro del visor, un asistente construido con Gemini que no responde en genérico — responde sobre la proteína que tienes delante, ahora mismo.*
+> *Y dentro del visor, un asistente construido con n8n que no responde en genérico — responde sobre la proteína que tienes delante, ahora mismo.*
 >
 > *Eso cambia lo que significa entender un resultado."*
 
@@ -82,7 +82,7 @@
 >
 > *PAE heatmap: error entre pares de residuos. Esta zona fuera de la diagonal... aquí hay una interacción que merece atención."*
 
-**ProteIA / Gemini — criterio 4:**
+**ProteIA / n8n — criterio 4:**
 *(abre ProteIA junto al visor)*
 
 > *"ProteIA está aquí, dentro del visor, con contexto completo de lo que estoy viendo.*
@@ -90,14 +90,14 @@
 
 *(espera la respuesta — silencio)*
 
-> *"Gemini no responde en genérico. Responde sobre esta proteína, este resultado, ahora.*
+> *"ProteIA no responde en genérico. Responde sobre esta proteína, este resultado, ahora.*
 > *ProteIA no reemplaza al investigador. Le devuelve tiempo para investigar."*
 
 ---
 
 ### [3:45 – 4:00] CREDENCIAL TÉCNICA *(P2, 15 segundos)*
 
-> *"React, Firebase, pdbe-molstar, Gemini. API oficial del reto — la misma infraestructura CESGA que usaría en producción. Desplegable hoy."*
+> *"React, Firebase, pdbe-molstar, n8n. API oficial del reto — la misma infraestructura CESGA que usaría en producción. Desplegable hoy."*
 
 ---
 
@@ -114,7 +114,7 @@
 
 *[Pantalla verde: ACCESO CONCEDIDO — 5 segundos de silencio]*
 
-> ***"Solux. OmicaFold. Despliega el futuro."***
+> ***"Micafold. Despliega el futuro."***
 
 *(Silencio. No decir gracias.)*
 

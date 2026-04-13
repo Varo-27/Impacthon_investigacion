@@ -40,7 +40,7 @@ Directly integrated with the **CESGA (Centro de Supercomputación de Galicia)** 
 - **Frontend**: [React 19](https://react.dev/), [Vite 8](https://vitejs.dev/)
 - **UI/UX**: [Tailwind CSS](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/)
 - **Visuals**: [3Dmol.js](https://3dmol.csb.pitt.edu/), [Mol*](https://molstar.org/)
-- **AI Backend**: Gemini 1.5 Pro via specialized N8N workflows.
+- **AI Backend**: n8n Webhooks for specialized LLM orchestration.
 - **Database**: Cloud Firestore (NoSQL) for job tracking and persistence.
 
 ---

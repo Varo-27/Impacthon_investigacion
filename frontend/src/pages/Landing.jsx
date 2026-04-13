@@ -98,7 +98,7 @@ export default function Landing() {
             {[
               { label: "CESGA FinisTerrae III", color: "border-blue-500/30 text-blue-300" },
               { label: "nuestro sistema 2", color: "border-emerald-500/30 text-emerald-300" },
-              { label: "Google Gemini", color: "border-primary-500/30 text-primary-300" },
+              { label: "n8n Orchestration", color: "border-primary-500/30 text-primary-300" },
               { label: "n8n", color: "border-orange-500/30 text-orange-300" },
               { label: "Firebase", color: "border-amber-500/30 text-amber-300" },
               { label: "pdbe-molstar", color: "border-rose-500/30 text-rose-300" },

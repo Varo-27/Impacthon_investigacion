@@ -102,7 +102,7 @@ Setup + fundamentos   Core features + visor 3D      Polish + pitch
 Ambas son **obligatorias**, en este orden:
 
 **A — Protein Copilot (LLM) ⭐ — máximo impacto**
-- Obtener API key de Gemini Flash 2.0 (gratis, sin tarjeta)
+- Configurar acceso al orquestador n8n para el asistente IA
 - Llamada desde `src/api/llm.js` con el contexto del resultado
 - Resumen automático al cargar la pantalla de resultados
 - Chat con preguntas presugeridas

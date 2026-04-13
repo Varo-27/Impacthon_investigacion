@@ -108,7 +108,7 @@ await supabase.auth.signInWithOAuth({ provider: 'google' })
 
 ### IA / LLMs (diferenciación)
 ```
-Gemini Flash 2.0 → ProteIA (explicación en lenguaje natural)
+n8n Webhooks     → ProteIA (explicación en lenguaje natural)
                  → Chat contextual con datos del job actual
 ```
 

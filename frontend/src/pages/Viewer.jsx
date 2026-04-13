@@ -417,7 +417,7 @@ ${imagesHtml}
 ${bioHtml}
 
 <section>
-  <h2>Análisis IA — ProteIA (Gemini 1.5 Pro via n8n)</h2>
+  <h2>Análisis IA — ProteIA (n8n Webhooks)</h2>
   <div class="ai-summary"><p>${summaryHtml}</p></div>
 </section>
 

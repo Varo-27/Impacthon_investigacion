@@ -97,7 +97,7 @@ El impacto a largo plazo depende de que CESGA y las instituciones adopten Micafo
 | Base de datos | Firebase Firestore | Jobs, proyectos, usuarios |
 | HPC Backend | CESGA FinisTerrae III | Cómputo AlphaFold 2 |
 | Orquestación | n8n + webhooks | Pipeline de jobs |
-| IA | Google Gemini (vía n8n) | ProteIA asistente |
+| IA | n8n Orchestration | ProteIA asistente |
 | Visualización 3D | pdbe-molstar (Mol*) | Visor estructural |
 | Exportación | jsPDF, html2canvas, LaTeX | Informes científicos |
 
