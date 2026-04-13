@@ -1,6 +1,7 @@
 # <img src="frontend/public/logo.png" width="40" height="40" align="center" style="margin-right: 10px;"> Micafold
 
 [![Hackathon](https://img.shields.io/badge/Impacthon-2026-blueviolet?style=for-the-badge)](https://github.com/JoseEstevez520/Impacthon_investigacion)
+[![Award](https://img.shields.io/badge/Award-🥈%202nd%20Place-gold?style=for-the-badge)](https://github.com/JoseEstevez520/Impacthon_investigacion)
 [![Target](https://img.shields.io/badge/Platform-CESGA%20HPC-brightgreen?style=for-the-badge)](https://www.cesga.es/)
 [![AI-Powered](https://img.shields.io/badge/Powered%20by-ProteIA-orange?style=for-the-badge)](https://github.com/JoseEstevez520/Impacthon_investigacion)
 
@@ -37,7 +38,7 @@ Directly integrated with the **CESGA (Centro de Supercomputación de Galicia)** 
 ## 🛠️ Technology Stack
 
 - **Frontend**: [React 19](https://react.dev/), [Vite 8](https://vitejs.dev/)
-- **UI/UX**: [Vanilla CSS](https://developer.mozilla.org/en-US/docs/Web/CSS), [Framer Motion](https://www.framer.com/motion/)
+- **UI/UX**: [Tailwind CSS](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/)
 - **Visuals**: [3Dmol.js](https://3dmol.csb.pitt.edu/), [Mol*](https://molstar.org/)
 - **AI Backend**: Gemini 1.5 Pro via specialized N8N workflows.
 - **Database**: Cloud Firestore (NoSQL) for job tracking and persistence.
