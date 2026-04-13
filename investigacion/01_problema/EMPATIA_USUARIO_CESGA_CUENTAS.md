@@ -10,7 +10,7 @@ la conversación sobre cuentas y persistencia.
 **Persona:** Alejandro, 38 años. Investigador en proteómica computacional.
 Trabaja en el CiTIUS (USC). Tiene acceso al CESGA Finis Terrae III.
 
-### Su flujo de trabajo habitual (sin LocalFold):
+### Su flujo de trabajo habitual (sin Micafold):
 ```
 08:30 — En casa. Se conecta al CESGA por SSH desde su portátil.
          Lanza 3 jobs de AlphaFold con un script de Slurm.
@@ -37,7 +37,7 @@ Final del día — Tiene 3 PDBs en su portátil, 0 en su pc de la facultad,
 
 ---
 
-## Lo que Alejandro REALMENTE necesita de LocalFold
+## Lo que Alejandro REALMENTE necesita de Micafold
 
 ### 1. Que reconozca que SOY YO
 
@@ -47,7 +47,7 @@ Para Alejandro, localStorage es **completamente inútil**.
 - Su directora necesita acceder a los mismos resultados desde Barcelona
 - Sus doctorandos trabajan con las mismas proteínas del grupo
 
-**Lo que espera:** Que LocalFold lo reconozca como él en cualquier dispositivo.
+**Lo que espera:** Que Micafold lo reconozca como él en cualquier dispositivo.
 Y lo más importante: **ya tiene una cuenta** — su cuenta institucional de la USC/CSIC.
 
 > **Insight crítico:** Alejandro no quiere crear una cuenta nueva.
@@ -63,14 +63,14 @@ Este es el flujo que más sentido tiene para Alejandro:
 
 ```
 Alejandro ya lanzó sus jobs por SSH hace 2 horas.
-Ahora abre LocalFold en el navegador.
+Ahora abre Micafold en el navegador.
 
 En vez de pegar una secuencia, hace clic en:
   [ Tengo un Job ID del CESGA ]
 
 Introduce: cesga_job_487523
 
-LocalFold consulta la API → llama a GET /jobs/cesga_job_487523/status
+Micafold consulta la API → llama a GET /jobs/cesga_job_487523/status
 → Si está completo, muestra los resultados directamente
 → Si está corriendo, hace polling en tiempo real
 ```
@@ -78,7 +78,7 @@ LocalFold consulta la API → llama a GET /jobs/cesga_job_487523/status
 **Por qué es perfecto para este usuario:**
 - No duplica trabajo (ya calculó, no quiere calcular otra vez)
 - Accede a sus resultados desde cualquier navegador sin instalar nada
-- LocalFold se convierte en su "panel de visualización" para el CESGA
+- Micafold se convierte en su "panel de visualización" para el CESGA
 
 ---
 
@@ -86,7 +86,7 @@ LocalFold consulta la API → llama a GET /jobs/cesga_job_487523/status
 
 ```
 Alejandro en su portátil: predice Ubiquitin → historial actualizado
-Alejandro en PC facultad: abre LocalFold → ve Ubiquitin en su historial
+Alejandro en PC facultad: abre Micafold → ve Ubiquitin en su historial
 Alejandro en casa: su directora abre el link → ve exactamente lo mismo
 ```
 
@@ -135,7 +135,7 @@ Dos modos de entrada en la pantalla principal:
 El historial se guarda en localStorage para la demo. En el pitch:
 
 > "Para los investigadores del CESGA que ya tienen cuenta institucional,
-> LocalFold en producción se integra con el SSO de la USC/CSIC mediante
+> Micafold en producción se integra con el SSO de la USC/CSIC mediante
 > SAML2 o eduroam. En ese caso el historial queda sincronizado en el
 > clúster, accesible desde cualquier dispositivo. El biólogo sin cuenta
 > CESGA usa el modo anónimo con persistencia local."
@@ -172,7 +172,7 @@ directamente al visor sin pasar por la API.
 
 ## Conclusión
 
-Para el CESGA user, el verdadero valor de LocalFold no es predecir
+Para el CESGA user, el verdadero valor de Micafold no es predecir
 (ya saben hacerlo por su cuenta) sino **visualizar, interpretar y compartir
 lo que ya calcularon**, desde cualquier lugar, sin instalar nada.
 

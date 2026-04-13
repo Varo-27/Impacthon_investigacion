@@ -1,8 +1,8 @@
-# Análisis estratégico — LocalFold
+# Análisis estratégico — Micafold
 
-> **Esto no es un reto. Es una misión.**
+> **Esto no es un resto. Es una misión.**
 > Un reto se gana el sábado. Una misión trasciende el hackathon.
-> LocalFold existe porque hay un problema real que frena el progreso científico, y hay personas que sufren mientras ese progreso tarda.
+> Micafold existe porque hay un problema real que frena el progreso científico, y hay personas que sufren mientras ese progreso tarda.
 
 ---
 
@@ -12,18 +12,18 @@ Los investigadores en bioinformática que necesitan predecir estructuras proteic
 
 **Consecuencia directa:** investigadores con perfil biológico pero no informático quedan excluidos de una herramienta que podría acelerar significativamente su trabajo. El tiempo científico se desperdicia en infraestructura.
 
-**Magnitud:** En España operan más de 50 grupos de investigación en bioinformática estructural. Todos ellos tienen acceso potencial al CESGA. Ninguno tiene hoy una interfaz como LocalFold.
+**Magnitud:** En España operan más de 50 grupos de investigación en bioinformática estructural. Todos ellos tienen acceso potencial al CESGA. Ninguno tiene hoy una interfaz como Micafold.
 
 ---
 
 ## 2. Solución
 
-LocalFold es una plataforma web que abstrae completamente la complejidad del HPC. El investigador sube una secuencia FASTA, selecciona los recursos de cómputo y recibe una predicción estructural completa con visualización 3D interactiva, métricas de confianza y análisis asistido por IA.
+Micafold es una plataforma web que abstrae completamente la complejidad del HPC. El investigador sube una secuencia FASTA, selecciona los recursos de cómputo y recibe una predicción estructural completa con visualización 3D interactiva, métricas de confianza y análisis asistido por IA.
 
 **El proceso completo:**
 1. Pegar secuencia FASTA o subir fichero
 2. Seleccionar preset de recursos (Alta / Intermedia / Baja fiabilidad)
-3. LocalFold gestiona el job en CESGA automáticamente
+3. Micafold gestiona el job en CESGA automáticamente
 4. Resultado: visor 3D con pLDDT coloreado, heatmap PAE, descarga PDB/JSON/LaTeX/PDF
 5. ProteIA analiza la estructura y responde preguntas científicas en lenguaje natural
 
@@ -31,7 +31,7 @@ LocalFold es una plataforma web que abstrae completamente la complejidad del HPC
 
 ## 3. Propuesta de valor
 
-| Para quién | Qué obtienen | Sin LocalFold |
+| Para quién | Qué obtienen | Sin Micafold |
 |---|---|---|
 | Investigador biólogo | Predicción estructural sin abrir terminal | Depende del departamento IT |
 | Grupo de investigación | Workspace colaborativo con proyectos compartidos | Ficheros por email o Dropbox |
@@ -40,7 +40,7 @@ LocalFold es una plataforma web que abstrae completamente la complejidad del HPC
 **Diferenciador clave frente a alternativas:**
 - **AlphaFold Server (Google DeepMind):** no conecta con CESGA, limitado a 10 jobs/día, sin colaboración
 - **ColabFold:** requiere Jupyter, sin interfaz, sin análisis IA integrado
-- **LocalFold:** HPC real + UX accesible + ProteIA + colaboración en tiempo real
+- **Micafold:** HPC real + UX accesible + ProteIA + colaboración en tiempo real
 
 ---
 
@@ -70,21 +70,21 @@ ProteIA es el componente de mayor diferenciación. Es un asistente de IA especia
 
 ## 6. Impacto real
 
-LocalFold no hace nueva ciencia. No mejora AlphaFold. Lo que hace es **eliminar la fricción** entre un investigador y una herramienta que ya existe. El impacto no es el descubrimiento — es la velocidad a la que puede llegar.
+Micafold no hace nueva ciencia. No mejora AlphaFold. Lo que hace es **eliminar la fricción** entre un investigador y una herramienta que ya existe. El impacto no es el descubrimiento — es la velocidad a la que puede llegar.
 
 **Y la velocidad en ciencia médica se traduce en vidas.**
 
 ### Dónde el impacto es más tangible
-En enfermedades donde las proteínas mal plegadas son el mecanismo central — ELA, Alzheimer, Parkinson, Huntington. En España: ~800.000 personas con Alzheimer, ~4.000 nuevos casos de ELA al año. Los grupos que investigan estas enfermedades en la USC, CSIC o CiMUS son exactamente el usuario de LocalFold.
+En enfermedades donde las proteínas mal plegadas son el mecanismo central — ELA, Alzheimer, Parkinson, Huntington. En España: ~800.000 personas con Alzheimer, ~4.000 nuevos casos de ELA al año. Los grupos que investigan estas enfermedades en la USC, CSIC o CiMUS son exactamente el usuario de Micafold.
 
 ### Impacto concreto y medible
-- **Tiempo:** cada predicción que antes requería días de configuración HPC, con LocalFold está lista en minutos
+- **Tiempo:** cada predicción que antes requería días de configuración HPC, con Micafold está lista en minutos
 - **Acceso:** investigadores sin perfil técnico pueden usar AlphaFold 2 sin depender del departamento IT
 - **Colaboración:** equipos multidisciplinares trabajando sobre los mismos resultados en tiempo real
 - **Conocimiento:** ProteIA democratiza la interpretación estructural — ya no hace falta ser bioinformático para entender los resultados
 
 ### El techo real
-El impacto a largo plazo depende de que CESGA y las instituciones adopten LocalFold en producción. Como prototipo demuestra que es posible y necesario. El siguiente paso es institucional — y ese paso, si se da, cambia cómo se hace ciencia en Galicia y en España.
+El impacto a largo plazo depende de que CESGA y las instituciones adopten Micafold en producción. Como prototipo demuestra que es posible y necesario. El siguiente paso es institucional — y ese paso, si se da, cambia cómo se hace ciencia en Galicia y en España.
 
 ---
 
@@ -107,11 +107,11 @@ El impacto a largo plazo depende de que CESGA y las instituciones adopten LocalF
 
 ## 8. Posicionamiento de marca
 
-- **Nombre:** LocalFold
+- **Nombre:** Micafold
 - **Slogan:** *Despliega el futuro.*
 - **Tono:** Científico pero accesible. Serio sin ser frío.
 - **Arquetipo:** Sage + Magician — saber profundo que transforma.
-- **Inspiración filosófica:** La visión de Demis Hassabis sobre la IA como instrumento para acelerar el entendimiento humano del universo. LocalFold no es una interfaz — es el acceso a ese entendimiento para quienes más lo necesitan.
+- **Inspiración filosófica:** La visión de Demis Hassabis sobre la IA como instrumento para acelerar el entendimiento humano del universo. Micafold no es una interfaz — es el acceso a ese entendimiento para quienes más lo necesitan.
 
 ---
 
@@ -131,4 +131,6 @@ El impacto a largo plazo depende de que CESGA y las instituciones adopten LocalF
 | API CESGA inestable en demo | Job pre-lanzado antes de presentar; datos de fallback listos |
 | Jurado no técnico no entiende proteínas | Narrativa centrada en enfermedades humanas, no en bioinformática |
 | Otros grupos tienen producto similar | ProteIA + colaboración son únicos; formato presentación diferente |
+| Cold start del servidor mock | Hacer petición de warm-up 2 min antes de presentar |
+ación son únicos; formato presentación diferente |
 | Cold start del servidor mock | Hacer petición de warm-up 2 min antes de presentar |

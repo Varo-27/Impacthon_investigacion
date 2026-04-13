@@ -1,6 +1,6 @@
 # 🚀 Hoja de Ruta: Ideas Disruptivas y Diferenciadoras
 
-Este documento detalla las funcionalidades de "Siguiente Nivel" para LocalFold, diseñadas para transformar una herramienta de visualización en una plataforma de descubrimiento científico autónomo.
+Este documento detalla las funcionalidades de "Siguiente Nivel" para Micafold, diseñadas para transformar una herramienta de visualización en una plataforma de descubrimiento científico autónomo.
 
 ---
 
@@ -12,7 +12,7 @@ Este documento detalla las funcionalidades de "Siguiente Nivel" para LocalFold, 
 *   **Visualización:** Un mapa 2D (Scatter Plot) donde cada punto es una proteína y los colores indican clústeres de similitud.
 
 ### 🧪 Análisis de Mutaciones de un Solo Punto (In-Silico)
-*   **Concepto:** Permitir al usuario seleccionar un residuo en el visor 3D y preguntar al Copilot: "¿Qué pasa si cambio esta Alanina por una Prolina?".
+*   **Concepto:** Permitir al usuario seleccionar un residuo en el visor 3D y preguntar a ProteIA: "¿Qué pasa si cambio esta Alanina por una Prolina?".
 *   **Valor:** Predicción inmediata de la Delta-Delta-G (estabilidad termodinámica) sin re-correr AlphaFold entero.
 
 ### 📊 Consenso Multi-Modelo (Voting)
@@ -21,14 +21,14 @@ Este documento detalla las funcionalidades de "Siguiente Nivel" para LocalFold, 
 
 ---
 
-## 🤖 2. Protein Copilot: De Asistente a Investigador
+## 🤖 2. ProteIA: De Asistente a Investigador
 
 ### 📝 Generador Automático de Protocolos de Laboratorio
-*   **Concepto:** El Copilot lee la estructura, detecta que es inestable y genera un PDF con el protocolo de purificación optimizado (pH, Buffer recomendado, temperatura).
+*   **Concepto:** ProteIA lee la estructura, detecta que es inestable y genera un PDF con el protocolo de purificación optimizado (pH, Buffer recomendado, temperatura).
 *   **Diferenciador:** Conecta lo digital con el laboratorio físico.
 
 ### 🔍 Vigilancia de Literatura en Tiempo Real
-*   **Concepto:** El Copilot busca en PubMed/bioRxiv estructuras similares recién publicadas que coincidan con la predicción actual.
+*   **Concepto:** ProteIA busca en PubMed/bioRxiv estructuras similares recién publicadas que coincidan con la predicción actual.
 *   **Valor:** Identifica si alguien ya ha descubierto o patentado algo similar.
 
 ---
@@ -41,7 +41,7 @@ Este documento detalla las funcionalidades de "Siguiente Nivel" para LocalFold, 
 
 ### 🔗 Arquitectura "Link-Stateless" Profunda
 *   **Concepto:** Permitir embeber el visor 3D en cuadernos de Notion, informes de investigadores o páginas web de laboratorios con un simple iframe.
-*   **Valor:** Convierte a LocalFold en el "YouTube de las proteínas".
+*   **Valor:** Convierte a Micafold en el "YouTube de las proteínas".
 
 ---
 

@@ -1,4 +1,4 @@
-# IDEAS — LocalFold (Impacthón 2026)
+# IDEAS — Micafold (Impacthón 2026)
 
 Priorización basada en los **5 criterios oficiales del jurado**, en orden de peso.
 
@@ -74,7 +74,7 @@ Priorización basada en los **5 criterios oficiales del jurado**, en orden de pe
   - 🥇 **1. Solubilidad** 👉 *"¿Esto se puede usar en laboratorio?"* (Barra de progreso semaforizada).
   - 🥈 **2. Estabilidad** 👉 *"¿Se mantiene funcional o se rompe?"* (Badge de estatus).
   - 🥉 **3. Afinidad de unión (binding)** 👉 *"¿Interactúa con algo importante?"* (Si hay datos de interfaz, destacarlos).
-  - ⭐ **4. Expresabilidad** 👉 *"¿Se puede producir fácilmente en cultivo?"* (Derivado de índices bioquímicos u optimización de codones).
+  - ⭐ **4. Expresabilidad** 👉 *"¿Se puede producir fácilmente en cultivo?"* (Derivados de índices bioquímicos u optimización de codones).
 - **Criterio:** 🥇 UX + 4º Datos creativos
 
 ### A9. Card de Accounting HPC
@@ -91,7 +91,7 @@ Priorización basada en los **5 criterios oficiales del jurado**, en orden de pe
 
 ## 🟠 BLOQUE B — DIFERENCIADORES (con esto se gana)
 
-### B1. ⭐ Protein Copilot ("Bio-Copilot") — Asistente Inteligente de Plegamiento
+### B1. ⭐ ProteIA ("Bio-Copilot") — Asistente Inteligente de Plegamiento
 **El feature que gana el hackathon. El jurado preguntará "¿tiene IA?".** En lugar de un simple formulario, integra un agente de IA que guía al usuario durante todo el proceso end-to-end.
 
 **1. Conversión de Lenguaje Natural a FASTA (El Input del futuro)**
@@ -166,7 +166,7 @@ Priorización basada en los **5 criterios oficiales del jurado**, en orden de pe
 - **Implementación mínima (sin tabla extra):** campo `project_name text` en `jobs` — el usuario escribe el nombre al guardar
 - **Implementación completa (tabla `projects`):** permite renombrar proyectos globalmente, ver estadísticas por carpeta, compartir proyectos enteros con colaboradores
 - **Decisión para hackathon:** usar `project_name text` (5 min) → tabla completa solo si sobra tiempo
-- **Por qué es interesante:** convierte LocalFold en gestor de investigación, no solo predictor. Muy relevante para el perfil CESGA que tiene múltiples experimentos en paralelo.
+- **Por qué es interesante:** convierte Micafold en gestor de investigación, no solo predictor. Muy relevante para el perfil CESGA que tiene múltiples experimentos en paralelo.
 
 ---
 
@@ -201,10 +201,10 @@ VIERNES NOCHE:
   B3           →  Compartir por URL (30 min)
 
 SÁBADO MAÑANA:
-  B1           →  Protein Copilot LLM ← ESTO GANA
+  B1           →  ProteIA LLM ← ESTO GANA
   B4           →  Tooltips educativos
   C1/C2/C3     →  Lo que quede de tiempo
 ```
 
 > **Regla de oro:** Un MVP funcional y bonito en A1-A10 ya compite.
-> El Protein Copilot (B1) es lo que gana.
+> El ProteIA (B1) es lo que gana.

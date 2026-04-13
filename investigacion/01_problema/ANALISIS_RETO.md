@@ -1,4 +1,4 @@
-# Analisis del Reto — Impacthon 2026: LocalFold
+# Analisis del Reto — Impacthon 2026: Micafold
 
 ## Resumen ejecutivo
 

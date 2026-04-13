@@ -420,7 +420,7 @@ export default function Labs() {
         <div>
           <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-3">
             <Beaker className="w-10 h-10 text-primary-500" />
-            MicaFold Labs
+            Micafold Labs
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
             Explora proteínas documentadas y pon a prueba tus conocimientos sobre sus estructuras predichas por AlphaFold.

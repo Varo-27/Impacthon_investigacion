@@ -308,7 +308,7 @@ export default function Viewer() {
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>MicaFold — ${jobData?.name || "Informe"}</title>
+<title>Micafold — ${jobData?.name || "Informe"}</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   @page { size: A4; margin: 0; }
@@ -390,7 +390,7 @@ export default function Viewer() {
 </div>
 
 <div class="header">
-  <div class="header-brand"> MicaFold<span>Informe de Predicción Estructural</span></div>
+  <div class="header-brand"> Micafold<span>Informe de Predicción Estructural</span></div>
   <div class="header-date">Impacthon 2026 · CESGA FinisTerrae III<br>${new Date().toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })}</div>
 </div>
 
@@ -422,7 +422,7 @@ ${bioHtml}
 </section>
 
 <div class="footer">
-  <div class="footer-brand"> MicaFold</div>
+  <div class="footer-brand"> Micafold</div>
   <div class="footer-note">Los resultados son predicciones computacionales generadas por nuestro sistema 2. No constituyen diagnóstico clínico ni asesoramiento médico.</div>
 </div>
 

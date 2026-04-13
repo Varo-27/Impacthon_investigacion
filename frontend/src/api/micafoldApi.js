@@ -85,7 +85,7 @@ export const micafoldApi = {
       return data.output || data.response || "No se pudo generar un resumen automático.";
     } catch (error) {
       console.error("MicaFold summary error:", error);
-      return "Hubo un problema al conectar con MicaFold.";
+      return "Hubo un problema al conectar con Micafold.";
     }
   },
 

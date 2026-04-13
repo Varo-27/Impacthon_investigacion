@@ -114,7 +114,7 @@ export default function Settings() {
       {/* ── PERFIL DE USO ── */}
       <Section title="Perfil de uso">
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-          MicaFold adapta sus respuestas según estos datos. Cámbialo cuando cambien tus necesidades.
+          Micafold adapta sus respuestas según estos datos. Cámbialo cuando cambien tus necesidades.
         </p>
 
         {/* Tipo de usuario */}
@@ -177,7 +177,7 @@ export default function Settings() {
               </button>
               {showInfo && (
                 <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-60 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-300 leading-relaxed shadow-xl z-10">
-                  MicaFold tendrá en cuenta este texto en cada análisis para adaptar las respuestas a tu contexto específico de investigación.
+                  Micafold tendrá en cuenta este texto en cada análisis para adaptar las respuestas a tu contexto específico de investigación.
                   <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 border-r border-b border-slate-700 rotate-45 -mt-1" />
                 </div>
               )}

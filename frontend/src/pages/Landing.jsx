@@ -37,8 +37,8 @@ export default function Landing() {
       <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "bg-slate-900/80 backdrop-blur-md border-b border-white/5" : "bg-transparent"}`}>
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src={logoUrl} className="w-8 h-8 object-contain" alt="MicaFold" />
-            <span className="text-xl font-bold tracking-tight text-white">Omica<span className="text-primary-500">Fold</span></span>
+            <img src={logoUrl} className="w-8 h-8 object-contain" alt="Micafold" />
+            <span className="text-xl font-bold tracking-tight text-white transition-colors duration-200">Mica<span className="text-primary-500">fold</span></span>
           </div>
           <button
             onClick={handleLogin}
@@ -71,7 +71,7 @@ export default function Landing() {
           </div>
 
           <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-400 leading-tight">
-            nuestro sistema en tu navegador,<br />sin abrir la terminal.
+            Nuestro sistema en tu navegador,<br />sin abrir la terminal.
           </h1>
 
           <p className="text-lg lg:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
@@ -121,8 +121,8 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { step: "01", icon: <Upload className="w-5 h-5" />, color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20", title: "Sube tu FASTA", desc: "Pega la secuencia o arrastra el fichero. El nombre se detecta automáticamente del header UniProt." },
-              { step: "02", icon: <Cpu className="w-5 h-5" />, color: "text-primary-400", bg: "bg-primary-500/10 border-primary-500/20", title: "El CESGA computa", desc: "MicaFold reserva nodos GPU A100 y ejecuta nuestro sistema 2 en el FinisTerrae III de forma transparente." },
-              { step: "03", icon: <Eye className="w-5 h-5" />, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", title: "Analiza y colabora", desc: "Visor 3D con pLDDT, heatmap PAE, análisis IA con MicaFold y workspace colaborativo en tiempo real." },
+              { step: "02", icon: <Cpu className="w-5 h-5" />, color: "text-primary-400", bg: "bg-primary-500/10 border-primary-500/20", title: "El CESGA computa", desc: "Micafold reserva nodos GPU A100 y ejecuta nuestro sistema 2 en el FinisTerrae III de forma transparente." },
+              { step: "03", icon: <Eye className="w-5 h-5" />, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", title: "Analiza y colabora", desc: "Visor 3D con pLDDT, heatmap PAE, análisis IA con ProteIA y workspace colaborativo en tiempo real." },
             ].map((item) => (
               <div key={item.step} className="relative flex flex-col gap-5 p-8 rounded-2xl bg-white dark:bg-slate-800/40 border border-white/5 hover:border-white/10 transition-colors">
                 <span className="absolute top-6 right-6 text-7xl font-black text-white/[0.04] leading-none select-none">{item.step}</span>
@@ -147,12 +147,12 @@ export default function Landing() {
             <h2 className="text-4xl lg:text-5xl font-extrabold text-white">Todo en una sola herramienta</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <FeatureCard icon={<Bot className="w-6 h-6 text-emerald-400" />} title="MicaFold — Copiloto IA" desc="Lee pLDDT, solubilidad e inestabilidad y traduce los datos técnicos a conclusiones biológicas accionables." accent="from-emerald-500" />
-            <FeatureCard icon={<BrainCircuit className="w-6 h-6 text-primary-400" />} title="MicaFold — Asistente RAG" desc="Escribe @ para adjuntar el contexto de cualquier predicción. Análisis personalizados, no respuestas genéricas." accent="from-primary-500" />
+            <FeatureCard icon={<Bot className="w-6 h-6 text-emerald-400" />} title="ProteIA — Copiloto IA" desc="Lee pLDDT, solubilidad e inestabilidad y traduce los datos técnicos a conclusiones biológicas accionables." accent="from-emerald-500" />
+            <FeatureCard icon={<BrainCircuit className="w-6 h-6 text-primary-400" />} title="Micafold — Asistente RAG" desc="Escribe @ para adjuntar el contexto de cualquier predicción. Análisis personalizados, no respuestas genéricas." accent="from-primary-500" />
             <FeatureCard icon={<Users className="w-6 h-6 text-blue-400" />} title="Proyectos colaborativos" desc="Invita colaboradores por email y centraliza todas las predicciones del grupo en un workspace compartido." accent="from-blue-500" />
             <FeatureCard icon={<BarChart3 className="w-6 h-6 text-amber-400" />} title="Visor 3D + PAE heatmap" desc="Estructura molecular interactiva con coloreado por confianza y matriz de error de alineación predicho." accent="from-amber-500" />
             <FeatureCard icon={<Bell className="w-6 h-6 text-rose-400" />} title="Notificaciones en tiempo real" desc="Recibe alertas cuando una predicción completa o falla, aunque tengas la pestaña en segundo plano." accent="from-rose-500" />
-            <FeatureCard icon={<FlaskConical className="w-6 h-6 text-violet-400" />} title="Informe PDF automático" desc="Genera en un clic un informe con estructura 3D, métricas de confianza y análisis de MicaFold." accent="from-violet-500" />
+            <FeatureCard icon={<FlaskConical className="w-6 h-6 text-violet-400" />} title="Informe PDF automático" desc="Genera en un clic un informe con estructura 3D, métricas de confianza y análisis de ProteIA." accent="from-violet-500" />
           </div>
         </div>
       </section>
@@ -170,14 +170,14 @@ export default function Landing() {
                   Un asistente que conoce<br /><span className="text-primary-300">tus</span> proteínas
                 </h2>
                 <p className="text-slate-400 leading-relaxed max-w-md">
-                  Menciona <code className="text-primary-300 bg-primary-900/40 px-1.5 py-0.5 rounded text-sm">@proyecto</code> o <code className="text-primary-300 bg-primary-900/40 px-1.5 py-0.5 rounded text-sm">@proteína</code> para que MicaFold analice tus datos reales — no literatura genérica. Desde comparar riesgos entre candidatos hasta identificar dianas terapéuticas.
+                  Menciona <code className="text-primary-300 bg-primary-900/40 px-1.5 py-0.5 rounded text-sm">@proyecto</code> o <code className="text-primary-300 bg-primary-900/40 px-1.5 py-0.5 rounded text-sm">@proteína</code> para que Micafold analice tus datos reales — no literatura genérica. Desde comparar riesgos entre candidatos hasta identificar dianas terapéuticas.
                 </p>
               </div>
               {/* Right: fake chat */}
               <div className="w-full lg:w-[440px] shrink-0 rounded-2xl bg-slate-800/80 border border-white/10 overflow-hidden">
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/5">
                   <BrainCircuit className="w-4 h-4 text-primary-400" />
-                  <span className="text-xs font-semibold text-slate-300">MicaFold</span>
+                  <span className="text-xs font-semibold text-slate-300">ProteIA</span>
                   <span className="ml-auto flex items-center gap-1 text-[10px] text-emerald-400">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />en línea
                   </span>
@@ -189,7 +189,7 @@ export default function Landing() {
                       <span className="text-primary-200 font-mono font-semibold">@Proyecto_ELA</span> de las 5 proteínas predichas, ¿cuál representa mayor riesgo de agregación patológica?
                     </div>
                   </div>
-                  {/* MicaFold response */}
+                  {/* ProteIA response */}
                   <div className="flex justify-start gap-2.5">
                     <div className="w-6 h-6 rounded-full bg-primary-900 border border-primary-700 flex items-center justify-center shrink-0 mt-0.5">
                       <BrainCircuit className="w-3 h-3 text-primary-400" />
@@ -234,8 +234,8 @@ export default function Landing() {
       <footer className="border-t border-white/5 py-10 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
-            <img src={logoUrl} className="w-6 h-6 object-contain" alt="MicaFold" />
-            <span className="font-bold text-white text-sm">Omica<span className="text-primary-500">Fold</span></span>
+            <img src={logoUrl} className="w-6 h-6 object-contain" alt="Micafold" />
+            <span className="font-bold text-white text-sm">Mica<span className="text-primary-500">fold</span></span>
             <span className="text-slate-600 text-sm">—</span>
             <span className="text-slate-400 text-xs">Predicción proteica en el navegador</span>
           </div>

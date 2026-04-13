@@ -1,4 +1,7 @@
-# LocalFold — Base de Conocimiento del Proyecto
+# Micafold — Base de Conocimiento del Proyecto
+
+> [!CAUTION]
+> **Aviso Importante:** La infraestructura técnica de este proyecto (API Mock del CESGA) ha sido desactivada tras el Impacthon 2026. Los documentos y el código se mantienen como referencia histórica.
 
 Todo lo que el equipo necesita saber antes de escribir código.
 
@@ -9,10 +12,10 @@ Todo lo que el equipo necesita saber antes de escribir código.
 ```
 investigacion/
 │
-├── 01_problema/                         ← Por qué existe LocalFold
+├── 01_problema/                         ← Por qué existe Micafold
 │   ├── DOCUMENTO_DE_INVESTIGACION.md    → Contexto del reto, problema y estado del arte
 │   ├── USUARIOS.md                      → 5 perfiles, escenarios reales, MoSCoW, modo dual
-│   └── ANALISIS_COMPETENCIA_NEUROSNAP.md → Funcionalidades, pricing, gaps vs LocalFold
+│   └── ANALISIS_COMPETENCIA_NEUROSNAP.md → Funcionalidades, pricing, gaps vs Micafold
 │
 ├── 02_producto/                         ← Qué construimos
 │   ├── IDEAS_CONSOLIDADAS.md            → 29 ideas priorizadas (🟢🟡🔴)
@@ -22,7 +25,7 @@ investigacion/
 │   ├── STACK_Y_APUNTES_DESARROLLO.md    → Stack, endpoints API, campos de salida
 │   ├── ARQUITECTURA_COMPONENTES.md      → Árbol React, decisión 3Dmol.js, polling
 │   ├── FORMATOS_ENTRADA_FASTA.md        → Todos los formatos de entrada y normalización
-│   ├── PROTEIN_COPILOT_IA.md            → Diseño técnico del asistente LLM
+│   ├── PROTEIN_COPILOT_IA.md            → Diseño técnico del asistente LLM (ProteIA)
 │   └── PLAN_SPRINT_HACKATHON.md         → Timeline 48h con checkpoints por bloque
 │
 └── README.md                            ← Este archivo
@@ -36,9 +39,9 @@ investigacion/
 
 **La solución existente:** Neurosnap — de pago ($7-80/mes), datos en USA (GDPR ❌), UX orientada a técnicos.
 
-**LocalFold:** La interfaz institucional del CESGA. Gratis, datos en Galicia, UX para el biólogo.
+**Micafold:** La interfaz institucional del CESGA. Gratis, datos en Galicia, UX para el biólogo.
 
-**El diferenciador ganador:** Protein Copilot — IA que traduce los datos crudos al lenguaje del investigador.
+**El diferenciador ganador:** ProteIA — IA que traduce los datos crudos al lenguaje del investigador.
 
 ---
 
@@ -46,7 +49,7 @@ investigacion/
 
 | Perfil | Lo que necesita | Feature clave |
 |---|---|---|
-| Biólogo de laboratorio | Autonomía sin informático | Copilot + visor pLDDT |
+| Biólogo de laboratorio | Autonomía sin informático | ProteIA + visor pLDDT |
 | Clínico / medicina personalizada | Privacidad de datos del paciente | CESGA institucional |
 | Drug discovery | Estructura para docking | PDB descargable + métricas |
 | Estudiante | Aprender mientras usa | Tooltips educativos + presets |
@@ -56,7 +59,7 @@ investigacion/
 
 ## Las 3 features que ganan el hackathon
 
-1. **Protein Copilot** — LLM que explica resultados en lenguaje natural (nadie más lo tiene)
+1. **ProteIA** — LLM que explica resultados en lenguaje natural (nadie más lo tiene)
 2. **Visor 3D coloreado por pLDDT** — el estándar visual que los jueces conocen
 3. **Sequence Rainbow** — barra 1D de confianza residuo a residuo (innovación visual propia)
 
@@ -69,7 +72,7 @@ JUEVES NOCHE    → Setup + Pantalla 1 (input FASTA + submit)
 VIERNES MAÑANA  → Pantalla 2 (polling + job lifecycle)
 VIERNES TARDE   → Pantalla 3 (visor 3D + métricas)
 VIERNES NOCHE   → PAE heatmap + descargas + MVP 100%
-SÁBADO MAÑANA   → Copilot LLM + upload PDB + pitch
+SÁBADO MAÑANA   → ProteIA LLM + upload PDB + pitch
 ```
 
 ---
